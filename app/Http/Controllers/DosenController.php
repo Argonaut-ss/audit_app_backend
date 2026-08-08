@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\DosenImport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreDosenRequest;
 use App\Http\Resources\DosenResource;
 use App\Models\Dosen;
@@ -95,6 +97,19 @@ class DosenController extends Controller
 
         return response()->json([
             'message' => 'Dosen deleted successfully',
+        ]);
+    }
+    
+        public function import(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,xlsx,xls', 'max:2048'],
+        ]);
+
+        Excel::import(new DosenImport, $request->file('file'));
+
+        return response()->json([
+            'message' => 'Dosen imported successfully',
         ]);
     }
 }

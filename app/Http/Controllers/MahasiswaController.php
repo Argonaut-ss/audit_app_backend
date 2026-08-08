@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\MahasiswaImport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreMahasiswaRequest;
 use App\Http\Resources\MahasiswaResource;
 use App\Models\Mahasiswa;
@@ -95,6 +97,19 @@ class MahasiswaController extends Controller
 
         return response()->json([
             'message' => 'Mahasiswa deleted successfully',
+        ]);
+    }
+
+        public function import(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,xlsx,xls', 'max:2048'],
+        ]);
+
+        Excel::import(new MahasiswaImport, $request->file('file'));
+
+        return response()->json([
+            'message' => 'Mahasiswa imported successfully',
         ]);
     }
 }

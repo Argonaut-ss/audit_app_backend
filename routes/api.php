@@ -16,5 +16,8 @@ Route::get('/health', function () {
     ]);
 });
 
+Route::post('mahasiswas/import', [MahasiswaController::class, 'import']);
+Route::post('dosens/import', [DosenController::class, 'import']);
+
 Route::apiResource('mahasiswas', MahasiswaController::class);
 Route::apiResource('dosens', DosenController::class);

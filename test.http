@@ -48,3 +48,14 @@ Content-Type: application/json
     "password": "Adrian123",
     "kode_dosen": "D1232"
 }
+
+### Import Mahasiswa
+POST http://localhost:8000/api/mahasiswas/import
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="mahasiswa_import.csv"
+Content-Type: text/csv
+
+< ./mahasiswa_import.csv
+------WebKitFormBoundary--
