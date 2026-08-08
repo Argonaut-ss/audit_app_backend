@@ -1,3 +1,6 @@
+# Untuk test API dengan VSCode extension: REST Client, https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# Nanti setelah install, ada tulisan "Send Request" di atas setiap request, klik itu untuk menjalankan requestnya.
+
 ### Health check
 GET http://localhost:8000/api/health
 
