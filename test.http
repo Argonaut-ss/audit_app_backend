@@ -1,0 +1,61 @@
+# Untuk test API dengan VSCode extension: REST Client, https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# Nanti setelah install, ada tulisan "Send Request" di atas setiap request, klik itu untuk menjalankan requestnya.
+
+### Health check
+GET http://localhost:8000/api/health
+
+### List mahasiswas
+GET http://localhost:8000/api/mahasiswas
+
+### Search mahasiswas
+GET http://localhost:8000/api/mahasiswas?search=adrian
+
+### Create mahasiswa
+POST http://localhost:8000/api/mahasiswas
+Content-Type: application/json
+
+{
+    "name": "Adrian Ananta",
+    "email": "adrian.ananta@binus.ac.id",
+    "password": "Adrian123",
+    "nim": "27022111029"
+}
+
+### Update mahasiswa
+PUT http://localhost:8000/api/mahasiswas/1
+Content-Type: application/json
+
+{
+    "name": "Adrian Updated",
+    "email": "adrian.ananta@binus.ac.id",
+    "password": "NewPass123",
+    "nim": "27022111029"
+}
+
+### Delete mahasiswa
+DELETE http://localhost:8000/api/mahasiswas/1
+
+### List dosens
+GET http://localhost:8000/api/dosens
+
+### Create dosen
+POST http://localhost:8000/api/dosens
+Content-Type: application/json
+
+{
+    "name": "Adrian Ananta",
+    "email": "adrian.ananta@binus.edu",
+    "password": "Adrian123",
+    "kode_dosen": "D1232"
+}
+
+### Import Mahasiswa
+POST http://localhost:8000/api/mahasiswas/import
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="mahasiswa_import.csv"
+Content-Type: text/csv
+
+< ./mahasiswa_import.csv
+------WebKitFormBoundary--
