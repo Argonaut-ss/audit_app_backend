@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     use \Illuminate\Database\Console\Seeds\WithoutModelEvents;
-
     public function run(): void
     {
         $this->call([
