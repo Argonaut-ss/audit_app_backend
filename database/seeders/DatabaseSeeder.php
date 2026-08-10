@@ -3,6 +3,11 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Admin;
+use App\Models\Dosen;
+use App\Models\Mahasiswa;
+use App\Models\Kelas;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             MahasiswaSeeder::class,
             DosenSeeder::class,
+            KelasSeeder::class,
         ]);
     }
 }

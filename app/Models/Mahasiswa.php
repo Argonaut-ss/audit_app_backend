@@ -17,4 +17,12 @@ class Mahasiswa extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Relasi: Mahasiswa dapat mengikuti banyak Kelas.
+     */
+    public function kelas(): BelongsToMany
+    {
+        return $this->belongsToMany(Kelas::class, 'kelas_mahasiswa', 'mahasiswa_id', 'kelas_id');
+    }
 }

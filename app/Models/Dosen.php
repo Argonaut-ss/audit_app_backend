@@ -17,4 +17,12 @@ class Dosen extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Relasi: Dosen dapat mengajar banyak Kelas.
+     */
+    public function kelas(): HasMany
+    {
+        return $this->hasMany(Kelas::class);
+    }
 }
