@@ -1,5 +1,7 @@
 # Untuk test API dengan VSCode extension: REST Client, https://marketplace.visualstudio.com/items?itemName=humao.rest-client
-# Nanti setelah install, ada tulisan "Send Request" di atas setiap request, klik itu untuk menjalankan requestnya.
+# Tidak perlu frontend
+# Nanti setelah install, ada tulisan "Send Request" di atas setiap request, klik itu untuk menjalankan requestnya
+# Atau bisa saja langsung click link
 
 ### Health check
 GET http://localhost:8000/api/health
@@ -50,6 +52,7 @@ Content-Type: application/json
 }
 
 ### Import Mahasiswa
+# Bila NIM atau Email sama row diskip dan tidak masuk, hanya row yang beda bisa masuk
 POST http://localhost:8000/api/mahasiswas/import
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
 

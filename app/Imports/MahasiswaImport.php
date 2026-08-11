@@ -4,48 +4,83 @@ namespace App\Imports;
 
 use App\Models\Mahasiswa;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
 
-class MahasiswaImport implements ToModel, WithHeadingRow, WithValidation
+class MahasiswaImport implements ToCollection, WithHeadingRow
 {
-    public function model(array $row): ?Mahasiswa
+    public function collection(Collection $rows): void
     {
-        return DB::transaction(function () use ($row) {
-            $user = User::create([
-                'name' => (string) $row['nama'],
-                'email' => (string) $row['email'],
-                'password' => Hash::make((string) ($row['password'] ?? $row['nim'])),
-            ]);
+        $skipped = [];
+        $imported = 0;
 
-            return new Mahasiswa([
-                'user_id' => $user->id,
-                'nim' => (string) $row['nim'],
-            ]);
-        });
-    }
+        foreach ($rows as $index => $row) {
+            $rowNum = $index + 2;
 
-    public function rules(): array
-    {
-        return [
-            'nim' => 'required',
-            'nama' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'nullable|min:6',
-        ];
-    }
+            if (empty($row['nim']) || empty($row['nama']) || empty($row['email'])) {
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'nim' => $row['nim'] ?? null,
+                    'reason' => 'Missing required fields (nim/nama/email)',
+                ];
+                continue;
+            }
 
-    public function customValidationMessages(): array
-    {
-        return [
-            'nim.required' => 'NIM is required.',
-            'nama.required' => 'Nama is required.',
-            'email.required' => 'Email is required.',
-            'email.email' => 'Email must be a valid email address.',
-            'email.unique' => 'Email already exists.',
-        ];
+            if (User::where('email', (string) $row['email'])->exists()) {
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'nim' => (string) $row['nim'],
+                    'reason' => 'Email already exists: ' . $row['email'],
+                ];
+                continue;
+            }
+
+            if (Mahasiswa::where('nim', (string) $row['nim'])->exists()) {
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'nim' => (string) $row['nim'],
+                    'reason' => 'NIM already exists: ' . $row['nim'],
+                ];
+                continue;
+            }
+
+            try {
+                DB::transaction(function () use ($row) {
+                    $user = User::create([
+                        'name' => (string) $row['nama'],
+                        'email' => (string) $row['email'],
+                        'password' => Hash::make((string) ($row['password'] ?? $row['nim'])),
+                    ]);
+
+                    Mahasiswa::create([
+                        'user_id' => $user->id,
+                        'nim' => (string) $row['nim'],
+                    ]);
+                });
+
+                $imported++;
+            } catch (\Throwable $e) {
+                Log::warning('Mahasiswa import failed for row ' . $rowNum, [
+                    'row' => $row->toArray(),
+                    'error' => $e->getMessage(),
+                ]);
+
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'nim' => (string) $row['nim'],
+                    'reason' => 'Database error: ' . $e->getMessage(),
+                ];
+            }
+        }
+
+        session()->put('mahasiswa_import_result', [
+            'imported' => $imported,
+            'skipped' => $skipped,
+            'total' => $rows->count(),
+        ]);
     }
 }
