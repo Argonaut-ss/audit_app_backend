@@ -13,7 +13,9 @@ use App\Http\Controllers\KelasController;
 Route::apiResource('admin', AdminController::class);
 Route::apiResource('dosen', DosenController::class);
 Route::apiResource('mahasiswa', MahasiswaController::class);
-Route::apiResource('kelas', KelasController::class);
+Route::apiResource('kelas', KelasController::class)->parameters([
+    'kelas' => 'kelas'
+]);
 
 Route::get('/user', function (Request $request) {
     return $request->user();
