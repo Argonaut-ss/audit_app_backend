@@ -83,6 +83,18 @@ class StoreKelasRequest extends FormRequest
                 $validator->errors()->add('kode_kelas', "Kelas '{$this->kode_kelas}' sudah memiliki jadwal pada hari {$this->hari} jam {$this->jam}.");
                 return; // Hentikan validasi custom jika ada duplikasi kelas
             }
+
+            // --- CEK 4: KONSISTENSI 1 KELAS = 1 DOSEN ---
+            $dosenBerbeda = Kelas::where('kode_kelas', $this->kode_kelas)
+                ->where('dosen_id', '!=', $this->dosen_id)
+                ->when($kelasId, function ($query, $kelasId) {
+                    return $query->where('id', '!=', $kelasId);
+                })
+                ->exists();
+
+            if ($dosenBerbeda) {
+                $validator->errors()->add('dosen_id', "Kelas '{$this->kode_kelas}' sudah terdaftar dan diajar oleh dosen lain. Satu kelas hanya boleh memiliki satu dosen.");
+            }
         });
     }
 }
