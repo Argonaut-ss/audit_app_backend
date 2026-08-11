@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('kelas', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_kelas')->unique();
+            $table->string('kode_kelas');
             $table->string('hari');
             $table->string('jam');
             $table->string('ruangan');
@@ -19,6 +19,9 @@ return new class extends Migration
             
             // Relasi ke tabel dosens (FK: dosen_id)
             $table->foreignId('dosen_id')->constrained('dosens')->cascadeOnDelete();
+            
+            // Menambahkan unique constraint untuk kombinasi hari, jam, dan ruangan
+            $table->unique(['hari', 'jam', 'ruangan']);
             
             $table->timestamps();
         });
