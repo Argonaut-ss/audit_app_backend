@@ -16,7 +16,6 @@ Route::apiResource('mahasiswa', MahasiswaController::class);
 Route::apiResource('kelas', KelasController::class)->parameters([
     'kelas' => 'kelas'
 ]);
-Route::apiResource('kelas', KelasController::class);
 Route::apiResource('kasus', KasusController::class);
 
 
