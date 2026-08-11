@@ -19,21 +19,19 @@ class KasusController extends Controller
             ->select([
                 'KasusID',
                 'KelasID',
+                'TipeKelas',
                 'NamaTugas',
                 'NamaFile',
-            ])
-            ->with([
-                'kelas:kode_kelas,tipe_kelas',
             ])
             ->get()
             ->map(function ($item) {
                 return [
-                    'KasusID'   => $item->KasusID,
-                    'KelasID'   => $item->KelasID,
+                    'KasusID' => $item->KasusID,
+                    'KelasID' => $item->KelasID,
+                    'TipeKelas' => $item->TipeKelas,
                     'NamaTugas' => $item->NamaTugas,
-                    'NamaFile'  => $item->NamaFile,
-                    'NamaKelas' => $item->kelas?->kode_kelas,
-                    'TipeKelas' => $item->kelas?->tipe_kelas,
+                    'NamaFile' => $item->NamaFile,
+                    'NamaKelas' => $item->KelasID,
                 ];
             });
 
@@ -43,7 +41,23 @@ class KasusController extends Controller
     /**
      * Membuat tugas baru.
      *
-     * 1 kelas hanya boleh mempunyai 1 tugas.
+     * Satu kode kelas + satu tipe kelas
+     * hanya boleh mempunyai satu tugas.
+     *
+     * Contoh:
+     *
+     * LA01 + UTS
+     * LA01 + UAS
+     * LA01 + Tugas
+     *
+     * Ketiganya boleh ada.
+     *
+     * Tetapi:
+     *
+     * LA01 + UTS
+     * LA01 + UTS
+     *
+     * tidak boleh ada dua.
      */
     public function store(Request $request)
     {
@@ -52,6 +66,12 @@ class KasusController extends Controller
                 'required',
                 'string',
                 'exists:kelas,kode_kelas',
+            ],
+
+            'TipeKelas' => [
+                'required',
+                'string',
+                'in:UTS,UAS,Tugas,Sandbox',
             ],
 
             'NamaTugas' => [
@@ -69,16 +89,47 @@ class KasusController extends Controller
         ]);
 
         /*
-         * Cek apakah kelas sudah mempunyai tugas.
+         * Satu KelasID + TipeKelas
+         * hanya boleh mempunyai satu tugas.
+         *
+         * Contoh:
+         *
+         * LA01 + UTS   -> boleh 1
+         * LA01 + UAS   -> boleh 1
+         * LA01 + Tugas -> boleh 1
+         *
+         * LA01 + UTS kedua -> ditolak.
+         *
+         * Hari dan jam pada tabel kelas
+         * TIDAK ikut diperiksa.
+         *
+         * Jadi:
+         *
+         * LA01 Senin 07.00
+         * LA01 Rabu 09.00
+         *
+         * tetap menggunakan tugas yang sama:
+         *
+         * LA01 + UTS
          */
         $existing = Kasus::where(
             'KelasID',
             $validated['KelasID']
-        )->exists();
+        )
+        ->where(
+            'TipeKelas',
+            $validated['TipeKelas']
+        )
+        ->exists();
 
         if ($existing) {
             return response()->json([
-                'message' => 'Kelas tersebut sudah memiliki tugas.',
+                'message' =>
+                    'Kelas ' .
+                    $validated['KelasID'] .
+                    ' sudah memiliki tugas untuk tipe kelas ' .
+                    $validated['TipeKelas'] .
+                    '.',
             ], 409);
         }
 
@@ -95,33 +146,33 @@ class KasusController extends Controller
         );
 
         /*
-         * Simpan ke database.
+         * Simpan tugas.
+         *
+         * TipeKelas DIAMBIL DARI FRONTEND,
+         * bukan dari tabel kelas.
          */
         $kasus = Kasus::create([
-            'KelasID'   => $validated['KelasID'],
+            'KelasID' => $validated['KelasID'],
+            'TipeKelas' => $validated['TipeKelas'],
             'NamaTugas' => $validated['NamaTugas'],
-            'NamaFile'  => $uploadedFile->getClientOriginalName(),
-            'File'      => $fileContent,
+            'NamaFile' => $uploadedFile->getClientOriginalName(),
+            'File' => $fileContent,
         ]);
 
         /*
-         * Ambil data kelas.
-         */
-        $kelas = $kasus->kelas;
-
-        /*
-         * Jangan mengembalikan kolom File.
+         * Jangan mengembalikan File karena
+         * File berisi binary PDF.
          */
         return response()->json([
             'message' => 'Tugas berhasil dibuat.',
 
             'data' => [
-                'KasusID'   => $kasus->KasusID,
-                'KelasID'   => $kasus->KelasID,
+                'KasusID' => $kasus->KasusID,
+                'KelasID' => $kasus->KelasID,
+                'TipeKelas' => $kasus->TipeKelas,
                 'NamaTugas' => $kasus->NamaTugas,
-                'NamaFile'  => $kasus->NamaFile,
-                'NamaKelas' => $kelas?->kode_kelas,
-                'TipeKelas' => $kelas?->tipe_kelas,
+                'NamaFile' => $kasus->NamaFile,
+                'NamaKelas' => $kasus->KelasID,
             ],
         ], 201);
     }
@@ -131,9 +182,6 @@ class KasusController extends Controller
      */
     public function file($id)
     {
-        /*
-         * Baru di sini file PDF diambil.
-         */
         $kasus = Kasus::findOrFail($id);
 
         return response(
