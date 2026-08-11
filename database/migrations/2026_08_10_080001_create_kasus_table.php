@@ -10,8 +10,11 @@ return new class extends Migration
     public function up(): void
     {
         /*
-         * Buat tabel kasus terlebih dahulu.
+         * =====================================================
+         * TABEL KASUS / TUGAS
+         * =====================================================
          */
+
         Schema::create('kasus', function (Blueprint $table) {
 
             /*
@@ -20,15 +23,29 @@ return new class extends Migration
             $table->id('KasusID');
 
             /*
-             * KelasID menyimpan kode_kelas.
+             * Kode kelas.
              *
-             * Tipe harus sama dengan:
-             *
-             * kelas.kode_kelas
-             *
-             * yaitu VARCHAR(255).
+             * Contoh:
+             * LA01
+             * LA02
              */
             $table->string('KelasID');
+
+            /*
+             * Tipe kelas.
+             *
+             * Contoh:
+             * UTS
+             * UAS
+             * Tugas
+             * Sandbox
+             */
+            $table->enum('TipeKelas', [
+                'UTS',
+                'UAS',
+                'Tugas',
+                'Sandbox',
+            ]);
 
             /*
              * Nama tugas.
@@ -41,27 +58,51 @@ return new class extends Migration
             $table->string('NamaFile');
 
             /*
-             * 1 kelas hanya boleh memiliki
-             * 1 tugas.
+             * =================================================
+             * SATU TUGAS UNTUK SATU KELAS + TIPE
+             * =================================================
+             *
+             * Contoh:
+             *
+             * LA01 + UTS  -> hanya boleh 1
+             * LA01 + UAS  -> hanya boleh 1
+             *
+             * Tetapi:
+             *
+             * LA01 + UTS
+             * LA01 + UAS
+             *
+             * boleh ada bersamaan.
              */
-            $table->unique('KelasID');
+            $table->unique(
+                ['KelasID', 'TipeKelas'],
+                'kasus_kelas_tipe_unique'
+            );
         });
 
         /*
-         * Tambahkan index pada kelas.kode_kelas
-         * karena kolom tersebut akan menjadi
-         * target foreign key.
+         * =====================================================
+         * INDEX KODE KELAS
+         * =====================================================
          *
-         * Kita TIDAK mengubah migration kelas.
+         * Karena Kasus.KelasID mengarah ke
+         * Kelas.kode_kelas.
+         *
+         * KITA TIDAK mengubah migration kelas.
          */
         Schema::table('kelas', function (Blueprint $table) {
-            $table->index('kode_kelas');
+            $table->index(
+                'kode_kelas',
+                'kelas_kode_kelas_index'
+            );
         });
 
         /*
-         * Tambahkan foreign key setelah
-         * index kode_kelas tersedia.
+         * =====================================================
+         * FOREIGN KEY
+         * =====================================================
          */
+
         Schema::table('kasus', function (Blueprint $table) {
 
             $table->foreign('KelasID')
@@ -69,6 +110,15 @@ return new class extends Migration
                 ->on('kelas')
                 ->cascadeOnDelete();
         });
+
+        /*
+         * =====================================================
+         * FILE PDF
+         * =====================================================
+         *
+         * MEDIUMBLOB dapat menyimpan file sampai sekitar 16 MB.
+         * Batas upload aplikasi kamu tetap dapat dibuat 10 MB.
+         */
 
         DB::statement(
             'ALTER TABLE kasus ADD File MEDIUMBLOB NOT NULL'
@@ -78,22 +128,24 @@ return new class extends Migration
     public function down(): void
     {
         /*
-         * Hapus foreign key.
+         * Hapus foreign key terlebih dahulu.
          */
         Schema::table('kasus', function (Blueprint $table) {
+
             $table->dropForeign([
                 'KelasID',
             ]);
         });
 
         /*
-         * Hapus index yang kita tambahkan
-         * pada tabel kelas.
+         * Hapus index kode_kelas yang kita tambahkan
+         * ke tabel kelas.
          */
         Schema::table('kelas', function (Blueprint $table) {
-            $table->dropIndex([
-                'kelas_kode_kelas_index',
-            ]);
+
+            $table->dropIndex(
+                'kelas_kode_kelas_index'
+            );
         });
 
         /*

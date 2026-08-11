@@ -17,10 +17,11 @@ class Kasus extends Model
 
     protected $fillable = [
         'KelasID',
+        'TipeKelas',
         'NamaTugas',
         'NamaFile',
         'File',
-    ];
+        ];
 
     protected $hidden = [
         'File',
