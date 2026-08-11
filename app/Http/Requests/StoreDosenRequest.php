@@ -13,12 +13,14 @@ class StoreDosenRequest extends FormRequest
 
     public function rules(): array
     {
-        $dosenId = $this->route('dosen')?->id;
+        $dosen = $this->route('dosen');
+        $userId = $dosen?->user_id;
+        $dosenId = $dosen?->id;
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . ($this->user_id ?? 'NULL')],
-            'password' => [$dosenId ? 'nullable' : 'required', 'string', 'min:6'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $userId],
+            'password' => [$dosen ? 'nullable' : 'required', 'string', 'min:6'],
             'kode_dosen' => ['required', 'string', 'max:50', 'unique:dosens,kode_dosen,' . $dosenId],
         ];
     }

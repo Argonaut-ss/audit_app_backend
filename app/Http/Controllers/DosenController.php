@@ -100,7 +100,7 @@ class DosenController extends Controller
         ]);
     }
     
-        public function import(Request $request): JsonResponse
+    public function import(Request $request): JsonResponse
     {
         $request->validate([
             'file' => ['required', 'file', 'mimes:csv,xlsx,xls', 'max:2048'],
@@ -108,8 +108,18 @@ class DosenController extends Controller
 
         Excel::import(new DosenImport, $request->file('file'));
 
+        $result = session()->get('dosen_import_result', [
+            'imported' => 0,
+            'skipped' => [],
+            'total' => 0,
+        ]);
+
         return response()->json([
-            'message' => 'Dosen imported successfully',
+            'message' => 'Import completed',
+            'imported' => $result['imported'],
+            'skipped_count' => count($result['skipped']),
+            'total_rows' => $result['total'],
+            'skipped_rows' => $result['skipped'],
         ]);
     }
 }

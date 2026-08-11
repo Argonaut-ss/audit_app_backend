@@ -4,48 +4,83 @@ namespace App\Imports;
 
 use App\Models\Dosen;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
 
-class DosenImport implements ToModel, WithHeadingRow, WithValidation
+class DosenImport implements ToCollection, WithHeadingRow
 {
-    public function model(array $row): ?Dosen
+    public function collection(Collection $rows): void
     {
-        return DB::transaction(function () use ($row) {
-            $user = User::create([
-                'name' => (string) $row['nama'],
-                'email' => (string) $row['email'],
-                'password' => Hash::make((string) ($row['password'] ?? $row['kode_dosen'])),
-            ]);
+        $skipped = [];
+        $imported = 0;
 
-            return new Dosen([
-                'user_id' => $user->id,
-                'kode_dosen' => (string) $row['kode_dosen'],
-            ]);
-        });
-    }
+        foreach ($rows as $index => $row) {
+            $rowNum = $index + 2;
 
-    public function rules(): array
-    {
-        return [
-            'kode_dosen' => 'required',
-            'nama' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'nullable|min:6',
-        ];
-    }
+            if (empty($row['kode_dosen']) || empty($row['nama']) || empty($row['email'])) {
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'kode_dosen' => $row['kode_dosen'] ?? null,
+                    'reason' => 'Missing required fields (kode_dosen/nama/email)',
+                ];
+                continue;
+            }
 
-    public function customValidationMessages(): array
-    {
-        return [
-            'kode_dosen.required' => 'Kode Dosen is required.',
-            'nama.required' => 'Nama is required.',
-            'email.required' => 'Email is required.',
-            'email.email' => 'Email must be a valid email address.',
-            'email.unique' => 'Email already exists.',
-        ];
+            if (User::where('email', (string) $row['email'])->exists()) {
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'kode_dosen' => (string) $row['kode_dosen'],
+                    'reason' => 'Email already exists: ' . $row['email'],
+                ];
+                continue;
+            }
+
+            if (Dosen::where('kode_dosen', (string) $row['kode_dosen'])->exists()) {
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'kode_dosen' => (string) $row['kode_dosen'],
+                    'reason' => 'Kode Dosen already exists: ' . $row['kode_dosen'],
+                ];
+                continue;
+            }
+
+            try {
+                DB::transaction(function () use ($row) {
+                    $user = User::create([
+                        'name' => (string) $row['nama'],
+                        'email' => (string) $row['email'],
+                        'password' => Hash::make((string) ($row['password'] ?? $row['kode_dosen'])),
+                    ]);
+
+                    Dosen::create([
+                        'user_id' => $user->id,
+                        'kode_dosen' => (string) $row['kode_dosen'],
+                    ]);
+                });
+
+                $imported++;
+            } catch (\Throwable $e) {
+                Log::warning('Dosen import failed for row ' . $rowNum, [
+                    'row' => $row->toArray(),
+                    'error' => $e->getMessage(),
+                ]);
+
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'kode_dosen' => (string) $row['kode_dosen'],
+                    'reason' => 'Database error: ' . $e->getMessage(),
+                ];
+            }
+        }
+
+        session()->put('dosen_import_result', [
+            'imported' => $imported,
+            'skipped' => $skipped,
+            'total' => $rows->count(),
+        ]);
     }
 }
