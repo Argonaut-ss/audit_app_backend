@@ -13,7 +13,13 @@ use App\Http\Controllers\KasusController;
 Route::apiResource('admin', AdminController::class);
 Route::apiResource('dosen', DosenController::class);
 Route::apiResource('mahasiswa', MahasiswaController::class);
+<<<<<<< Updated upstream
 Route::apiResource('kelas', KelasController::class);
+=======
+Route::apiResource('kelas', KelasController::class)->parameters([
+    'kelas' => 'kelas'
+]);
+>>>>>>> Stashed changes
 Route::apiResource('kasus', KasusController::class);
 
 
