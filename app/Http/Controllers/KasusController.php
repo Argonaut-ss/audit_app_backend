@@ -134,6 +134,25 @@ class KasusController extends Controller
             ],
         ], 201);
     }
+    /**
+     * Menghapus tugas berdasarkan ID.
+     */
+    public function destroy($id)
+    {
+        $kasus = Kasus::find($id);
+
+        if (!$kasus) {
+            return response()->json([
+                'message' => 'Tugas tidak ditemukan.',
+            ], 404);
+        }
+
+        $kasus->delete();
+
+        return response()->json([
+            'message' => 'Tugas berhasil dihapus.',
+        ], 200);
+    }
 
     /**
      * Menampilkan file PDF.
