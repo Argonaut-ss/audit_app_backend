@@ -20,6 +20,7 @@ class KasusController extends Controller
                 'KasusID',
                 'KelasID',
                 'TipeKelas',
+                'Client',
                 'NamaTugas',
                 'NamaFile',
             ])
@@ -29,6 +30,7 @@ class KasusController extends Controller
                     'KasusID' => $item->KasusID,
                     'KelasID' => $item->KelasID,
                     'TipeKelas' => $item->TipeKelas,
+                    'Client' => $item->Client,
                     'NamaTugas' => $item->NamaTugas,
                     'NamaFile' => $item->NamaFile,
                     'NamaKelas' => $item->KelasID,
@@ -38,27 +40,6 @@ class KasusController extends Controller
         return response()->json($kasus);
     }
 
-    /**
-     * Membuat tugas baru.
-     *
-     * Satu kode kelas + satu tipe kelas
-     * hanya boleh mempunyai satu tugas.
-     *
-     * Contoh:
-     *
-     * LA01 + UTS
-     * LA01 + UAS
-     * LA01 + Tugas
-     *
-     * Ketiganya boleh ada.
-     *
-     * Tetapi:
-     *
-     * LA01 + UTS
-     * LA01 + UTS
-     *
-     * tidak boleh ada dua.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -72,6 +53,12 @@ class KasusController extends Controller
                 'required',
                 'string',
                 'in:UTS,UAS,Tugas,Sandbox',
+            ],
+
+            'Client' => [
+                'required',
+                'string',
+                'max:255',
             ],
 
             'NamaTugas' => [
@@ -89,38 +76,19 @@ class KasusController extends Controller
         ]);
 
         /*
-         * Satu KelasID + TipeKelas
-         * hanya boleh mempunyai satu tugas.
-         *
-         * Contoh:
-         *
-         * LA01 + UTS   -> boleh 1
-         * LA01 + UAS   -> boleh 1
-         * LA01 + Tugas -> boleh 1
-         *
-         * LA01 + UTS kedua -> ditolak.
-         *
-         * Hari dan jam pada tabel kelas
-         * TIDAK ikut diperiksa.
-         *
-         * Jadi:
-         *
-         * LA01 Senin 07.00
-         * LA01 Rabu 09.00
-         *
-         * tetap menggunakan tugas yang sama:
-         *
-         * LA01 + UTS
+         * =====================================================
+         * CEK DUPLIKASI KASUS
+         * =====================================================
          */
         $existing = Kasus::where(
             'KelasID',
             $validated['KelasID']
         )
-        ->where(
-            'TipeKelas',
-            $validated['TipeKelas']
-        )
-        ->exists();
+            ->where(
+                'TipeKelas',
+                $validated['TipeKelas']
+            )
+            ->exists();
 
         if ($existing) {
             return response()->json([
@@ -133,27 +101,16 @@ class KasusController extends Controller
             ], 409);
         }
 
-        /*
-         * Ambil file PDF.
-         */
         $uploadedFile = $request->file('file');
 
-        /*
-         * Baca PDF sebagai binary.
-         */
         $fileContent = file_get_contents(
             $uploadedFile->getRealPath()
         );
 
-        /*
-         * Simpan tugas.
-         *
-         * TipeKelas DIAMBIL DARI FRONTEND,
-         * bukan dari tabel kelas.
-         */
         $kasus = Kasus::create([
             'KelasID' => $validated['KelasID'],
             'TipeKelas' => $validated['TipeKelas'],
+            'Client' => $validated['Client'],
             'NamaTugas' => $validated['NamaTugas'],
             'NamaFile' => $uploadedFile->getClientOriginalName(),
             'File' => $fileContent,
@@ -170,6 +127,7 @@ class KasusController extends Controller
                 'KasusID' => $kasus->KasusID,
                 'KelasID' => $kasus->KelasID,
                 'TipeKelas' => $kasus->TipeKelas,
+                'Client' => $kasus->Client,
                 'NamaTugas' => $kasus->NamaTugas,
                 'NamaFile' => $kasus->NamaFile,
                 'NamaKelas' => $kasus->KelasID,

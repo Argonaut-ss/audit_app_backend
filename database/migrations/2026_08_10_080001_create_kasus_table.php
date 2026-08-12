@@ -9,71 +9,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        /*
-         * =====================================================
-         * TABEL KASUS / TUGAS
-         * =====================================================
-         */
-
         Schema::create('kasus', function (Blueprint $table) {
-
-            /*
-             * Primary key.
-             */
+            
+            // Primary key.
+             
             $table->id('KasusID');
-
-            /*
-             * Kode kelas.
-             *
-             * Contoh:
-             * LA01
-             * LA02
-             */
             $table->string('KelasID');
-
-            /*
-             * Tipe kelas.
-             *
-             * Contoh:
-             * UTS
-             * UAS
-             * Tugas
-             * Sandbox
-             */
             $table->enum('TipeKelas', [
                 'UTS',
                 'UAS',
                 'Tugas',
                 'Sandbox',
             ]);
-
-            /*
-             * Nama tugas.
-             */
+            $table->string('Client');
             $table->string('NamaTugas');
-
-            /*
-             * Nama file PDF.
-             */
             $table->string('NamaFile');
 
-            /*
-             * =================================================
-             * SATU TUGAS UNTUK SATU KELAS + TIPE
-             * =================================================
-             *
-             * Contoh:
-             *
-             * LA01 + UTS  -> hanya boleh 1
-             * LA01 + UAS  -> hanya boleh 1
-             *
-             * Tetapi:
-             *
-             * LA01 + UTS
-             * LA01 + UAS
-             *
-             * boleh ada bersamaan.
-             */
             $table->unique(
                 ['KelasID', 'TipeKelas'],
                 'kasus_kelas_tipe_unique'
@@ -81,16 +32,11 @@ return new class extends Migration
         });
 
         /*
-         * =====================================================
-         * INDEX KODE KELAS
-         * =====================================================
-         *
-         * Karena Kasus.KelasID mengarah ke
-         * Kelas.kode_kelas.
-         *
-         * KITA TIDAK mengubah migration kelas.
+         * Kasus.KelasID mengarah secara logical
+         * ke Kelas.kode_kelas.
          */
         Schema::table('kelas', function (Blueprint $table) {
+
             $table->index(
                 'kode_kelas',
                 'kelas_kode_kelas_index'
@@ -115,11 +61,7 @@ return new class extends Migration
          * =====================================================
          * FILE PDF
          * =====================================================
-         *
-         * MEDIUMBLOB dapat menyimpan file sampai sekitar 16 MB.
-         * Batas upload aplikasi kamu tetap dapat dibuat 10 MB.
          */
-
         DB::statement(
             'ALTER TABLE kasus ADD File MEDIUMBLOB NOT NULL'
         );
@@ -127,9 +69,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        /*
-         * Hapus foreign key terlebih dahulu.
-         */
         Schema::table('kasus', function (Blueprint $table) {
 
             $table->dropForeign([
@@ -137,10 +76,6 @@ return new class extends Migration
             ]);
         });
 
-        /*
-         * Hapus index kode_kelas yang kita tambahkan
-         * ke tabel kelas.
-         */
         Schema::table('kelas', function (Blueprint $table) {
 
             $table->dropIndex(
@@ -148,9 +83,6 @@ return new class extends Migration
             );
         });
 
-        /*
-         * Hapus tabel kasus.
-         */
         Schema::dropIfExists('kasus');
     }
 };
