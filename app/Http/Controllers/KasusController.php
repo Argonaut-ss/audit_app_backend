@@ -3,16 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kasus;
+use App\Models\DataClient;
 use Illuminate\Http\Request;
 
 class KasusController extends Controller
 {
-    /**
-     * Menampilkan semua tugas.
-     *
-     * File PDF TIDAK diambil agar tidak masuk
-     * ke response JSON.
-     */
     public function index()
     {
         $kasus = Kasus::query()
@@ -20,9 +15,12 @@ class KasusController extends Controller
                 'KasusID',
                 'KelasID',
                 'TipeKelas',
-                'Client',
+                'ClientID',
                 'NamaTugas',
                 'NamaFile',
+            ])
+            ->with([
+                'client:ClientID,NamaClient',
             ])
             ->get()
             ->map(function ($item) {
@@ -30,7 +28,12 @@ class KasusController extends Controller
                     'KasusID' => $item->KasusID,
                     'KelasID' => $item->KelasID,
                     'TipeKelas' => $item->TipeKelas,
-                    'Client' => $item->Client,
+                    'ClientID' => $item->ClientID,
+
+                    'NamaClient' => $item->client
+                        ? $item->client->NamaClient
+                        : null,
+
                     'NamaTugas' => $item->NamaTugas,
                     'NamaFile' => $item->NamaFile,
                     'NamaKelas' => $item->KelasID,
@@ -40,9 +43,16 @@ class KasusController extends Controller
         return response()->json($kasus);
     }
 
+
+    /**
+     * =====================================================
+     * STORE
+     * =====================================================
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
+
             'KelasID' => [
                 'required',
                 'string',
@@ -55,7 +65,7 @@ class KasusController extends Controller
                 'in:UTS,UAS,Tugas,Sandbox',
             ],
 
-            'Client' => [
+            'NamaClient' => [
                 'required',
                 'string',
                 'max:255',
@@ -75,11 +85,13 @@ class KasusController extends Controller
             ],
         ]);
 
-        /*
-         * =====================================================
+
+        /**
+         * =================================================
          * CEK DUPLIKASI KASUS
-         * =====================================================
+         * =================================================
          */
+
         $existing = Kasus::where(
             'KelasID',
             $validated['KelasID']
@@ -89,6 +101,7 @@ class KasusController extends Controller
                 $validated['TipeKelas']
             )
             ->exists();
+
 
         if ($existing) {
             return response()->json([
@@ -101,75 +114,170 @@ class KasusController extends Controller
             ], 409);
         }
 
+
+        /**
+         * =================================================
+         * FILE
+         * =================================================
+         */
+
         $uploadedFile = $request->file('file');
 
         $fileContent = file_get_contents(
             $uploadedFile->getRealPath()
         );
 
+
+        /**
+         * =================================================
+         * CARI / BUAT DATA CLIENT
+         * =================================================
+         */
+
+        $client = DataClient::firstOrCreate(
+            [
+                'NamaClient' => trim(
+                    $validated['NamaClient']
+                ),
+            ]
+        );
+
+
+        /**
+         * =================================================
+         * CREATE KASUS
+         * =================================================
+         */
+
         $kasus = Kasus::create([
-            'KelasID' => $validated['KelasID'],
-            'TipeKelas' => $validated['TipeKelas'],
-            'Client' => $validated['Client'],
-            'NamaTugas' => $validated['NamaTugas'],
-            'NamaFile' => $uploadedFile->getClientOriginalName(),
-            'File' => $fileContent,
+
+            'KelasID' =>
+                $validated['KelasID'],
+
+            'TipeKelas' =>
+                $validated['TipeKelas'],
+
+            /*
+             * data_client.ClientID
+             *          ↓
+             * kasus.ClientID
+             */
+            'ClientID' =>
+                $client->ClientID,
+
+            'NamaTugas' =>
+                $validated['NamaTugas'],
+
+            'NamaFile' =>
+                $uploadedFile->getClientOriginalName(),
+
+            'File' =>
+                $fileContent,
         ]);
 
-        /*
-         * Jangan mengembalikan File karena
-         * File berisi binary PDF.
+
+        /**
+         * =================================================
+         * RESPONSE
+         * =================================================
          */
+
         return response()->json([
-            'message' => 'Tugas berhasil dibuat.',
+
+            'message' =>
+                'Tugas berhasil dibuat.',
 
             'data' => [
-                'KasusID' => $kasus->KasusID,
-                'KelasID' => $kasus->KelasID,
-                'TipeKelas' => $kasus->TipeKelas,
-                'Client' => $kasus->Client,
-                'NamaTugas' => $kasus->NamaTugas,
-                'NamaFile' => $kasus->NamaFile,
-                'NamaKelas' => $kasus->KelasID,
+
+                'KasusID' =>
+                    $kasus->KasusID,
+
+                'KelasID' =>
+                    $kasus->KelasID,
+
+                'TipeKelas' =>
+                    $kasus->TipeKelas,
+
+                'ClientID' =>
+                    $client->ClientID,
+
+                'NamaClient' =>
+                    $client->NamaClient,
+
+                'NamaTugas' =>
+                    $kasus->NamaTugas,
+
+                'NamaFile' =>
+                    $kasus->NamaFile,
+
+                'NamaKelas' =>
+                    $kasus->KelasID,
             ],
+
         ], 201);
     }
+
+
     /**
-     * Menghapus tugas berdasarkan ID.
+     * =====================================================
+     * DESTROY
+     * =====================================================
      */
+
     public function destroy($id)
     {
         $kasus = Kasus::find($id);
 
+
         if (!$kasus) {
             return response()->json([
-                'message' => 'Tugas tidak ditemukan.',
+                'message' =>
+                    'Tugas tidak ditemukan.',
             ], 404);
         }
 
+
         $kasus->delete();
 
+
         return response()->json([
-            'message' => 'Tugas berhasil dihapus.',
+            'message' =>
+                'Tugas berhasil dihapus.',
         ], 200);
     }
 
+
     /**
-     * Menampilkan file PDF.
+     * =====================================================
+     * FILE
+     * =====================================================
      */
+
     public function file($id)
     {
         $kasus = Kasus::findOrFail($id);
+
+
+        if (!$kasus->File) {
+            return response()->json([
+                'message' =>
+                    'File tugas tidak ditemukan.',
+            ], 404);
+        }
+
 
         return response(
             $kasus->File,
             200,
             [
-                'Content-Type' => 'application/pdf',
+                'Content-Type' =>
+                    'application/pdf',
 
                 'Content-Disposition' =>
                     'inline; filename="' .
-                    addslashes($kasus->NamaFile) .
+                    addslashes(
+                        $kasus->NamaFile
+                    ) .
                     '"',
             ]
         );

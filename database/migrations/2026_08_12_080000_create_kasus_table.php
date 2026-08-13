@@ -9,11 +9,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        /*
+         * =====================================================
+         * TABEL KASUS
+         * =====================================================
+         */
+
         Schema::create('kasus', function (Blueprint $table) {
-            
-            // Primary key.
-             
-            $table->id('KasusID');
+            $table->id('KasusID'); // PK
             $table->string('KelasID');
             $table->enum('TipeKelas', [
                 'UTS',
@@ -21,7 +24,8 @@ return new class extends Migration
                 'Tugas',
                 'Sandbox',
             ]);
-            $table->string('Client');
+
+            $table->unsignedBigInteger('ClientID');
             $table->string('NamaTugas');
             $table->string('NamaFile');
 
@@ -31,10 +35,13 @@ return new class extends Migration
             );
         });
 
+
         /*
-         * Kasus.KelasID mengarah secara logical
-         * ke Kelas.kode_kelas.
+         * =====================================================
+         * INDEX KODE KELAS
+         * =====================================================
          */
+
         Schema::table('kelas', function (Blueprint $table) {
 
             $table->index(
@@ -43,10 +50,10 @@ return new class extends Migration
             );
         });
 
-        /*
-         * =====================================================
-         * FOREIGN KEY
-         * =====================================================
+
+        /* Kasus.KelasID
+         *       ↓
+         * Kelas.kode_kelas
          */
 
         Schema::table('kasus', function (Blueprint $table) {
@@ -57,18 +64,29 @@ return new class extends Migration
                 ->cascadeOnDelete();
         });
 
-        /*
-         * =====================================================
-         * FILE PDF
-         * =====================================================
-         */
+        Schema::table('kasus', function (Blueprint $table) {
+
+            $table->foreign('ClientID')
+                ->references('ClientID')
+                ->on('data_client')
+                ->restrictOnDelete();
+        });
+
         DB::statement(
             'ALTER TABLE kasus ADD File MEDIUMBLOB NOT NULL'
         );
     }
 
+
     public function down(): void
     {
+        Schema::table('kasus', function (Blueprint $table) {
+
+            $table->dropForeign([
+                'ClientID',
+            ]);
+        });
+
         Schema::table('kasus', function (Blueprint $table) {
 
             $table->dropForeign([
