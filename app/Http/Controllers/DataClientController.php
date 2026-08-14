@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\DataClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class DataClientController extends Controller
-{   
+{
     public function index()
     {
         $clients = DataClient::query()
@@ -14,6 +15,7 @@ class DataClientController extends Controller
                 'ClientID',
                 'NamaClient',
                 'JenisClient',
+                'NPWP',
                 'AlamatClient',
                 'HPClient',
                 'EmailClient',
@@ -23,6 +25,8 @@ class DataClientController extends Controller
                 'HPKantor',
                 'EmailKantor',
                 'URLKantor',
+                'LogoKantor',
+                'LogoPerusahaan',
             ])
             ->orderBy('NamaClient')
             ->get();
@@ -53,6 +57,12 @@ class DataClientController extends Controller
                 'max:255',
             ],
 
+            'NPWP' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
             'AlamatClient' => [
                 'nullable',
                 'string',
@@ -106,19 +116,89 @@ class DataClientController extends Controller
                 'string',
                 'max:255',
             ],
+
+            'LogoKantor' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
+
+            'LogoPerusahaan' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
         ]);
 
 
-        $client = DataClient::create($validated);
+        /*
+         * =================================================
+         * FOLDER LOGO
+         * =================================================
+         */
 
+        $logoPath = public_path('DataClient/Logo');
+
+        if (!File::exists($logoPath)) {
+            File::makeDirectory(
+                $logoPath,
+                0755,
+                true
+            );
+        }
+
+        if ($request->hasFile('LogoKantor')) {
+            $file = $request->file('LogoKantor');
+            $fileName =
+                'kantor_' .
+                time() .
+                '_' .
+                uniqid() .
+                '.' .
+                $file->getClientOriginalExtension();
+
+            $file->move(
+                $logoPath,
+                $fileName
+            );
+
+            $validated['LogoKantor'] =
+                'DataClient/Logo/' . $fileName;
+        }
+
+        if ($request->hasFile('LogoPerusahaan')) {
+            $file = $request->file('LogoPerusahaan');
+            $fileName =
+                'perusahaan_' .
+                time() .
+                '_' .
+                uniqid() .
+                '.' .
+                $file->getClientOriginalExtension();
+
+            $file->move(
+                $logoPath,
+                $fileName
+            );
+
+            $validated['LogoPerusahaan'] = 'DataClient/Logo/' . $fileName;
+        }
+
+        /*
+         * =================================================
+         * CREATE
+         * =================================================
+         */
+
+        $client = DataClient::create($validated);
 
         return response()->json([
             'message' => 'Data client berhasil dibuat.',
-
             'data' => $client,
         ], 201);
     }
-
 
     /*
      * =====================================================
@@ -129,10 +209,8 @@ class DataClientController extends Controller
     public function show($id)
     {
         $client = DataClient::findOrFail($id);
-
         return response()->json($client);
     }
-
 
     /*
      * =====================================================
@@ -143,8 +221,6 @@ class DataClientController extends Controller
     public function update(Request $request, $id)
     {
         $client = DataClient::findOrFail($id);
-
-
         $validated = $request->validate([
 
             'NamaClient' => [
@@ -159,6 +235,12 @@ class DataClientController extends Controller
                 'max:255',
             ],
 
+            'NPWP' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
             'AlamatClient' => [
                 'nullable',
                 'string',
@@ -212,19 +294,92 @@ class DataClientController extends Controller
                 'string',
                 'max:255',
             ],
+
+            'LogoKantor' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
+
+            'LogoPerusahaan' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
         ]);
 
+        $logoPath = public_path('DataClient/Logo');
+        if (!File::exists($logoPath)) {
+            File::makeDirectory(
+                $logoPath,
+                0755,
+                true
+            );
+        }
+
+        if ($request->hasFile('LogoKantor')) {
+            if ($client->LogoKantor) {
+                $oldLogo =
+                    public_path($client->LogoKantor);
+                if (File::exists($oldLogo)) {
+                    File::delete($oldLogo);
+                }
+            }
+            $file = $request->file('LogoKantor');
+            $fileName =
+                'kantor_' .
+                time() .
+                '_' .
+                uniqid() .
+                '.' .
+                $file->getClientOriginalExtension();
+            $file->move(
+                $logoPath,
+                $fileName
+            );
+            $validated['LogoKantor'] =
+                'DataClient/Logo/' . $fileName;
+        }
+
+        if ($request->hasFile('LogoPerusahaan')) {
+            if ($client->LogoPerusahaan) {
+                $oldLogo =
+                    public_path($client->LogoPerusahaan);
+                if (File::exists($oldLogo)) {
+                    File::delete($oldLogo);
+                }
+            }
+            $file =
+                $request->file('LogoPerusahaan');
+            $fileName =
+                'perusahaan_' .
+                time() .
+                '_' .
+                uniqid() .
+                '.' .
+                $file->getClientOriginalExtension();
+            $file->move(
+                $logoPath,
+                $fileName
+            );
+            $validated['LogoPerusahaan'] = 'DataClient/Logo/' . $fileName;
+        }
+
+        /*
+         * =================================================
+         * UPDATE DATABASE
+         * =================================================
+         */
 
         $client->update($validated);
-
-
         return response()->json([
-            'message' => 'Data client berhasil diperbarui.',
-
+            'message' =>
+                'Data client berhasil diperbarui.',
             'data' => $client,
         ]);
     }
-
 
     /*
      * =====================================================
@@ -235,20 +390,38 @@ class DataClientController extends Controller
     public function destroy($id)
     {
         $client = DataClient::findOrFail($id);
-        if ($client->kasus()->exists()) {
 
+        /*
+         * Jangan hapus client jika masih
+         * digunakan oleh kasus/tugas.
+         */
+
+        if ($client->kasus()->exists()) {
             return response()->json([
                 'message' =>
                     'Client tidak dapat dihapus karena masih digunakan oleh tugas/kasus.',
             ], 409);
         }
+        if ($client->LogoKantor) {
 
+            $logo =
+                public_path($client->LogoKantor);
+            if (File::exists($logo)) {
+                File::delete($logo);
+            }
+        }
+        if ($client->LogoPerusahaan) {
 
+            $logo =
+                public_path($client->LogoPerusahaan);
+            if (File::exists($logo)) {
+                File::delete($logo);
+            }
+        }
         $client->delete();
-
-
         return response()->json([
-            'message' => 'Data client berhasil dihapus.',
+            'message' =>
+                'Data client berhasil dihapus.',
         ]);
     }
 }
