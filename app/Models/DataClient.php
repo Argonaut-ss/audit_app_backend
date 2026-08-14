@@ -17,6 +17,19 @@ class DataClient extends Model
 
     protected $fillable = [
         'NamaClient',
+        'NamaKantor',
+        'JenisClient',
+        'NPWP',
+        'AlamatClient',
+        'AlamatKantor',
+        'HPClient',
+        'HPKantor',
+        'EmailClient',
+        'EmailKantor',
+        'URLClient',
+        'URLKantor',
+        'LogoKantor',
+        'LogoPerusahaan',
     ];
 
 

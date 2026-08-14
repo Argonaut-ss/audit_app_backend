@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('data_client', function (Blueprint $table) {
             $table->id('ClientID');
+            $table->string('NPWP')->nullable();
             $table->string('NamaClient');
             $table->string('NamaKantor')->nullable();
             $table->string('JenisClient')->nullable();
@@ -21,6 +22,8 @@ return new class extends Migration
             $table->string('EmailKantor')->nullable();
             $table->string('URLClient')->nullable();
             $table->string('URLKantor')->nullable();
+            $table->string('LogoKantor')->nullable();
+            $table->string('LogoPerusahaan')->nullable();
         });
     }
 
