@@ -84,14 +84,7 @@ class KasusController extends Controller
                 'max:10240',
             ],
         ]);
-
-
-        /**
-         * =================================================
-         * CEK DUPLIKASI KASUS
-         * =================================================
-         */
-
+        
         $existing = Kasus::where(
             'KelasID',
             $validated['KelasID']
@@ -114,40 +107,22 @@ class KasusController extends Controller
             ], 409);
         }
 
-
-        /**
-         * =================================================
-         * FILE
-         * =================================================
-         */
-
         $uploadedFile = $request->file('file');
-
         $fileContent = file_get_contents(
             $uploadedFile->getRealPath()
         );
 
+        /*
+        * Setiap tugas/kasus memiliki DataClient sendiri.
+        *
+        * NamaClient yang sama TIDAK digabung.
+        */
 
-        /**
-         * =================================================
-         * CARI / BUAT DATA CLIENT
-         * =================================================
-         */
-
-        $client = DataClient::firstOrCreate(
-            [
-                'NamaClient' => trim(
-                    $validated['NamaClient']
-                ),
-            ]
-        );
-
-
-        /**
-         * =================================================
-         * CREATE KASUS
-         * =================================================
-         */
+        $client = DataClient::create([
+            'NamaClient' => trim(
+                $validated['NamaClient']
+            ),
+        ]);
 
         $kasus = Kasus::create([
 
@@ -157,11 +132,6 @@ class KasusController extends Controller
             'TipeKelas' =>
                 $validated['TipeKelas'],
 
-            /*
-             * data_client.ClientID
-             *          ↓
-             * kasus.ClientID
-             */
             'ClientID' =>
                 $client->ClientID,
 
@@ -174,13 +144,6 @@ class KasusController extends Controller
             'File' =>
                 $fileContent,
         ]);
-
-
-        /**
-         * =================================================
-         * RESPONSE
-         * =================================================
-         */
 
         return response()->json([
 
@@ -236,9 +199,15 @@ class KasusController extends Controller
             ], 404);
         }
 
-
+        $clientID = $kasus->ClientID;
         $kasus->delete();
 
+        if ($clientID) 
+            { DataClient::where(
+                'ClientID',
+                $clientID 
+                )->delete(); 
+            }
 
         return response()->json([
             'message' =>
