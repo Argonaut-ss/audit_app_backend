@@ -1,0 +1,103 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+###
+# RBAC Kelas
+# Hanya Admin yang bisa CRUD/write, User lain hanya bisa read/search/list
+# Swap {{adminToken}}, {{mahasiswaToken}}, {{dosenToken}} sesuai role yang ingin diuji
+
+### a. Lihat kelas
+# Bila admin, bisa lihat semua kelas
+# Bila mahasiswa/dosen, hanya bisa lihat kelas yang mereka ikuti
+GET {{baseUrl}}/kelas
+Authorization: Bearer {{adminToken}}
+
+### b. Search kelas
+# Bila admin, bisa search semua kelas
+# Bila mahasiswa/dosen, hanya bisa search kelas yang mereka ikuti
+GET {{baseUrl}}/kelas?search=BETA
+Authorization: Bearer {{adminToken}}
+
+### c. Membuat kelas 
+# → 201, bila admin
+# -> 403, bila mahasiswa/dosen
+POST {{baseUrl}}/kelas
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "kode_kelas": "BETA01",
+  "hari": "Jumat",
+  "jam": "23:00",
+  "ruangan": "R707",
+  "periode": "2025/2026",
+  "tipe_kelas": "Tugas",
+  "dosen_id": 2,
+  "mahasiswa_ids": []
+}
+
+### d. Update kelas
+# -> 201, bila admin
+# → 403, bila mahasiswa/dosen
+PUT {{baseUrl}}/kelas/2
+Authorization: Bearer {{dosenToken}}
+Content-Type: {{contentType}}
+
+{
+  "kode_kelas": "HACKED", 
+  "hari": "Senin",
+  "jam": "08:00",
+  "ruangan": "R101",
+  "periode": "2026/2027",
+  "tipe_kelas": "UTS",
+  "dosen_id": 1
+}
+
+### e. Akses detail kelas
+# -> 200, bila admin, mahasiswa/dosen yang terdaftar di kelas
+# → 403, bila mahasiswa/dosen mencoba akses kelas yang bukan milik mereka
+GET {{baseUrl}}/kelas/2
+Authorization: Bearer {{adminToken}}
+
+### f. Delete kelas 
+# -> 201, bila admin
+# -> 403, bila mahasiswa/dosen
+DELETE {{baseUrl}}/kelas/2
+Authorization: Bearer {{adminToken}}

@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\DosenImport;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreDosenRequest;
 use App\Http\Resources\DosenResource;
+use App\Imports\DosenImport;
 use App\Models\Dosen;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DosenController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $query = Dosen::with('user');
 
         if ($search = $request->get('search')) {
@@ -41,6 +43,8 @@ class DosenController extends Controller
 
     public function store(StoreDosenRequest $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $data = DB::transaction(function () use ($request) {
             $user = User::create([
                 'name' => $request->name,
@@ -62,8 +66,10 @@ class DosenController extends Controller
         ], 201);
     }
 
-    public function show(Dosen $dosen): JsonResponse
+    public function show(Dosen $dosen, Request $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         return response()->json([
             'data' => new DosenResource($dosen->load('user')),
         ]);
@@ -71,6 +77,8 @@ class DosenController extends Controller
 
     public function update(StoreDosenRequest $request, Dosen $dosen): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $data = DB::transaction(function () use ($request, $dosen) {
             $dosen->user->update([
                 'name' => $request->name,
@@ -91,17 +99,21 @@ class DosenController extends Controller
         ]);
     }
 
-    public function destroy(Dosen $dosen): JsonResponse
+    public function destroy(Dosen $dosen, Request $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $dosen->user->delete();
 
         return response()->json([
             'message' => 'Dosen deleted successfully',
         ]);
     }
-    
+
     public function import(Request $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $request->validate([
             'file' => ['required', 'file', 'mimes:csv,xlsx,xls', 'max:2048'],
         ]);

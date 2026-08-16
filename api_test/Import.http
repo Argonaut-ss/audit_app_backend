@@ -1,0 +1,69 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+# Health Check
+GET {{baseUrl}}/health
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+# Import
+# Test apakah skip duplicate NIM & Email
+# Test apakah insert entry baru yang valid meskipun ada duplicate, 
+# Test apakah auto-generate password
+
+### a. Import mahasiswa CSV/Excel
+# Test duplicate NIM & Email
+POST {{baseUrl}}/mahasiswas/import
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="file"; filename="mahasiswa_import.csv"
+Content-Type: text/csv
+
+< ./mahasiswa_import.csv
+------FormBoundary--
+
+### b. Import dosen CSV/Excel
+POST {{baseUrl}}/dosens/import
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="file"; filename="dosen_import.csv"
+Content-Type: text/csv
+
+< ./dosen_import.csv
+------FormBoundary--
