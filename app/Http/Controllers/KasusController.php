@@ -3,16 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kasus;
+use App\Models\DataClient;
 use Illuminate\Http\Request;
 
 class KasusController extends Controller
 {
-    /**
-     * Menampilkan semua tugas.
-     *
-     * File PDF TIDAK diambil agar tidak masuk
-     * ke response JSON.
-     */
     public function index()
     {
         $kasus = Kasus::query()
@@ -20,8 +15,12 @@ class KasusController extends Controller
                 'KasusID',
                 'KelasID',
                 'TipeKelas',
+                'ClientID',
                 'NamaTugas',
                 'NamaFile',
+            ])
+            ->with([
+                'client:ClientID,NamaClient',
             ])
             ->get()
             ->map(function ($item) {
@@ -29,6 +28,12 @@ class KasusController extends Controller
                     'KasusID' => $item->KasusID,
                     'KelasID' => $item->KelasID,
                     'TipeKelas' => $item->TipeKelas,
+                    'ClientID' => $item->ClientID,
+
+                    'NamaClient' => $item->client
+                        ? $item->client->NamaClient
+                        : null,
+
                     'NamaTugas' => $item->NamaTugas,
                     'NamaFile' => $item->NamaFile,
                     'NamaKelas' => $item->KelasID,
@@ -38,30 +43,16 @@ class KasusController extends Controller
         return response()->json($kasus);
     }
 
+
     /**
-     * Membuat tugas baru.
-     *
-     * Satu kode kelas + satu tipe kelas
-     * hanya boleh mempunyai satu tugas.
-     *
-     * Contoh:
-     *
-     * LA01 + UTS
-     * LA01 + UAS
-     * LA01 + Tugas
-     *
-     * Ketiganya boleh ada.
-     *
-     * Tetapi:
-     *
-     * LA01 + UTS
-     * LA01 + UTS
-     *
-     * tidak boleh ada dua.
+     * =====================================================
+     * STORE
+     * =====================================================
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
+
             'KelasID' => [
                 'required',
                 'string',
@@ -72,6 +63,12 @@ class KasusController extends Controller
                 'required',
                 'string',
                 'in:UTS,UAS,Tugas,Sandbox',
+            ],
+
+            'NamaClient' => [
+                'required',
+                'string',
+                'max:255',
             ],
 
             'NamaTugas' => [
@@ -87,40 +84,17 @@ class KasusController extends Controller
                 'max:10240',
             ],
         ]);
-
-        /*
-         * Satu KelasID + TipeKelas
-         * hanya boleh mempunyai satu tugas.
-         *
-         * Contoh:
-         *
-         * LA01 + UTS   -> boleh 1
-         * LA01 + UAS   -> boleh 1
-         * LA01 + Tugas -> boleh 1
-         *
-         * LA01 + UTS kedua -> ditolak.
-         *
-         * Hari dan jam pada tabel kelas
-         * TIDAK ikut diperiksa.
-         *
-         * Jadi:
-         *
-         * LA01 Senin 07.00
-         * LA01 Rabu 09.00
-         *
-         * tetap menggunakan tugas yang sama:
-         *
-         * LA01 + UTS
-         */
+        
         $existing = Kasus::where(
             'KelasID',
             $validated['KelasID']
         )
-        ->where(
-            'TipeKelas',
-            $validated['TipeKelas']
-        )
-        ->exists();
+            ->where(
+                'TipeKelas',
+                $validated['TipeKelas']
+            )
+            ->exists();
+
 
         if ($existing) {
             return response()->json([
@@ -133,66 +107,146 @@ class KasusController extends Controller
             ], 409);
         }
 
-        /*
-         * Ambil file PDF.
-         */
         $uploadedFile = $request->file('file');
-
-        /*
-         * Baca PDF sebagai binary.
-         */
         $fileContent = file_get_contents(
             $uploadedFile->getRealPath()
         );
 
         /*
-         * Simpan tugas.
-         *
-         * TipeKelas DIAMBIL DARI FRONTEND,
-         * bukan dari tabel kelas.
-         */
-        $kasus = Kasus::create([
-            'KelasID' => $validated['KelasID'],
-            'TipeKelas' => $validated['TipeKelas'],
-            'NamaTugas' => $validated['NamaTugas'],
-            'NamaFile' => $uploadedFile->getClientOriginalName(),
-            'File' => $fileContent,
+        * Setiap tugas/kasus memiliki DataClient sendiri.
+        *
+        * NamaClient yang sama TIDAK digabung.
+        */
+
+        $client = DataClient::create([
+            'NamaClient' => trim(
+                $validated['NamaClient']
+            ),
         ]);
 
-        /*
-         * Jangan mengembalikan File karena
-         * File berisi binary PDF.
-         */
+        $kasus = Kasus::create([
+
+            'KelasID' =>
+                $validated['KelasID'],
+
+            'TipeKelas' =>
+                $validated['TipeKelas'],
+
+            'ClientID' =>
+                $client->ClientID,
+
+            'NamaTugas' =>
+                $validated['NamaTugas'],
+
+            'NamaFile' =>
+                $uploadedFile->getClientOriginalName(),
+
+            'File' =>
+                $fileContent,
+        ]);
+
         return response()->json([
-            'message' => 'Tugas berhasil dibuat.',
+
+            'message' =>
+                'Tugas berhasil dibuat.',
 
             'data' => [
-                'KasusID' => $kasus->KasusID,
-                'KelasID' => $kasus->KelasID,
-                'TipeKelas' => $kasus->TipeKelas,
-                'NamaTugas' => $kasus->NamaTugas,
-                'NamaFile' => $kasus->NamaFile,
-                'NamaKelas' => $kasus->KelasID,
+
+                'KasusID' =>
+                    $kasus->KasusID,
+
+                'KelasID' =>
+                    $kasus->KelasID,
+
+                'TipeKelas' =>
+                    $kasus->TipeKelas,
+
+                'ClientID' =>
+                    $client->ClientID,
+
+                'NamaClient' =>
+                    $client->NamaClient,
+
+                'NamaTugas' =>
+                    $kasus->NamaTugas,
+
+                'NamaFile' =>
+                    $kasus->NamaFile,
+
+                'NamaKelas' =>
+                    $kasus->KelasID,
             ],
+
         ], 201);
     }
 
+
     /**
-     * Menampilkan file PDF.
+     * =====================================================
+     * DESTROY
+     * =====================================================
      */
+
+    public function destroy($id)
+    {
+        $kasus = Kasus::find($id);
+
+
+        if (!$kasus) {
+            return response()->json([
+                'message' =>
+                    'Tugas tidak ditemukan.',
+            ], 404);
+        }
+
+        $clientID = $kasus->ClientID;
+        $kasus->delete();
+
+        if ($clientID) 
+            { DataClient::where(
+                'ClientID',
+                $clientID 
+                )->delete(); 
+            }
+
+        return response()->json([
+            'message' =>
+                'Tugas berhasil dihapus.',
+        ], 200);
+    }
+
+
+    /**
+     * =====================================================
+     * FILE
+     * =====================================================
+     */
+
     public function file($id)
     {
         $kasus = Kasus::findOrFail($id);
+
+
+        if (!$kasus->File) {
+            return response()->json([
+                'message' =>
+                    'File tugas tidak ditemukan.',
+            ], 404);
+        }
+
 
         return response(
             $kasus->File,
             200,
             [
-                'Content-Type' => 'application/pdf',
+                'Content-Type' =>
+                    'application/pdf',
 
                 'Content-Disposition' =>
                     'inline; filename="' .
-                    addslashes($kasus->NamaFile) .
+                    addslashes(
+                        $kasus->NamaFile
+                    ) .
                     '"',
             ]
         );
