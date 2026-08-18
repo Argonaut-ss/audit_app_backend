@@ -19,6 +19,7 @@ class Kelas extends Model
         'periode',
         'tipe_kelas',
         'dosen_id',
+        'KasusID',
     ];
 
     // Relasi: Kelas ini diampu oleh satu Dosen.
@@ -31,6 +32,16 @@ class Kelas extends Model
     public function mahasiswas(): BelongsToMany
     {
         return $this->belongsToMany(Mahasiswa::class, 'kelas_mahasiswa', 'kelas_id', 'mahasiswa_id');
+    }
+
+    // Relasi: Kelas ini memiliki satu Kasus.
+    public function kasus()
+    {
+        return $this->belongsTo(
+            Kasus::class,
+            'KasusID',
+            'KasusID'
+        );
     }
 
         public function scopeForUser($query, User $user)

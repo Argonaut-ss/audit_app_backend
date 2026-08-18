@@ -4,30 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Models\Kasus;
 use App\Models\DataClient;
+use App\Models\Kelas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KasusController extends Controller
 {
+    /**
+     * =====================================================
+     * INDEX
+     * =====================================================
+     */
     public function index()
     {
         $kasus = Kasus::query()
             ->select([
                 'KasusID',
-                'KelasID',
-                'TipeKelas',
                 'ClientID',
                 'NamaTugas',
                 'NamaFile',
             ])
             ->with([
                 'client:ClientID,NamaClient',
+                'kelas:id,kode_kelas,tipe_kelas,KasusID',
             ])
             ->get()
             ->map(function ($item) {
                 return [
                     'KasusID' => $item->KasusID,
-                    'KelasID' => $item->KelasID,
-                    'TipeKelas' => $item->TipeKelas,
+
+                    'KelasID' => $item->kelas
+                        ? $item->kelas->id
+                        : null,
+
+                    'kode_kelas' => $item->kelas
+                        ? $item->kelas->kode_kelas
+                        : null,
+
+                    'TipeKelas' => $item->kelas
+                        ? $item->kelas->tipe_kelas
+                        : null,
+
+                    'KasusID_Kelas' => $item->kelas
+                        ? $item->kelas->KasusID
+                        : null,
+
                     'ClientID' => $item->ClientID,
 
                     'NamaClient' => $item->client
@@ -36,7 +57,10 @@ class KasusController extends Controller
 
                     'NamaTugas' => $item->NamaTugas,
                     'NamaFile' => $item->NamaFile,
-                    'NamaKelas' => $item->KelasID,
+
+                    'NamaKelas' => $item->kelas
+                        ? $item->kelas->kode_kelas
+                        : null,
                 ];
             });
 
@@ -48,12 +72,22 @@ class KasusController extends Controller
      * =====================================================
      * STORE
      * =====================================================
+     *
+     * Membuat 1 Kasus baru untuk 1 record Kelas.
+     *
+     * Relasi:
+     *
+     * kelas.KasusID
+     *       ↓
+     * kasus.KasusID
+     *
+     * Tidak ada KelasID di tabel kasus.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
 
-            'KelasID' => [
+            'kode_kelas' => [
                 'required',
                 'string',
                 'exists:kelas,kode_kelas',
@@ -84,66 +118,129 @@ class KasusController extends Controller
                 'max:10240',
             ],
         ]);
-        
-        $existing = Kasus::where(
-            'KelasID',
-            $validated['KelasID']
+
+
+        /*
+         * Cari record Kelas berdasarkan:
+         *
+         * kode_kelas + tipe_kelas
+         *
+         * Contoh:
+         *
+         * LA01 + UTS
+         * LA01 + UAS
+         * LB01 + UTS
+         */
+        $kelas = Kelas::where(
+            'kode_kelas',
+            $validated['kode_kelas']
         )
             ->where(
-                'TipeKelas',
+                'tipe_kelas',
                 $validated['TipeKelas']
             )
-            ->exists();
+            ->first();
 
 
-        if ($existing) {
+        if (!$kelas) {
             return response()->json([
                 'message' =>
                     'Kelas ' .
-                    $validated['KelasID'] .
-                    ' sudah memiliki tugas untuk tipe kelas ' .
+                    $validated['kode_kelas'] .
+                    ' dengan tipe ' .
                     $validated['TipeKelas'] .
-                    '.',
+                    ' tidak ditemukan.',
+            ], 404);
+        }
+
+
+        /*
+         * Karena relasinya 1 : 1,
+         * satu record kelas hanya boleh memiliki
+         * satu KasusID.
+         */
+        if ($kelas->KasusID !== null) {
+            return response()->json([
+                'message' =>
+                    'Kelas ' .
+                    $kelas->kode_kelas .
+                    ' dengan tipe ' .
+                    $kelas->tipe_kelas .
+                    ' sudah memiliki tugas.',
             ], 409);
         }
 
+
         $uploadedFile = $request->file('file');
+
         $fileContent = file_get_contents(
             $uploadedFile->getRealPath()
         );
 
+
         /*
-        * Setiap tugas/kasus memiliki DataClient sendiri.
-        *
-        * NamaClient yang sama TIDAK digabung.
-        */
+         * Semua proses dibuat dalam satu transaction.
+         */
+        $result = DB::transaction(function () use (
+            $validated,
+            $uploadedFile,
+            $fileContent,
+            $kelas
+        ) {
 
-        $client = DataClient::create([
-            'NamaClient' => trim(
-                $validated['NamaClient']
-            ),
-        ]);
+            /*
+             * Setiap tugas memiliki DataClient sendiri.
+             *
+             * Walaupun NamaClient sama,
+             * tetap dibuat ClientID baru.
+             */
+            $client = DataClient::create([
+                'NamaClient' => trim(
+                    $validated['NamaClient']
+                ),
+            ]);
 
-        $kasus = Kasus::create([
 
-            'KelasID' =>
-                $validated['KelasID'],
+            /*
+             * Buat Kasus BARU.
+             *
+             * Tidak ada KelasID.
+             *
+             * KasusID otomatis dibuat oleh database.
+             */
+            $kasus = Kasus::create([
 
-            'TipeKelas' =>
-                $validated['TipeKelas'],
+                'ClientID' =>
+                    $client->ClientID,
 
-            'ClientID' =>
-                $client->ClientID,
+                'NamaTugas' =>
+                    $validated['NamaTugas'],
 
-            'NamaTugas' =>
-                $validated['NamaTugas'],
+                'NamaFile' =>
+                    $uploadedFile->getClientOriginalName(),
 
-            'NamaFile' =>
-                $uploadedFile->getClientOriginalName(),
+                'File' =>
+                    $fileContent,
+            ]);
 
-            'File' =>
-                $fileContent,
-        ]);
+
+            /*
+             * Hubungkan Kasus dengan Kelas.
+             *
+             * kelas.KasusID → kasus.KasusID
+             */
+            $kelas->update([
+                'KasusID' => $kasus->KasusID,
+            ]);
+
+
+            return [
+                'kasus' => $kasus,
+                'client' => $client,
+                'kelas' => $kelas->fresh(),
+            ];
+        });
+
 
         return response()->json([
 
@@ -153,28 +250,31 @@ class KasusController extends Controller
             'data' => [
 
                 'KasusID' =>
-                    $kasus->KasusID,
+                    $result['kasus']->KasusID,
 
                 'KelasID' =>
-                    $kasus->KelasID,
+                    $result['kelas']->id,
+
+                'kode_kelas' =>
+                    $result['kelas']->kode_kelas,
 
                 'TipeKelas' =>
-                    $kasus->TipeKelas,
+                    $result['kelas']->tipe_kelas,
 
                 'ClientID' =>
-                    $client->ClientID,
+                    $result['client']->ClientID,
 
                 'NamaClient' =>
-                    $client->NamaClient,
+                    $result['client']->NamaClient,
 
                 'NamaTugas' =>
-                    $kasus->NamaTugas,
+                    $result['kasus']->NamaTugas,
 
                 'NamaFile' =>
-                    $kasus->NamaFile,
+                    $result['kasus']->NamaFile,
 
                 'NamaKelas' =>
-                    $kasus->KelasID,
+                    $result['kelas']->kode_kelas,
             ],
 
         ], 201);
@@ -186,7 +286,6 @@ class KasusController extends Controller
      * DESTROY
      * =====================================================
      */
-
     public function destroy($id)
     {
         $kasus = Kasus::find($id);
@@ -199,15 +298,44 @@ class KasusController extends Controller
             ], 404);
         }
 
-        $clientID = $kasus->ClientID;
-        $kasus->delete();
 
-        if ($clientID) 
-            { DataClient::where(
-                'ClientID',
-                $clientID 
-                )->delete(); 
+        $clientID = $kasus->ClientID;
+
+
+        DB::transaction(function () use (
+            $kasus,
+            $clientID
+        ) {
+
+            /*
+             * Lepaskan KasusID dari Kelas terlebih dahulu.
+             */
+            Kelas::where(
+                'KasusID',
+                $kasus->KasusID
+            )->update([
+                'KasusID' => null,
+            ]);
+
+
+            /*
+             * Hapus kasus.
+             */
+            $kasus->delete();
+
+
+            /*
+             * Karena Client dibuat khusus untuk kasus ini,
+             * Client juga dihapus.
+             */
+            if ($clientID) {
+                DataClient::where(
+                    'ClientID',
+                    $clientID
+                )->delete();
             }
+        });
+
 
         return response()->json([
             'message' =>
@@ -221,7 +349,6 @@ class KasusController extends Controller
      * FILE
      * =====================================================
      */
-
     public function file($id)
     {
         $kasus = Kasus::findOrFail($id);

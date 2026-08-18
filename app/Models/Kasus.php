@@ -15,19 +15,15 @@ class Kasus extends Model
 
     public $timestamps = false;
 
+
     protected $fillable = [
-        'KelasID',
-        'TipeKelas',
         'ClientID',
         'NamaTugas',
         'NamaFile',
         'File',
     ];
 
-    /**
-     * File binary jangan dikirim
-     * ketika model diubah menjadi JSON.
-     */
+
     protected $hidden = [
         'File',
     ];
@@ -37,21 +33,27 @@ class Kasus extends Model
      * =====================================================
      * RELATIONSHIP KE KELAS
      * =====================================================
+     *
+     * Kelas.KasusID
+     *       ↓
+     * Kasus.KasusID
+     *
+     * 1 : 1
      */
     public function kelas()
     {
-        return $this->belongsTo(
+        return $this->hasOne(
             Kelas::class,
-            'KelasID',
-            'kode_kelas'
+            'KasusID',
+            'KasusID'
         );
     }
 
 
-    /*
-     * Kasus.ClientID
-     *       ↓
-     * DataClient.ClientID
+    /**
+     * =====================================================
+     * RELATIONSHIP KE DATA CLIENT
+     * =====================================================
      */
     public function client()
     {
