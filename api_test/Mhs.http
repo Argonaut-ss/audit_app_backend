@@ -1,0 +1,92 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+# Health Check
+GET {{baseUrl}}/health
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+# Mahasiswa Read/Write
+# Hanya Admin yang bisa CRUD/write
+
+### a. List mahasiswa
+GET {{baseUrl}}/mahasiswas
+Authorization: Bearer {{adminToken}}
+
+### b. Search mahasiswa
+GET {{baseUrl}}/mahasiswas?search=adrian
+Authorization: Bearer {{adminToken}}
+
+### c. Tampilkan mahasiswa spesifik
+GET {{baseUrl}}/mahasiswas/1
+Authorization: Bearer {{adminToken}}
+
+### d. Update data mahasiswa selain email
+PUT {{baseUrl}}/mahasiswas/1
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Adrian Ananta Updated",
+  "email": "adrian.ananta@binus.ac.id",
+  "nim": "2702357402"
+}
+
+### e. Update data mahasiswa dengan email lain
+PUT {{baseUrl}}/mahasiswas/1
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Adrian Ananta Updated",
+  "email": "adrian.ananta.updated@binus.ac.id",
+  "nim": "2702357402"
+}
+
+### f. Update data mahasiswa dengan email yang sudah ada (punya user lain) 
+# → 422, karena email sudah ada di database
+PUT {{baseUrl}}/mahasiswas/1
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Adrian Ananta Updated",
+  "email": "test@example.com",
+  "nim": "2702357402"
+}
+
+### g. Delete mahasiswa
+DELETE {{baseUrl}}/mahasiswas/1
+Authorization: Bearer {{adminToken}}

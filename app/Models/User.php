@@ -9,13 +9,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     public function mahasiswa(): HasOne
     {
@@ -25,6 +26,21 @@ class User extends Authenticatable
     public function dosen(): HasOne
     {
         return $this->hasOne(Dosen::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isDosen(): bool
+    {
+        return $this->role === 'dosen';
+    }
+
+    public function isMahasiswa(): bool
+    {
+        return $this->role === 'mahasiswa';
     }
 
     protected function casts(): array

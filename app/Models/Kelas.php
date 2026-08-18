@@ -21,19 +21,30 @@ class Kelas extends Model
         'dosen_id',
     ];
 
-    /**
-     * Relasi: Kelas ini diampu oleh satu Dosen.
-     */
+    // Relasi: Kelas ini diampu oleh satu Dosen.
     public function dosen(): BelongsTo
     {
         return $this->belongsTo(Dosen::class);
     }
 
-    /**
-     * Relasi: Kelas ini memiliki banyak Mahasiswa (Many-to-Many via pivot kelas_mahasiswa).
-     */
+    // Relasi: Kelas ini memiliki banyak Mahasiswa (Many-to-Many via pivot kelas_mahasiswa).
     public function mahasiswas(): BelongsToMany
     {
         return $this->belongsToMany(Mahasiswa::class, 'kelas_mahasiswa', 'kelas_id', 'mahasiswa_id');
+    }
+
+        public function scopeForUser($query, User $user)
+    {
+        if ($user->isMahasiswa()) {
+            return $query->whereHas('mahasiswas', function ($q) use ($user) {
+                $q->where('mahasiswa_id', $user->mahasiswa->id);
+            });
+        }
+
+        if ($user->isDosen()) {
+            return $query->where('dosen_id', $user->dosen->id);
+        }
+
+        return $query;
     }
 }

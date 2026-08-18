@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\MahasiswaImport;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreMahasiswaRequest;
 use App\Http\Resources\MahasiswaResource;
+use App\Imports\MahasiswaImport;
 use App\Models\Mahasiswa;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MahasiswaController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $query = Mahasiswa::with('user');
 
         if ($search = $request->get('search')) {
@@ -41,6 +43,8 @@ class MahasiswaController extends Controller
 
     public function store(StoreMahasiswaRequest $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $data = DB::transaction(function () use ($request) {
             $user = User::create([
                 'name' => $request->name,
@@ -62,8 +66,10 @@ class MahasiswaController extends Controller
         ], 201);
     }
 
-    public function show(Mahasiswa $mahasiswa): JsonResponse
+    public function show(Mahasiswa $mahasiswa, Request $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         return response()->json([
             'data' => new MahasiswaResource($mahasiswa->load('user')),
         ]);
@@ -71,6 +77,8 @@ class MahasiswaController extends Controller
 
     public function update(StoreMahasiswaRequest $request, Mahasiswa $mahasiswa): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $data = DB::transaction(function () use ($request, $mahasiswa) {
             $mahasiswa->user->update([
                 'name' => $request->name,
@@ -91,9 +99,11 @@ class MahasiswaController extends Controller
         ]);
     }
 
-    public function destroy(Mahasiswa $mahasiswa): JsonResponse
+    public function destroy(Mahasiswa $mahasiswa, Request $request): JsonResponse
     {
-        $mahasiswa->user->delete(); // Cascade deletes mahasiswa via FK constraint
+        abort_if(! $request->user()->isAdmin(), 403);
+
+        $mahasiswa->user->delete();
 
         return response()->json([
             'message' => 'Mahasiswa deleted successfully',
@@ -102,6 +112,8 @@ class MahasiswaController extends Controller
 
     public function import(Request $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $request->validate([
             'file' => ['required', 'file', 'mimes:csv,xlsx,xls', 'max:2048'],
         ]);

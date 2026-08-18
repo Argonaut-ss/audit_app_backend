@@ -1,36 +1,11 @@
 ## API Endpoints
-Check test.http to test with no frontend
-Arti ID adalah internal DB ID, bukan NIM atau Kode Dosen
-### Mahasiswa
-| Method    | Endpoint                                           | Action                            |
-| --------- | -------------------------------------------------- | --------------------------------- |
-| GET       | `/api/mahasiswas?search=adrian&per_page=5&?page=1` | List + search                     |
-| POST      | `/api/mahasiswas`                                  | Create                            |
-| GET       | `/api/mahasiswas/{id}`                             | Show                              |
-| PUT/PATCH | `/api/mahasiswas/{id}`                             | Update                            |
-| DELETE    | `/api/mahasiswas/{id}`                             | Delete                            |
-| POST      | `/api/mahasiswas/import`                           | `multipart/form-data` with `file` |
-
-### Dosen
-| Method    | Endpoint                                       | Action                            |
-| --------- | ---------------------------------------------- | --------------------------------- |
-| GET       | `/api/dosens?search=adrian&per_page=5&?page=1` | List + search                     |
-| POST      | `/api/dosens`                                  | Create                            |
-| GET       | `/api/dosens/{id}`                             | Show                              |
-| PUT/PATCH | `/api/dosens/{id}`                             | Update                            |
-| DELETE    | `/api/dosens/{id}`                             | Delete                            |
-| POST      | `/api/dosens/import`                           | `multipart/form-data` with `file` |
-
-### Kelas
-| Method    | Endpoint                                    | Action        |
-| --------- | ------------------------------------------- | ------------- |
-| GET       | `/api/kelas?search=LA01&per_page=5&?page=1` | List + search |
-| POST      | `/api/kelas`                                | Create        |
-| GET       | `/api/kelas/{id}`                           | Show          |
-| PUT/PATCH | `/api/kelas/{id}`                           | Update        |
-| DELETE    | `/api/kelas/{id}`                           | Delete        |
+Check api_test folder
 
 &nbsp;
+
+## To Do
+- Cek apakah ada email yang sama di DB, supaya tidak bisa insert duplicate email
+- Delete tidak bisa karena DB schema/relasi antara kasus dan kelas
 
 ## Terminal
 
@@ -42,6 +17,11 @@ php artisan migrate:fresh --seed
 ### Initialize empty database
 ```php
 php artisan migrate:fresh
+```
+### initialize test database 
+dengan dummy data yang pasti supaya lbh mudah test API
+```php
+php artisan db:seed --class=TestSeeder
 ```
 
 ### Launch server to test API

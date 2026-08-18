@@ -14,11 +14,13 @@ class KelasController extends Controller
     public function index(Request $request): JsonResponse
     {
         // Tarik data kelas sekalian dengan data dosen (dan user-nya untuk nama)
-        $query = Kelas::with(['dosen.user', 'mahasiswas.user']);
+        $query = Kelas::forUser($request->user())->with(['dosen.user', 'mahasiswas.user']);
 
         if ($search = $request->get('search')) {
-            $query->where('kode_kelas', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_kelas', 'like', "%{$search}%")
                   ->orWhere('ruangan', 'like', "%{$search}%");
+            });
         }
 
         $kelas = $query->latest()->paginate($request->get('per_page', 10));
@@ -35,7 +37,10 @@ class KelasController extends Controller
     }
 
     public function store(StoreKelasRequest $request): JsonResponse
+
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $data = DB::transaction(function () use ($request) {
             // 1. Simpan data Kelas
             $kelas = Kelas::create($request->validated());
@@ -54,8 +59,10 @@ class KelasController extends Controller
         ], 201);
     }
 
-    public function show(Kelas $kelas): JsonResponse
+    public function show(Kelas $kelas, Request $request): JsonResponse
     {
+        abort_if(! $this->canAccess($request->user(), $kelas), 403);
+
         return response()->json([
             'data' => new KelasResource($kelas->load(['dosen.user', 'mahasiswas.user'])),
         ]);
@@ -63,6 +70,8 @@ class KelasController extends Controller
 
     public function update(StoreKelasRequest $request, Kelas $kelas): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $data = DB::transaction(function () use ($request, $kelas) {
             // 1. Update data Kelas
             $kelas->update($request->validated());
@@ -81,12 +90,31 @@ class KelasController extends Controller
         ]);
     }
 
-    public function destroy(Kelas $kelas): JsonResponse
+    public function destroy(Kelas $kelas, Request $request): JsonResponse
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+        
         $kelas->delete();
 
         return response()->json([
             'message' => 'Kelas deleted successfully',
         ]);
+    }
+    
+        private function canAccess($user, Kelas $kelas): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isDosen()) {
+            return $kelas->dosen_id === $user->dosen->id;
+        }
+
+        if ($user->isMahasiswa()) {
+            return $kelas->mahasiswas()->where('mahasiswa_id', $user->mahasiswa->id)->exists();
+        }
+
+        return false;
     }
 }

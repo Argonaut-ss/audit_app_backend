@@ -1,0 +1,92 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+# Health Check
+GET {{baseUrl}}/health
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+# Dosen Read/Write
+# Hanya Admin yang bisa CRUD/write
+
+### a. List dosen
+GET {{baseUrl}}/dosens
+Authorization: Bearer {{adminToken}}
+
+### b. Search dosen
+GET {{baseUrl}}/dosens?search=D1232
+Authorization: Bearer {{adminToken}}
+
+### c. Tampilkan dosen spesifik
+GET {{baseUrl}}/dosens/1
+Authorization: Bearer {{adminToken}}
+
+### d. Update data dosen selain email
+PUT {{baseUrl}}/dosens/1
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Wono Jair Updated",
+  "email": "wono.jair@binus.edu",
+  "kode_dosen": "D1232"
+}
+
+### e. Update data dosen dengan email lain
+PUT {{baseUrl}}/dosens/1
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Wono Jair Updated",
+  "email": "wono.jair.udin@binus.edu",
+  "kode_dosen": "D1232"
+}
+
+### f. Update data dosen dengan email yang sudah ada (punya user lain) 
+# → 422, karena email sudah ada di database
+PUT {{baseUrl}}/dosens/1
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Wono Jair Updated",
+  "email": "siti.aninysah@binus.edu",
+  "kode_dosen": "D1232"
+}
+
+### g. Delete dosen
+DELETE {{baseUrl}}/dosens/1
+Authorization: Bearer {{adminToken}}

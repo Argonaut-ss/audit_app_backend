@@ -17,7 +17,7 @@ class MahasiswaFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'nim' => fake()->unique()->numerify('27#########'),
+            'nim' => fake()->unique()->numerify('27########'),
         ];
     }
 }

@@ -1,48 +1,44 @@
 <?php
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
+// use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DosenController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\KasusController;
-use App\Http\Controllers\DataClientController;
-use App\Http\Controllers\JwbKasusController;
 
-// Mendaftarkan seluruh route CRUD otomatis untuk setiap entitas
-Route::apiResource('admin', AdminController::class);
-Route::apiResource('dosen', DosenController::class);
-Route::apiResource('mahasiswa', MahasiswaController::class);
-Route::apiResource('kelas', KelasController::class)->parameters([
-    'kelas' => 'kelas'
-]);
-Route::apiResource('kasus', KasusController::class);
-Route::apiResource('data-client', DataClientController::class);
-Route::apiResource('jwb-kasus', JwbKasusController::class);
+// Login & Logout & RBAC
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('jwb-kasus/{id}/file',[JwbKasusController::class, 'file']);
-Route::get('/kasus/{id}/file', [KasusController::class, 'file']);
-/*
-|--------------------------------------------------------------------------
-| Health Check
-|--------------------------------------------------------------------------
-*/
+Route::middleware('auth:sanctum')->group(function () {
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
 
+    // Imports
+    Route::post('mahasiswas/import', [MahasiswaController::class, 'import']);
+    Route::post('dosens/import', [DosenController::class, 'import']);
+
+    // CRUD
+    // Mendaftarkan seluruh route CRUD otomatis untuk setiap entitas
+    // Route::apiResource('admin', AdminController::class);
+    Route::apiResource('dosens', DosenController::class);
+    Route::apiResource('mahasiswas', MahasiswaController::class);
+    Route::apiResource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
+    Route::apiResource('kasus', KasusController::class);
+
+    Route::get('kasus/{id}/file', [KasusController::class, 'file']);
+});
+
+// Health check
 Route::get('/health', function () {
     return response()->json([
         'status' => 'success',
         'message' => 'Backend is running',
     ]);
 });
-
-Route::post('mahasiswas/import', [MahasiswaController::class, 'import']);
-Route::post('dosens/import', [DosenController::class, 'import']);
-
-Route::apiResource('mahasiswas', MahasiswaController::class);
-Route::apiResource('dosens', DosenController::class);
