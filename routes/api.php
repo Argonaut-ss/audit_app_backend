@@ -8,6 +8,8 @@ use App\Http\Controllers\DosenController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\KasusController;
+use App\Http\Controllers\DataClientController;
+use App\Http\Controllers\JwbKasusController;
 
 // Login & Logout & RBAC
 Route::post('/login', [AuthController::class, 'login']);
@@ -30,8 +32,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('dosens', DosenController::class);
     Route::apiResource('mahasiswas', MahasiswaController::class);
     Route::apiResource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
-    Route::apiResource('kasus', KasusController::class);
 
+    Route::apiResource('kasus', KasusController::class);
+    Route::apiResource('data-client', DataClientController::class);
+    Route::apiResource('jwb-kasus', JwbKasusController::class);
+
+    Route::get('jwb-kasus/{id}/file',[JwbKasusController::class, 'file']);
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
 });
 
