@@ -1,0 +1,116 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@adminToken = {{adminLogin.response.body.token}}
+@auditId = 1
+@kasusId = 2
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### 1. Daftar audit mahasiswa
+# Expected: 200
+# Hanya audit milik mahasiswa yang masih terdaftar di kelas terkait.
+GET {{baseUrl}}/audits
+Accept: application/json
+Authorization: Bearer {{mahasiswaToken}}
+
+### 2. Tambah audit
+# Expected: 201 bila KasusID ini belum memiliki audit; jika sudah ada, expected 409.
+# KasusID harus merupakan tugas yang tersedia di kelas mahasiswa.
+POST {{baseUrl}}/audits
+Accept: application/json
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: {{contentType}}
+
+{
+  "KasusID": {{kasusId}},
+  "jenis_perusahaan": "Manufaktur",
+  "periode_audit": "2026-08-19",
+  "waktu_mulai": "2026-08-20",
+  "batas_waktu": "2026-08-31"
+}
+
+### 3. Tambah audit dengan tanggal batas sebelum waktu mulai
+# Expected: 422
+POST {{baseUrl}}/audits
+Accept: application/json
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: {{contentType}}
+
+{
+  "KasusID": {{kasusId}},
+  "jenis_perusahaan": "Jasa",
+  "periode_audit": "2026-08-19",
+  "waktu_mulai": "2026-08-25",
+  "batas_waktu": "2026-08-20"
+}
+
+### 4. Tambah audit dengan data wajib kosong
+# Expected: 422
+POST {{baseUrl}}/audits
+Accept: application/json
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: {{contentType}}
+
+{}
+
+### 5. Tambah audit duplikat untuk kasus yang sama
+# Expected: 409
+POST {{baseUrl}}/audits
+Accept: application/json
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: {{contentType}}
+
+{
+  "KasusID": {{kasusId}},
+  "jenis_perusahaan": "Dagang",
+  "periode_audit": "2026-08-19",
+  "waktu_mulai": "2026-08-20",
+  "batas_waktu": "2026-08-31"
+}
+
+### 6. Update audit
+# Expected: 200
+# Ganti auditId sesuai AuditID yang tersimpan.
+PUT {{baseUrl}}/audits/{{auditId}}
+Accept: application/json
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: {{contentType}}
+
+{
+  "KasusID": {{kasusId}},
+  "jenis_perusahaan": "Dagang",
+  "periode_audit": "2026-08-19",
+  "waktu_mulai": "2026-08-21",
+  "batas_waktu": "2026-09-01"
+}
+
+### 7. Akses audit tanpa token
+# Expected: 401
+GET {{baseUrl}}/audits
+Accept: application/json
+
+### 8. Akses audit dengan role admin
+# Expected: 403
+GET {{baseUrl}}/audits
+Accept: application/json
+Authorization: Bearer {{adminToken}}
