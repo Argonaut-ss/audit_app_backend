@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JwbKasus;
 use App\Models\Kasus;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -14,25 +15,27 @@ class JwbKasusController extends Controller
      * INDEX
      * =====================================================
      *
-     * Menampilkan daftar jawaban.
+     * Admin: semua jawaban.
+     * Dosen: jawaban untuk kasus di kelas yang diampu.
+     * Mahasiswa: jawaban miliknya sendiri saja.
      *
      * File binary tidak ikut dikirim.
      */
 
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        $jawaban = JwbKasus::query()
+        $jawaban = JwbKasus::forUser($request->user())
             ->select([
                 'JwbKasusID',
                 'SubmisID',
                 'KasusID',
-                'NIM',
+                'nim',
                 'TanggalUpload',
                 'Nilai',
             ])
             ->with([
-                'kasus:KasusID,KelasID,TipeKelas,ClientID,NamaTugas,NamaFile',
-                'mahasiswa:NIM',
+                'kasus.kelas',
+                'mahasiswa.user',
             ])
             ->orderByDesc('TanggalUpload')
             ->get();
@@ -45,22 +48,20 @@ class JwbKasusController extends Controller
      * =====================================================
      * STORE
      * =====================================================
+     *
+     * Hanya mahasiswa. NIM selalu dari user yang login, bukan request body.
      */
 
     public function store(Request $request)
     {
+        abort_if(! $request->user()->isMahasiswa(), 403);
+
         $validated = $request->validate([
 
             'KasusID' => [
                 'required',
                 'integer',
                 'exists:kasus,KasusID',
-            ],
-
-            'NIM' => [
-                'required',
-                'string',
-                'exists:mahasiswa,NIM',
             ],
 
             'file' => [
@@ -72,15 +73,34 @@ class JwbKasusController extends Controller
         ]);
 
 
+        $mahasiswa = $request->user()->mahasiswa;
+
+
         /*
          * =====================================================
          * AMBIL KASUS
          * =====================================================
          */
 
-        $kasus = Kasus::findOrFail(
+        $kasus = Kasus::with('kelas')->findOrFail(
             $validated['KasusID']
         );
+
+        if (! $kasus->kelas) {
+            return response()->json([
+                'message' => 'Tugas tidak terhubung ke kelas manapun.',
+            ], 404);
+        }
+
+
+        /*
+         * Harus terdaftar di kelas pemilik kasus ini.
+         */
+        $enrolled = $kasus->kelas->mahasiswas()
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->exists();
+
+        abort_unless($enrolled, 403, 'Anda tidak terdaftar di kelas ini.');
 
 
         /*
@@ -94,8 +114,8 @@ class JwbKasusController extends Controller
             $validated['KasusID']
         )
         ->where(
-            'NIM',
-            $validated['NIM']
+            'nim',
+            $mahasiswa->nim
         )
         ->exists();
 
@@ -146,7 +166,7 @@ class JwbKasusController extends Controller
 
             'KasusID' => $validated['KasusID'],
 
-            'NIM' => $validated['NIM'],
+            'nim' => $mahasiswa->nim,
 
             'TanggalUpload' => now(),
 
@@ -177,7 +197,7 @@ class JwbKasusController extends Controller
                     $jawaban->KasusID,
 
                 'NIM' =>
-                    $jawaban->NIM,
+                    $jawaban->nim,
 
                 'TanggalUpload' =>
                     $jawaban->TanggalUpload,
@@ -192,23 +212,14 @@ class JwbKasusController extends Controller
      * =====================================================
      */
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $jawaban = JwbKasus::query()
-            ->select([
-                'JwbKasusID',
-                'SubmisID',
-                'KasusID',
-                'NIM',
-                'TanggalUpload',
-                'Nilai',
-            ])
-            ->with([
-                'kasus:KasusID,KelasID,TipeKelas,ClientID,NamaTugas,NamaFile',
-                'mahasiswa:NIM',
-            ])
-            ->findOrFail($id);
+        $jawaban = JwbKasus::with([
+            'kasus.kelas',
+            'mahasiswa.user',
+        ])->findOrFail($id);
 
+        abort_if(! $this->canAccess($request->user(), $jawaban), 403);
 
         return response()->json($jawaban);
     }
@@ -218,28 +229,23 @@ class JwbKasusController extends Controller
      * =====================================================
      * FILE
      * =====================================================
+     *
+     * Download file jawaban. Previously PUBLIC.
      */
 
-    public function file($id)
+    public function file(Request $request, $id)
     {
-        $jawaban = JwbKasus::findOrFail($id);
+        $jawaban = JwbKasus::with('kasus.kelas')->findOrFail($id);
 
+        abort_if(! $this->canAccess($request->user(), $jawaban), 403);
 
-        if (!$jawaban->File) {
+        if (! $jawaban->File) {
 
             return response()->json([
                 'message' =>
                     'File jawaban tidak ditemukan.',
             ], 404);
         }
-
-
-        $extension = strtolower(
-            pathinfo(
-                $jawaban->SubmisID,
-                PATHINFO_EXTENSION
-            )
-        );
 
         return response(
             $jawaban->File,
@@ -263,12 +269,15 @@ class JwbKasusController extends Controller
      * =====================================================
      * UPDATE
      * =====================================================
+     *
+     * Memberi nilai — Admin atau Dosen pengampu kelas saja.
      */
 
     public function update(Request $request, $id)
     {
-        $jawaban = JwbKasus::findOrFail($id);
+        $jawaban = JwbKasus::with('kasus.kelas')->findOrFail($id);
 
+        abort_if(! $this->canManage($request->user(), $jawaban), 403);
 
         $validated = $request->validate([
 
@@ -302,7 +311,7 @@ class JwbKasusController extends Controller
                     $jawaban->KasusID,
 
                 'NIM' =>
-                    $jawaban->NIM,
+                    $jawaban->nim,
 
                 'TanggalUpload' =>
                     $jawaban->TanggalUpload,
@@ -320,10 +329,11 @@ class JwbKasusController extends Controller
      * =====================================================
      */
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $jawaban = JwbKasus::findOrFail($id);
+        $jawaban = JwbKasus::with('kasus.kelas')->findOrFail($id);
 
+        abort_if(! $this->canManage($request->user(), $jawaban), 403);
 
         $jawaban->delete();
 
@@ -332,5 +342,38 @@ class JwbKasusController extends Controller
             'message' =>
                 'Jawaban kasus berhasil dihapus.',
         ]);
+    }
+
+    private function canAccess($user, JwbKasus $jawaban): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isMahasiswa()) {
+            return $jawaban->nim === $user->mahasiswa->nim;
+        }
+
+        return $this->dosenPengampu($user, $jawaban);
+    }
+
+    private function canManage($user, JwbKasus $jawaban): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $this->dosenPengampu($user, $jawaban);
+    }
+
+    private function dosenPengampu($user, JwbKasus $jawaban): bool
+    {
+        if (! $user->isDosen() || ! $user->dosen) {
+            return false;
+        }
+
+        $kelas = $jawaban->kasus ? $jawaban->kasus->kelas : null;
+
+        return $kelas !== null && $kelas->dosen_id === $user->dosen->id;
     }
 }

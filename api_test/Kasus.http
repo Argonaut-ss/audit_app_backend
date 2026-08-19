@@ -1,0 +1,100 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+
+# Health Check (no Auth)
+GET {{baseUrl}}/health
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+# RBAC Kasus (Tugas)
+# Hanya Admin yang bisa CRUD/write, User lain hanya bisa read/search/list
+# Swap {{adminToken}}, {{mahasiswaToken}}, {{dosenToken}} sesuai role yang ingin diuji
+
+### a. Lihat kasus
+# Bila admin, bisa lihat semua kasus
+# Bila mahasiswa/dosen, hanya bisa lihat kasus yang mereka ikuti
+GET {{baseUrl}}/kasus
+Authorization: Bearer {{adminToken}}
+
+### b. Search kasus
+# Bila admin, bisa search semua kasus
+# Bila mahasiswa/dosen, hanya bisa search kasus yang mereka ikuti
+GET {{baseUrl}}/kasus?search=UTS
+Authorization: Bearer {{adminToken}}
+
+### c. Membuat kasus
+# -> 201, bila admin atau dosen
+# → 403, bila mahasiswa
+POST {{baseUrl}}/kasus
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="kode_kelas"
+
+TEST02
+------FormBoundary
+Content-Disposition: form-data; name="TipeKelas"
+
+Tugas
+
+------FormBoundary
+Content-Disposition: form-data; name="NamaTugas"
+
+Tugas 2
+
+------FormBoundary
+Content-Disposition: form-data; name="NamaClient"
+
+Industry Industries
+------FormBoundary
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ./test.pdf
+------FormBoundary--
+
+### d. Akses file kasus
+# -> 200, bila admin, mahasiswa/dosen yang terdaftar di kelas
+# -> 403, bila mahasiswa/dosen mencoba akses kelas yang bukan milik mereka
+# -> 404, bila kasus tidak ditemukan
+GET {{baseUrl}}/kasus/1/file
+Authorization: Bearer {{adminToken}}
+
+### e. Delete kasus
+# -> 201, bila admin atau dosen
+# → 403, bila mahasiswa
+DELETE {{baseUrl}}/kasus/1
+Authorization: Bearer {{adminToken}}

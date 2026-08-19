@@ -6,6 +6,7 @@ use App\Models\Kasus;
 use App\Models\DataClient;
 use App\Models\Kelas;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class KasusController extends Controller
@@ -15,9 +16,9 @@ class KasusController extends Controller
      * INDEX
      * =====================================================
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        $kasus = Kasus::query()
+        $kasus = Kasus::forUser($request->user())
             ->select([
                 'KasusID',
                 'ClientID',
@@ -85,6 +86,8 @@ class KasusController extends Controller
      */
     public function store(Request $request)
     {
+        abort_if(! $request->user()->isAdmin(), 403);
+
         $validated = $request->validate([
 
             'kode_kelas' => [
@@ -286,18 +289,18 @@ class KasusController extends Controller
      * DESTROY
      * =====================================================
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $kasus = Kasus::find($id);
+        abort_if(! $request->user()->isAdmin(), 403);
 
+        $kasus = Kasus::findOrFail($id);
 
-        if (!$kasus) {
+        if ($kasus->jawaban()->exists()) {
             return response()->json([
                 'message' =>
-                    'Tugas tidak ditemukan.',
-            ], 404);
+                    'Tugas tidak dapat dihapus karena sudah ada jawaban yang dikumpulkan.',
+            ], 409);
         }
-
 
         $clientID = $kasus->ClientID;
 
@@ -349,10 +352,11 @@ class KasusController extends Controller
      * FILE
      * =====================================================
      */
-    public function file($id)
+    public function file(Request $request, $id)
     {
-        $kasus = Kasus::findOrFail($id);
+        $kasus = Kasus::with('kelas')->findOrFail($id);
 
+        abort_if(! $this->canAccess($request->user(), $kasus), 403);
 
         if (!$kasus->File) {
             return response()->json([
@@ -377,5 +381,30 @@ class KasusController extends Controller
                     '"',
             ]
         );
+    }
+
+    private function canAccess($user, Kasus $kasus): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        $kelas = $kasus->kelas;
+
+        if (! $kelas) {
+            return false;
+        }
+
+        if ($user->isDosen()) {
+            return $kelas->dosen_id === $user->dosen->id;
+        }
+
+        if ($user->isMahasiswa()) {
+            return $kelas->mahasiswas()
+                ->where('mahasiswa_id', $user->mahasiswa->id)
+                ->exists();
+        }
+
+        return false;
     }
 }

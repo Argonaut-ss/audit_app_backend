@@ -63,4 +63,30 @@ class Kasus extends Model
             'ClientID'
         );
     }
+    
+        public function scopeForUser($query, User $user)
+    {
+        if ($user->isMahasiswa()) {
+            return $query->whereHas('kelas.mahasiswas', function ($q) use ($user) {
+                $q->where('mahasiswa_id', $user->mahasiswa->id);
+            });
+        }
+
+        if ($user->isDosen()) {
+            return $query->whereHas('kelas', function ($q) use ($user) {
+                $q->where('dosen_id', $user->dosen->id);
+            });
+        }
+
+        return $query;
+    }
+
+        public function jawaban()
+    {
+        return $this->hasMany(
+            JwbKasus::class,
+            'KasusID',
+            'KasusID'
+        );
+    }
 }

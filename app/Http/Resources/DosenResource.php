@@ -14,7 +14,6 @@ class DosenResource extends JsonResource
             'kode_dosen' => $this->kode_dosen,
             'name' => $this->user->name,
             'email' => $this->user->email,
-            'password' => '********',
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

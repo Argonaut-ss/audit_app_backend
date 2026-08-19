@@ -14,7 +14,6 @@ class MahasiswaResource extends JsonResource
             'nim' => $this->nim,
             'name' => $this->user->name,
             'email' => $this->user->email,
-            'password' => '********', // Never return real password
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
