@@ -4,19 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\KelasCardResource;
 use App\Models\Kelas;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class KelasCardController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request)
     {
-        $kelas = Kelas::with([
-            'dosen.user',
-            'kasus.client',
-        ])->get();
+        $kelas = Kelas::forUser($request->user())
+            ->with([
+                'dosen.user',
+                'kasus.client',
+            ])
+            ->get();
 
-        return response()->json([
-            'data' => KelasCardResource::collection($kelas),
-        ]);
+        return KelasCardResource::collection($kelas);
     }
 }
