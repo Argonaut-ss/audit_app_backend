@@ -13,8 +13,6 @@ use App\Http\Controllers\JwbKasusController;
 
 use App\Http\Controllers\KelasCardController;
 
-Route::get('/kelas-card', [KelasCardController::class, 'index']);
-
 // Login & Logout & RBAC
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -43,6 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('jwb-kasus/{id}/file',[JwbKasusController::class, 'file']);
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
+
+    // Helper Functions
+    Route::get('/kelas-card', [KelasCardController::class, 'index']);
 });
 
 // Health check
