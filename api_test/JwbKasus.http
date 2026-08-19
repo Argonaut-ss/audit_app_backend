@@ -1,0 +1,105 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+
+# Health Check (no Auth)
+GET {{baseUrl}}/health
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+# List & Akses File Jawaban
+# Bila admin, bisa lihat semua
+# bila dosen/mhs, hanya bisa lihat jawaban kelas/kasus mereka
+
+### Lihat semua jawaban
+GET {{baseUrl}}/jwb-kasus
+Authorization: Bearer {{adminToken}}
+
+### Lihat jawaban spesifik
+GET {{baseUrl}}/jwb-kasus/1
+Authorization: Bearer {{adminToken}}
+
+### Akses file jawaban
+GET {{baseUrl}}/jwb-kasus/1/file
+Authorization: Bearer {{adminToken}}
+
+### Submit Jawaban
+# Hanya mhs yang bisa jawab ke kasus masing-masing
+POST {{baseUrl}}/jwb-kasus
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="KasusID"
+
+1
+------FormBoundary
+Content-Disposition: form-data; name="file"; filename="jawaban-test.pdf"
+Content-Type: application/pdf
+
+< ./test.pdf
+------FormBoundary--
+
+### Test Duplicate Submission
+# -> 409, karena telah jawab
+POST {{baseUrl}}/jwb-kasus
+Authorization: Bearer {{mahasiswaToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="KasusID"
+
+1
+------FormBoundary
+Content-Disposition: form-data; name="file"; filename="duplicate.pdf"
+Content-Type: application/pdf
+
+< ./test.pdf
+------FormBoundary--
+
+### Penilaian
+# Admin & Dosen bisa (sesuai kelas), Mhs tidak
+PUT {{baseUrl}}/jwb-kasus/1
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "Nilai": 100
+}
+
+### Hapus jawaban
+# Admin & Dosen bisa, Mhs tidak
+# -> 200
+DELETE {{baseUrl}}/jwb-kasus/1
+Authorization: Bearer {{adminToken}}

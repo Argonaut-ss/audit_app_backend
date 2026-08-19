@@ -19,16 +19,30 @@ return new class extends Migration
             
             // Relasi ke tabel dosens (FK: dosen_id)
             $table->foreignId('dosen_id')->constrained('dosens')->cascadeOnDelete();
+
+            // Relasi 1:1 ke tabel kasus
+            $table->unsignedBigInteger('KasusID')->nullable()->unique();
             
             // Menambahkan unique constraint untuk kombinasi hari, jam, dan ruangan
             $table->unique(['hari', 'jam', 'ruangan']);
             
             $table->timestamps();
         });
+
+        Schema::table('kelas', function (Blueprint $table) {
+            $table->foreign('KasusID')
+                ->references('KasusID')
+                ->on('kasus')
+                ->nullOnDelete();
+        });
     }
 
     public function down(): void
     {
+        Schema::table('kelas', function (Blueprint $table) {
+            $table->dropForeign(['KasusID']);
+        });
+
         Schema::dropIfExists('kelas');
     }
 };

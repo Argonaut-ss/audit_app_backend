@@ -39,10 +39,31 @@ class DataClient extends Model
      */
     public function kasus()
     {
-        return $this->hasMany(
+        return $this->hasOne(
             Kasus::class,
             'ClientID',
             'ClientID'
         );
+    }
+
+        public function scopeForUser($query, User $user)
+    {
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        if ($user->isDosen()) {
+            return $query->whereHas('kasus.kelas', function ($q) use ($user) {
+                $q->where('dosen_id', $user->dosen->id);
+            });
+        }
+
+        if ($user->isMahasiswa()) {
+            return $query->whereHas('kasus.kelas.mahasiswas', function ($q) use ($user) {
+                $q->where('mahasiswa_id', $user->mahasiswa->id);
+            });
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 }

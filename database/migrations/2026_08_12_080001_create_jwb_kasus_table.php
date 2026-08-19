@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('jwb_kasus', function (Blueprint $table) {
             $table->id('JwbKasusID');
-            $table->string('SubmitID')->unique();
+            $table->string('SubmisID')->unique();
             $table->unsignedBigInteger('KasusID');
             $table->string('nim');
             $table->dateTime('TanggalUpload');

@@ -14,7 +14,7 @@ class KelasController extends Controller
     public function index(Request $request): JsonResponse
     {
         // Tarik data kelas sekalian dengan data dosen (dan user-nya untuk nama)
-        $query = Kelas::forUser($request->user())->with(['dosen.user', 'mahasiswas.user']);
+        $query = Kelas::forUser($request->user())->with(['dosen.user', 'mahasiswas.user', 'kasus.client']);
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -50,7 +50,7 @@ class KelasController extends Controller
                 $kelas->mahasiswas()->sync($request->mahasiswa_ids);
             }
 
-            return $kelas->load(['dosen.user', 'mahasiswas.user']);
+            return $kelas->load(['dosen.user', 'mahasiswas.user', 'kasus.client']);
         });
 
         return response()->json([
@@ -64,7 +64,7 @@ class KelasController extends Controller
         abort_if(! $this->canAccess($request->user(), $kelas), 403);
 
         return response()->json([
-            'data' => new KelasResource($kelas->load(['dosen.user', 'mahasiswas.user'])),
+            'data' => new KelasResource($kelas->load(['dosen.user', 'mahasiswas.user', 'kasus.client'])),
         ]);
     }
 
@@ -81,7 +81,7 @@ class KelasController extends Controller
                 $kelas->mahasiswas()->sync($request->mahasiswa_ids);
             }
 
-            return $kelas->load(['dosen.user', 'mahasiswas.user']);
+            return $kelas->load(['dosen.user', 'mahasiswas.user', 'kasus.client']);
         });
 
         return response()->json([

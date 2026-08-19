@@ -57,4 +57,23 @@ class JwbKasus extends Model
             'nim'
         );
     }
+
+        public function scopeForUser($query, User $user)
+    {
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        if ($user->isDosen()) {
+            return $query->whereHas('kasus.kelas', function ($q) use ($user) {
+                $q->where('dosen_id', $user->dosen->id);
+            });
+        }
+
+        if ($user->isMahasiswa()) {
+            return $query->where('nim', $user->mahasiswa->nim);
+        }
+
+        return $query->whereRaw('1 = 0');
+    }
 }

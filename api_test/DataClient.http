@@ -1,0 +1,87 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+# List/Search/Tampilkan spesifik
+# Admin bisa semua, Dosen & Mhs sesuai kasus
+
+### List DataClient
+GET {{baseUrl}}/data-client
+Authorization: Bearer {{adminToken}}
+
+### Tampilkan DataClient spesifik
+GET {{baseUrl}}/data-client/1
+Authorization: Bearer {{adminToken}}
+
+### Search
+GET {{baseUrl}}/data-client?search=Test
+Authorization: Bearer {{adminToken}}
+
+### Show
+GET {{baseUrl}}/data-client/1
+Authorization: Bearer {{adminToken}}
+
+### Create DataClient
+# Hanya Admin yang bisa
+POST {{baseUrl}}/data-client
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "NamaClient": "API Created Client"
+}
+
+# Edit DataClient
+# Only Admin change NamaClient, Dosen can't edit anything
+
+### Update
+PUT {{baseUrl}}/data-client/1
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "NamaClient": "PT Test Client Updated",
+  "NPWP": "99.999.999.9-999.999",
+  "EmailClient": "updated@test.local",
+  "JenisClient": "Perusahaan Updated",
+  "AlamatClient": "Updated by Mhs"
+}
+
+# Hapus
+# Hanya Admin yang bisa, bila sedang tidak digunakan oleh Kasus
+
+### Admin
+DELETE {{baseUrl}}/data-client/1
+Authorization: Bearer {{adminToken}}

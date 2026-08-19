@@ -15,19 +15,15 @@ class Kasus extends Model
 
     public $timestamps = false;
 
+
     protected $fillable = [
-        'KelasID',
-        'TipeKelas',
         'ClientID',
         'NamaTugas',
         'NamaFile',
         'File',
     ];
 
-    /**
-     * File binary jangan dikirim
-     * ketika model diubah menjadi JSON.
-     */
+
     protected $hidden = [
         'File',
     ];
@@ -37,21 +33,27 @@ class Kasus extends Model
      * =====================================================
      * RELATIONSHIP KE KELAS
      * =====================================================
+     *
+     * Kelas.KasusID
+     *       ↓
+     * Kasus.KasusID
+     *
+     * 1 : 1
      */
     public function kelas()
     {
-        return $this->belongsTo(
+        return $this->hasOne(
             Kelas::class,
-            'KelasID',
-            'kode_kelas'
+            'KasusID',
+            'KasusID'
         );
     }
 
 
-    /*
-     * Kasus.ClientID
-     *       ↓
-     * DataClient.ClientID
+    /**
+     * =====================================================
+     * RELATIONSHIP KE DATA CLIENT
+     * =====================================================
      */
     public function client()
     {
@@ -59,6 +61,32 @@ class Kasus extends Model
             DataClient::class,
             'ClientID',
             'ClientID'
+        );
+    }
+    
+        public function scopeForUser($query, User $user)
+    {
+        if ($user->isMahasiswa()) {
+            return $query->whereHas('kelas.mahasiswas', function ($q) use ($user) {
+                $q->where('mahasiswa_id', $user->mahasiswa->id);
+            });
+        }
+
+        if ($user->isDosen()) {
+            return $query->whereHas('kelas', function ($q) use ($user) {
+                $q->where('dosen_id', $user->dosen->id);
+            });
+        }
+
+        return $query;
+    }
+
+        public function jawaban()
+    {
+        return $this->hasMany(
+            JwbKasus::class,
+            'KasusID',
+            'KasusID'
         );
     }
 }
