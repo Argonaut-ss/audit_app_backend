@@ -11,6 +11,10 @@ use App\Http\Controllers\KasusController;
 use App\Http\Controllers\DataClientController;
 use App\Http\Controllers\JwbKasusController;
 
+use App\Http\Controllers\KelasCardController;
+
+Route::get('/kelas-card', [KelasCardController::class, 'index']);
+
 // Login & Logout & RBAC
 Route::post('/login', [AuthController::class, 'login']);
 
