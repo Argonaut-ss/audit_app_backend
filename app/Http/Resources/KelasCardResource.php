@@ -10,6 +10,8 @@ class KelasCardResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'KelasID'         => $this->id,
+            'KasusID'         => $this->KasusID,
             'kode_kelas'      => $this->kode_kelas,
             'tipe_kelas'      => $this->tipe_kelas,
             'nama_dosen'      => $this->dosen?->user?->name,
