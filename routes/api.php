@@ -10,6 +10,7 @@ use App\Http\Controllers\KelasController;
 use App\Http\Controllers\KasusController;
 use App\Http\Controllers\DataClientController;
 use App\Http\Controllers\JwbKasusController;
+use App\Http\Controllers\AuditController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -40,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('kasus', KasusController::class);
     Route::apiResource('data-client', DataClientController::class);
     Route::apiResource('jwb-kasus', JwbKasusController::class);
+    Route::apiResource('audits', AuditController::class)->only(['index', 'store', 'update']);
 
     Route::get('jwb-kasus/{id}/file',[JwbKasusController::class, 'file']);
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
