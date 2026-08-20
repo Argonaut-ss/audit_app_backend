@@ -16,7 +16,7 @@ class KelasCardResource extends JsonResource
             'tipe_kelas'      => $this->tipe_kelas,
             'nama_dosen'      => $this->dosen?->user?->name,
             'kode_dosen'      => $this->dosen?->kode_dosen,
-            'nama_perusahaan' => $this->kasus?->client?->NamaKantor,
+            'nama_perusahaan' => $this->kasus?->client?->NamaClient,
         ];
     }
 }
