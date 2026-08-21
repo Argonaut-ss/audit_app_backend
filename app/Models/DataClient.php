@@ -29,6 +29,13 @@ class DataClient extends Model
         'URLClient',
         'URLKantor',
         'LogoKantor',
+        'NamaLogoKantor',
+        'LogoPerusahaan',
+        'NamaLogoPerusahaan',
+    ];
+
+    protected $hidden = [
+        'LogoKantor',
         'LogoPerusahaan',
     ];
 
