@@ -16,16 +16,13 @@ class JwbKasus extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'SubmisID',
+        'MahasiswasID',
         'KasusID',
-        'nim',
-        'TanggalUpload',
+        'JenisPerusahaan',
+        'Periode',
+        'WaktuMulai',
+        'BatasWaktu',
         'Nilai',
-        'File',
-    ];
-
-    protected $hidden = [
-        'File',
     ];
 
     /*
@@ -44,21 +41,21 @@ class JwbKasus extends Model
     }
 
     /*
-     * jwb_kasus.nim
+     * jwb_kasus.MahasiswasID
      *        ↓
-     * mahasiswas.nim
+     * mahasiswas.id
      */
 
     public function mahasiswa()
     {
         return $this->belongsTo(
             Mahasiswa::class,
-            'nim',
-            'nim'
+            'MahasiswasID',
+            'id'
         );
     }
 
-        public function scopeForUser($query, User $user)
+    public function scopeForUser($query, User $user)
     {
         if ($user->isAdmin()) {
             return $query;
@@ -71,7 +68,7 @@ class JwbKasus extends Model
         }
 
         if ($user->isMahasiswa()) {
-            return $query->where('nim', $user->mahasiswa->nim);
+            return $query->where('MahasiswasID', $user->mahasiswa->id);
         }
 
         return $query->whereRaw('1 = 0');

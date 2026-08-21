@@ -64,7 +64,7 @@ class Kasus extends Model
         );
     }
     
-        public function scopeForUser($query, User $user)
+    public function scopeForUser($query, User $user)
     {
         if ($user->isMahasiswa()) {
             return $query->whereHas('kelas.mahasiswas', function ($q) use ($user) {
@@ -81,7 +81,7 @@ class Kasus extends Model
         return $query;
     }
 
-        public function jawaban()
+    public function jawaban()
     {
         return $this->hasMany(
             JwbKasus::class,

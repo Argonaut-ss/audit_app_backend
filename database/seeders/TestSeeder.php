@@ -169,17 +169,17 @@ class TestSeeder extends Seeder
                 'KasusID' => $kasus1->KasusID,
             ]);
 
-            JwbKasus::updateOrCreate(
-                ['JwbKasusID' => 1],
-                [
-                    'SubmisID' => 'TEST-SUB-001',
-                    'KasusID' => $kasus1->KasusID,
-                    'nim' => $mahasiswa1->nim,
-                    'TanggalUpload' => now(),
-                    'Nilai' => 85,
-                    'File' => self::fakePdf(),
-                ]
-            );
+            // JwbKasus::updateOrCreate(
+            //     ['JwbKasusID' => 1],
+            //     [
+            //         'SubmisID' => 'TEST-SUB-001',
+            //         'KasusID' => $kasus1->KasusID,
+            //         'nim' => $mahasiswa1->nim,
+            //         'TanggalUpload' => now(),
+            //         'Nilai' => 85,
+            //         'File' => self::fakePdf(),
+            //     ]
+            // );
         });
     }
 
