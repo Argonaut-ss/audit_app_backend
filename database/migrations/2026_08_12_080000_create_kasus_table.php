@@ -10,27 +10,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kasus', function (Blueprint $table) {
-
             $table->id('KasusID');
-
-            $table->unsignedBigInteger(
-                'ClientID'
-            );
-
-            $table->string(
-                'NamaTugas'
-            );
-
-            $table->string(
-                'NamaFile'
-            );
+            $table->unsignedBigInteger('ClientID');
+            $table->string('NamaTugas');
+            $table->string('NamaFile');
         });
 
 
-        Schema::table('kasus', function (
-            Blueprint $table
-        ) {
-
+        Schema::table('kasus', function (Blueprint $table) {
             $table->foreign('ClientID')
                 ->references('ClientID')
                 ->on('data_client')
@@ -38,26 +25,17 @@ return new class extends Migration
         });
 
 
-        DB::statement(
-            'ALTER TABLE kasus ADD File MEDIUMBLOB NOT NULL'
-        );
+        DB::statement('ALTER TABLE kasus ADD File MEDIUMBLOB NOT NULL');
     }
 
 
     public function down(): void
     {
-        Schema::table('kasus', function (
-            Blueprint $table
-        ) {
-
+        Schema::table('kasus', function (Blueprint $table) {
             $table->dropForeign([
                 'ClientID',
             ]);
         });
-
-
-        Schema::dropIfExists(
-            'kasus'
-        );
+        Schema::dropIfExists('kasus');
     }
 };

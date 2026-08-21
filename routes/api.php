@@ -39,6 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('kasus', KasusController::class);
     Route::apiResource('data-client', DataClientController::class);
     Route::apiResource('jwb-kasus', JwbKasusController::class);
+    
+    Route::get('/data-client/{id}/logo-kantor', [DataClientController::class, 'logoKantor']);
+    Route::get('/data-client/{id}/logo-perusahaan', [DataClientController::class, 'logoPerusahaan']);
     Route::apiResource('audits', AuditController::class)->only(['index', 'store', 'update']);
 
     Route::get('jwb-kasus/{id}/file',[JwbKasusController::class, 'file']);

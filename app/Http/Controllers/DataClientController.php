@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\DataClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 
 class DataClientController extends Controller
 {
@@ -17,16 +16,36 @@ class DataClientController extends Controller
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('NamaClient', 'like', "%{$search}%")
-                  ->orWhere('NamaKantor', 'like', "%{$search}%")
-                  ->orWhere('NPWP', 'like', "%{$search}%");
+                ->orWhere('NamaKantor', 'like', "%{$search}%")
+                ->orWhere('NPWP', 'like', "%{$search}%");
             });
         }
 
         $clients = $query->orderBy('ClientID', 'desc')
             ->paginate($request->get('per_page', 10));
 
+        $data = collect($clients->items())
+            ->map(function ($client) {
+
+                $client->LogoKantor =
+                    $client->LogoKantor
+                        ? 'data:image/webp;base64,' .
+                        base64_encode($client->LogoKantor)
+                        : null;
+
+                $client->LogoPerusahaan =
+                    $client->LogoPerusahaan
+                        ? 'data:image/webp;base64,' .
+                        base64_encode($client->LogoPerusahaan)
+                        : null;
+
+                return $client;
+            })
+            ->values();
+
         return response()->json([
-            'data' => $clients->items(),
+            'data' => $data,
+            
             'meta' => [
                 'current_page' => $clients->currentPage(),
                 'last_page'    => $clients->lastPage(),
@@ -196,10 +215,72 @@ class DataClientController extends Controller
             unset($validated['NamaClient']);
         }
 
-        foreach (['LogoKantor' => 'kantor', 'LogoPerusahaan' => 'perusahaan'] as $field => $prefix) {
-            if ($request->hasFile($field)) {
-                $validated[$field] = $this->replaceLogo($client, $field, $request->file($field), $prefix);
+        if ($request->hasFile('LogoKantor')) {
+            $file = $request->file('LogoKantor');
+
+            $image = imagecreatefromstring(
+                file_get_contents($file->getRealPath())
+            );
+
+            if ($image === false) {
+                return response()->json([
+                    'message' => 'Logo kantor tidak dapat diproses.',
+                ], 422);
             }
+
+            ob_start();
+
+            imagewebp(
+                $image,
+                null,
+                85
+            );
+
+            $webpData = ob_get_clean();
+
+            imagedestroy($image);
+
+            $validated['LogoKantor'] = $webpData;
+
+            $validated['NamaLogoKantor'] =
+                pathinfo(
+                    $file->getClientOriginalName(),
+                    PATHINFO_FILENAME
+                ) . '.webp';
+        }
+
+        if ($request->hasFile('LogoPerusahaan')) {
+            $file = $request->file('LogoPerusahaan');
+
+            $image = imagecreatefromstring(
+                file_get_contents($file->getRealPath())
+            );
+
+            if ($image === false) {
+                return response()->json([
+                    'message' => 'Logo perusahaan tidak dapat diproses.',
+                ], 422);
+            }
+
+            ob_start();
+
+            imagewebp(
+                $image,
+                null,
+                85
+            );
+
+            $webpData = ob_get_clean();
+
+            imagedestroy($image);
+
+            $validated['LogoPerusahaan'] = $webpData;
+
+            $validated['NamaLogoPerusahaan'] =
+                pathinfo(
+                    $file->getClientOriginalName(),
+                    PATHINFO_FILENAME
+                ) . '.webp';
         }
 
         /*
@@ -214,6 +295,78 @@ class DataClientController extends Controller
             'message' => 'Data client berhasil diperbarui.',
             'data'    => $client,
         ]);
+    }
+
+
+    /*
+     * =====================================================
+     * LOGO KANTOR
+     * =====================================================
+     */
+
+    public function logoKantor(Request $request, $id)
+    {
+        $client = DataClient::findOrFail($id);
+
+        abort_if(! $this->canAccess($request->user(), $client), 403);
+
+        if (!$client->LogoKantor) {
+            return response()->json([
+                'message' => 'Logo kantor tidak ditemukan.',
+            ], 404);
+        }
+
+        return response(
+            $client->LogoKantor,
+            200,
+            [
+                'Content-Type' =>
+                    'image/webp',
+
+                'Content-Disposition' =>
+                    'inline; filename="' .
+                    addslashes(
+                        $client->NamaLogoKantor
+                    ) .
+                    '"',
+            ]
+        );
+    }
+
+
+    /*
+     * =====================================================
+     * LOGO PERUSAHAAN
+     * =====================================================
+     */
+
+    public function logoPerusahaan(Request $request, $id)
+    {
+        $client = DataClient::findOrFail($id);
+
+        abort_if(! $this->canAccess($request->user(), $client), 403);
+
+        if (!$client->LogoPerusahaan) {
+            return response()->json([
+                'message' => 'Logo perusahaan tidak ditemukan.',
+            ], 404);
+        }
+
+        return response(
+            $client->LogoPerusahaan,
+            200,
+            [
+                'Content-Type' =>
+                    'image/webp',
+
+                'Content-Disposition' =>
+                    'inline; filename="' .
+                    addslashes(
+                        $client->NamaLogoPerusahaan
+                    ) .
+                    '"',
+            ]
+        );
     }
 
 
@@ -240,15 +393,6 @@ class DataClientController extends Controller
             ], 409);
         }
 
-        foreach (['LogoKantor', 'LogoPerusahaan'] as $field) {
-            if ($client->{$field}) {
-                $path = public_path($client->{$field});
-                if (File::exists($path)) {
-                    File::delete($path);
-                }
-            }
-        }
-
         $client->delete();
 
         return response()->json([
@@ -262,27 +406,6 @@ class DataClientController extends Controller
      * FILE HELPERS & AUTHORIZATION
      * =====================================================
      */
-
-    private function replaceLogo(DataClient $client, string $field, $file, string $prefix): string
-    {
-        if ($client->{$field}) {
-            $old = public_path($client->{$field});
-            if (File::exists($old)) {
-                File::delete($old);
-            }
-        }
-
-        $logoPath = public_path('DataClient/Logo');
-
-        if (! File::exists($logoPath)) {
-            File::makeDirectory($logoPath, 0755, true);
-        }
-
-        $fileName = $prefix . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $file->move($logoPath, $fileName);
-
-        return 'DataClient/Logo/' . $fileName;
-    }
 
     private function canAccess($user, DataClient $client): bool
     {
