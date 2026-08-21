@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\JwbKasus;
+use App\Models\Perikatan;
 use App\Models\Kasus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JwbKasusController extends Controller
 {
@@ -130,37 +132,40 @@ class JwbKasusController extends Controller
             ], 409);
         }
 
-
         /*
          * =====================================================
          * CREATE
          * =====================================================
          */
+        
+        $result = DB::transaction(function () use ($mahasiswa, $validated) {
+            $jawaban = JwbKasus::create([
+                'MahasiswasID' =>
+                    $mahasiswa->id,
+                'KasusID' =>
+                    $validated['KasusID'],
+                'Nilai' =>
+                    null,
+            ]);
 
-        $jawaban = JwbKasus::create([
-
-            'MahasiswasID' =>
-                $mahasiswa->id,
-
-            'KasusID' =>
-                $validated['KasusID'],
-
-            'JenisPerusahaan' =>
-                $validated['JenisPerusahaan'],
-
-            'Periode' =>
-                $validated['Periode'],
-
-            'WaktuMulai' =>
-                $validated['WaktuMulai'],
-
-            'BatasWaktu' =>
-                $validated['BatasWaktu'],
-
-            'Nilai' =>
-                null,
-        ]);
-
+            Perikatan::create([
+                'JwbKasusID' =>
+                    $jawaban->JwbKasusID,
+                'FileProposal' =>
+                    null,
+                'FileSPK' =>
+                    null,
+                'FileSuratTugas' =>
+                    null,
+                'FilePenugasan' =>
+                    null,
+                'FileIndependensi' =>
+                    null,
+                'Pembuat' =>
+                    null,
+            ]);
+            return $jawaban;
+        });
 
         /*
          * =====================================================
@@ -220,47 +225,9 @@ class JwbKasusController extends Controller
 
     /*
      * =====================================================
-     * FILE
-     * =====================================================
-     *
-     * Download file jawaban. Previously PUBLIC.
-     */
-
-    public function file(Request $request, $id)
-    {
-        $jawaban = JwbKasus::with('kasus.kelas')->findOrFail($id);
-
-        abort_if(! $this->canAccess($request->user(), $jawaban), 403);
-
-        if (! $jawaban->File) {
-
-            return response()->json([
-                'message' => 'File jawaban tidak ditemukan.',
-            ], 404);
-        }
-
-        return response(
-            $jawaban->File,
-            200,
-            [
-                'Content-Type' => 'application/octet-stream',
-
-                'Content-Disposition' => 'inline; filename="' .
-                    addslashes(
-                        'JwbKasus-' . $jawaban->JwbKasusID
-                    ) .
-                    '"',
-            ]
-        );
-    }
-
-
-    /*
-     * =====================================================
      * UPDATE
      * =====================================================
      *
-     * Memberi nilai — Admin atau Dosen pengampu kelas saja.
      */
 
     public function update(Request $request, $id)
@@ -275,12 +242,9 @@ class JwbKasusController extends Controller
                 'max:100',
             ],
         ]);
-
-
         $jawaban->update([
             'Nilai' => $validated['Nilai'] ?? null,
         ]);
-
 
         return response()->json([
             'message' => 'Jawaban kasus berhasil diperbarui.',
@@ -312,7 +276,6 @@ class JwbKasusController extends Controller
             ],
         ]);
     }
-
 
     /*
      * =====================================================
