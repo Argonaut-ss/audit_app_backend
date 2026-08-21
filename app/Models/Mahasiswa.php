@@ -27,4 +27,15 @@ class Mahasiswa extends Model
     {
         return $this->belongsToMany(Kelas::class, 'kelas_mahasiswa', 'mahasiswa_id', 'kelas_id');
     }
+    /**
+     * Relasi: Mahasiswa dapat memiliki banyak jawaban kasus.
+     */
+    public function jawaban()
+    {
+        return $this->hasMany(
+            JwbKasus::class,
+            'MahasiswasID',
+            'id'
+        );
+    }
 }
