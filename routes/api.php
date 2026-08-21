@@ -11,6 +11,7 @@ use App\Http\Controllers\KasusController;
 use App\Http\Controllers\DataClientController;
 use App\Http\Controllers\JwbKasusController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\PerikatanController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -34,11 +35,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::apiResource('admin', AdminController::class);
     Route::apiResource('dosens', DosenController::class);
     Route::apiResource('mahasiswas', MahasiswaController::class);
-    Route::apiResource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
-
+    
     Route::apiResource('kasus', KasusController::class);
     Route::apiResource('data-client', DataClientController::class);
     Route::apiResource('jwb-kasus', JwbKasusController::class);
+    
+    Route::apiResource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
     
     Route::get('/data-client/{id}/logo-kantor', [DataClientController::class, 'logoKantor']);
     Route::get('/data-client/{id}/logo-perusahaan', [DataClientController::class, 'logoPerusahaan']);
