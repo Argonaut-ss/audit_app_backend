@@ -55,6 +55,15 @@ class JwbKasus extends Model
         );
     }
 
+    public function perikatan()
+    {
+        return $this->hasOne(
+            Perikatan::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
+    }
+
     public function scopeForUser($query, User $user)
     {
         if ($user->isAdmin()) {

@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Imports
     Route::post('mahasiswas/import', [MahasiswaController::class, 'import']);
     Route::post('dosens/import', [DosenController::class, 'import']);
+    Route::post('/perikatan/{id}', [PerikatanController::class, 'update']);
 
     // CRUD
     // Mendaftarkan seluruh route CRUD otomatis untuk setiap entitas
@@ -48,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('jwb-kasus/{id}/file',[JwbKasusController::class, 'file']);
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
+    Route::get('/perikatan/{id}', [PerikatanController::class, 'show']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);
