@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JwbKasus;
 use App\Models\Perikatan;
 use App\Models\Kasus;
+use App\Models\DetilVerifikasi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -81,8 +82,6 @@ class JwbKasusController extends Controller
                 'after_or_equal:WaktuMulai',
             ],
         ]);
-
-
         $mahasiswa = $request->user()->mahasiswa;
 
         /*
@@ -92,13 +91,11 @@ class JwbKasusController extends Controller
          */
 
         $kasus = Kasus::with('kelas')->findOrFail($validated['KasusID']);
-
         if (! $kasus->kelas) {
             return response()->json([
                 'message' => 'Tugas tidak terhubung ke kelas manapun.',
             ], 404);
         }
-
 
         /*
          * Harus terdaftar di kelas pemilik kasus ini.
@@ -140,31 +137,34 @@ class JwbKasusController extends Controller
         
         $result = DB::transaction(function () use ($mahasiswa, $validated) {
             $jawaban = JwbKasus::create([
-                'MahasiswasID' =>
-                    $mahasiswa->id,
-                'KasusID' =>
-                    $validated['KasusID'],
-                'Nilai' =>
-                    null,
+                'MahasiswasID' => $mahasiswa->id,
+                'KasusID' => $validated['KasusID'],
+                'JenisPerusahaan' => $validated['JenisPerusahaan'],
+                'Periode' => $validated['Periode'],
+                'WaktuMulai' => $validated['WaktuMulai'],
+                'BatasWaktu' => $validated['BatasWaktu'],
+                'Nilai' => null,
             ]);
 
-            Perikatan::create([
-                'JwbKasusID' =>
-                    $jawaban->JwbKasusID,
-                'FileProposal' =>
-                    null,
-                'FileSPK' =>
-                    null,
-                'FileSuratTugas' =>
-                    null,
-                'FilePenugasan' =>
-                    null,
-                'FileIndependensi' =>
-                    null,
-                'Pembuat' =>
-                    null,
+            $perikatan = Perikatan::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+                'FileProposal' => null,
+                'FileSPK' => null,
+                'FileSuratTugas' => null,
+                'FilePenugasan' =>null,
+                'FileIndependensi' => null,
+                'Pembuat' => null,
             ]);
-            return $jawaban;
+
+             $detilVerifikasi = DetilVerifikasi::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]); 
+
+            return [
+                'jawaban' => $jawaban,
+                'perikatan' => $perikatan,
+                'detilVerifikasi' => $detilVerifikasi,
+            ];
         });
 
         /*
@@ -174,33 +174,16 @@ class JwbKasusController extends Controller
          */
 
         return response()->json([
-            'message' =>
-                'Jawaban kasus berhasil dikumpulkan.',
-
+            'message' => 'Jawaban kasus berhasil dikumpulkan.',
             'data' => [
-                'JwbKasusID' =>
-                    $jawaban->JwbKasusID,
-
-                'MahasiswasID' =>
-                    $jawaban->MahasiswasID,
-
-                'KasusID' =>
-                    $jawaban->KasusID,
-
-                'JenisPerusahaan' =>
-                    $jawaban->JenisPerusahaan,
-
-                'Periode' =>
-                    $jawaban->Periode,
-
-                'WaktuMulai' =>
-                    $jawaban->WaktuMulai,
-
-                'BatasWaktu' =>
-                    $jawaban->BatasWaktu,
-
-                'Nilai' =>
-                    $jawaban->Nilai,
+                'JwbKasusID' => $result['jawaban']->JwbKasusID,
+                'MahasiswasID' => $result['jawaban']->MahasiswasID,
+                'KasusID' => $result['jawaban']->KasusID,
+                'JenisPerusahaan' => $result['jawaban']->JenisPerusahaan,
+                'Periode' => $result['jawaban']->Periode,
+                'WaktuMulai' => $result['jawaban']->WaktuMulai,
+                'BatasWaktu' => $result['jawaban']->BatasWaktu,
+                'Nilai' => $result['jawaban']->Nilai,
             ],
         ], 201);
     }
@@ -242,6 +225,7 @@ class JwbKasusController extends Controller
                 'max:100',
             ],
         ]);
+
         $jawaban->update([
             'Nilai' => $validated['Nilai'] ?? null,
         ]);
@@ -250,29 +234,14 @@ class JwbKasusController extends Controller
             'message' => 'Jawaban kasus berhasil diperbarui.',
 
             'data' => [
-                'JwbKasusID' =>
-                    $jawaban->JwbKasusID,
-
-                'MahasiswasID' =>
-                    $jawaban->MahasiswasID,
-
-                'KasusID' =>
-                    $jawaban->KasusID,
-
-                'JenisPerusahaan' =>
-                    $jawaban->JenisPerusahaan,
-
-                'Periode' =>
-                    $jawaban->Periode,
-
-                'WaktuMulai' =>
-                    $jawaban->WaktuMulai,
-
-                'BatasWaktu' =>
-                    $jawaban->BatasWaktu,
-
-                'Nilai' =>
-                    $jawaban->Nilai,
+                'JwbKasusID' => $jawaban->JwbKasusID,
+                'MahasiswasID' => $jawaban->MahasiswasID,
+                'KasusID' => $jawaban->KasusID,
+                'JenisPerusahaan' => $jawaban->JenisPerusahaan,
+                'Periode' => $jawaban->Periode,
+                'WaktuMulai' => $jawaban->WaktuMulai,
+                'BatasWaktu' => $jawaban->BatasWaktu,
+                'Nilai' => $jawaban->Nilai,
             ],
         ]);
     }

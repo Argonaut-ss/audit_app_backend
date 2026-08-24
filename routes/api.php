@@ -12,6 +12,7 @@ use App\Http\Controllers\DataClientController;
 use App\Http\Controllers\JwbKasusController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\PerikatanController;
+use App\Http\Controllers\DetilVerifikasiController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -47,9 +48,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/data-client/{id}/logo-perusahaan', [DataClientController::class, 'logoPerusahaan']);
     Route::apiResource('audits', AuditController::class)->only(['index', 'store', 'update']);
 
-    Route::get('jwb-kasus/{id}/file',[JwbKasusController::class, 'file']);
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
     Route::get('/perikatan/{id}', [PerikatanController::class, 'show']);
+    Route::apiResource('detil-verifikasi', DetilVerifikasiController::class)->only(['index', 'show', 'update',]);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);
