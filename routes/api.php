@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
     Route::get('/perikatan/{id}', [PerikatanController::class, 'show']);
+    Route::delete('/perikatan/{id}/{file}', [PerikatanController::class, 'destroy']);
     Route::apiResource('detil-verifikasi', DetilVerifikasiController::class)->only(['index', 'show', 'update',]);
 
     Route::get('/identifikasi/{jwbKasusId}', [IdentifikasiController::class, 'show']);
