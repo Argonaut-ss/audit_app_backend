@@ -18,7 +18,7 @@ class DetilVerifikasiController extends Controller
         $detail = DetilVerifikasi::with([
             'jwbKasus',
         ])
-            ->orderByDesc('ID')
+            ->orderByDesc('DetilVerifikasiID')
             ->get();
 
         return response()->json($detail);

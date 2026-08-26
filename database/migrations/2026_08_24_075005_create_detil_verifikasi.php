@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detil_verifikasi', function (Blueprint $table) {
-            $table->id('ID');
+            $table->id('DetilVerifikasiID');
             $table->unsignedBigInteger('JwbKasusID');
             $table->boolean('DetailPermintaan')->default(false);
             $table->boolean('RincianPersediaan')->default(false);

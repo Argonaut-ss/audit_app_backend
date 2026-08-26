@@ -152,9 +152,8 @@ class JwbKasusController extends Controller
                 'FileProposal' => null,
                 'FileSPK' => null,
                 'FileSuratTugas' => null,
-                'FilePenugasan' =>null,
+                'FilePenugasan' => null,
                 'FileIndependensi' => null,
-                'Pembuat' => null,
             ]);
 
              $detilVerifikasi = DetilVerifikasi::create([
