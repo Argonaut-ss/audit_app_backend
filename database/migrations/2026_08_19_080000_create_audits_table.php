@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    
+    /*
     public function up(): void
     {
         Schema::create('audits', function (Blueprint $table) {
@@ -26,6 +28,7 @@ return new class extends Migration
             $table->unique(['user_id', 'KasusID']);
         });
     }
+    */
 
     public function down(): void
     {

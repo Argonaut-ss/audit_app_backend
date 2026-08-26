@@ -10,7 +10,7 @@ use App\Http\Controllers\KelasController;
 use App\Http\Controllers\KasusController;
 use App\Http\Controllers\DataClientController;
 use App\Http\Controllers\JwbKasusController;
-use App\Http\Controllers\AuditController;
+// use App\Http\Controllers\AuditController; // API audits sudah tidak digunakan.
 use App\Http\Controllers\PerikatanController;
 use App\Http\Controllers\DetilVerifikasiController;
 use App\Http\Controllers\Api\IdentifikasiController;
@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/data-client/{id}/logo-kantor', [DataClientController::class, 'logoKantor']);
     Route::get('/data-client/{id}/logo-perusahaan', [DataClientController::class, 'logoPerusahaan']);
-    Route::apiResource('audits', AuditController::class)->only(['index', 'store', 'update']);
+    // Route::apiResource('audits', AuditController::class)->only(['index', 'store', 'update']);
 
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
     Route::get('/perikatan/{id}', [PerikatanController::class, 'show']);

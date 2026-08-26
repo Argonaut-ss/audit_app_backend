@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+/*
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -38,3 +39,5 @@ class Audit extends \Illuminate\Database\Eloquent\Model
         return $this->belongsTo(Kasus::class, 'KasusID', 'KasusID');
     }
 }
+
+*/
