@@ -22,7 +22,6 @@ class Perikatan extends Model
         'FileSuratTugas',
         'FilePenugasan',
         'FileIndependensi',
-        'Pembuat',
     ];
 
     protected $hidden = [

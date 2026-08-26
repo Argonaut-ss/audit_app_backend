@@ -204,7 +204,6 @@ class TestSeeder extends Seeder
                     'FileSuratTugas' => null,
                     'FilePenugasan' => null,
                     'FileIndependensi' => null,
-                    'Pembuat' => null,
                 ]
             );
 

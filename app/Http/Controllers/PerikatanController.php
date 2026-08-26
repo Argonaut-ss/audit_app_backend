@@ -23,7 +23,6 @@ class PerikatanController extends Controller
         return response()->json($perikatan);
     }
 
-
     /*
      * =====================================================
      * UPDATE
@@ -35,7 +34,6 @@ class PerikatanController extends Controller
         $perikatan = Perikatan::findOrFail($id);
 
         $validated = $request->validate([
-
             'FileProposal' => [
                 'nullable',
                 'file',
@@ -60,17 +58,8 @@ class PerikatanController extends Controller
                 'nullable',
                 'file',
             ],
-
-            'Pembuat' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
         ]);
-
-
         $data = [];
-
 
         if ($request->hasFile('FileProposal')) {
             $data['FileProposal'] =
@@ -79,14 +68,12 @@ class PerikatanController extends Controller
                 );
         }
 
-
         if ($request->hasFile('FileSPK')) {
             $data['FileSPK'] =
                 file_get_contents(
                     $request->file('FileSPK')->getRealPath()
                 );
         }
-
 
         if ($request->hasFile('FileSuratTugas')) {
             $data['FileSuratTugas'] =
@@ -95,7 +82,6 @@ class PerikatanController extends Controller
                 );
         }
 
-
         if ($request->hasFile('FilePenugasan')) {
             $data['FilePenugasan'] =
                 file_get_contents(
@@ -103,23 +89,13 @@ class PerikatanController extends Controller
                 );
         }
 
-
         if ($request->hasFile('FileIndependensi')) {
             $data['FileIndependensi'] =
                 file_get_contents(
                     $request->file('FileIndependensi')->getRealPath()
                 );
         }
-
-
-        if ($request->filled('Pembuat')) {
-            $data['Pembuat'] =
-                $validated['Pembuat'];
-        }
-
-
         $perikatan->update($data);
-
 
         return response()->json([
             'message' =>
@@ -131,9 +107,49 @@ class PerikatanController extends Controller
 
                 'JwbKasusID' =>
                     $perikatan->JwbKasusID,
+            ],
+        ]);
+    }
 
-                'Pembuat' =>
-                    $perikatan->Pembuat,
+    /*
+    * =====================================================
+    * DESTROY FILE
+    * =====================================================
+    * Menghapus salah satu file dari data perikatan.
+    * Record perikatan tidak ikut dihapus.
+    */
+
+    public function destroy(Request $request, $id, $file): JsonResponse
+    {
+        $perikatan = Perikatan::findOrFail($id);
+        $allowedFiles = [
+            'FileProposal',
+            'FileSPK',
+            'FileSuratTugas',
+            'FilePenugasan',
+            'FileIndependensi',
+        ];
+
+        if (! in_array($file, $allowedFiles, true)) {
+            return response()->json([
+                'message' => 'Jenis file tidak valid.',
+            ], 422);
+        }
+
+        if (is_null($perikatan->{$file})) {
+            return response()->json([
+                'message' => 'File tersebut tidak ditemukan.',
+            ], 404);
+        }
+        $perikatan->{$file} = null;
+        $perikatan->save();
+
+        return response()->json([
+            'message' => "{$file} berhasil dihapus.",
+            'data' => [
+                'PerikatanID' => $perikatan->PerikatanID,
+                'JwbKasusID' => $perikatan->JwbKasusID,
+                $file => null,
             ],
         ]);
     }

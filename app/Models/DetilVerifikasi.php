@@ -10,7 +10,7 @@ class DetilVerifikasi extends Model
     use HasFactory;
     protected $table = 'detil_verifikasi';
 
-    protected $primaryKey = 'ID';
+    protected $primaryKey = 'DetilVerifikasiID';
 
     public $timestamps = false;
     
