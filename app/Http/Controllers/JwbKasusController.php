@@ -32,6 +32,7 @@ class JwbKasusController extends Controller
             ])
             ->with([
                 'kasus.kelas',
+                'kasus.client',
                 'mahasiswa.user',
             ])
             ->orderByDesc('JwbKasusID')
@@ -167,6 +168,12 @@ class JwbKasusController extends Controller
             ];
         });
 
+        $result['jawaban']->load([
+            'kasus.kelas',
+            'kasus.client',
+            'mahasiswa.user',
+        ]);
+
         /*
          * =====================================================
          * RESPONSE
@@ -175,16 +182,7 @@ class JwbKasusController extends Controller
 
         return response()->json([
             'message' => 'Jawaban kasus berhasil dikumpulkan.',
-            'data' => [
-                'JwbKasusID' => $result['jawaban']->JwbKasusID,
-                'MahasiswasID' => $result['jawaban']->MahasiswasID,
-                'KasusID' => $result['jawaban']->KasusID,
-                'JenisPerusahaan' => $result['jawaban']->JenisPerusahaan,
-                'Periode' => $result['jawaban']->Periode,
-                'WaktuMulai' => $result['jawaban']->WaktuMulai,
-                'BatasWaktu' => $result['jawaban']->BatasWaktu,
-                'Nilai' => $result['jawaban']->Nilai,
-            ],
+            'data' => $result['jawaban'],
         ], 201);
     }
 
@@ -216,9 +214,34 @@ class JwbKasusController extends Controller
     public function update(Request $request, $id)
     {
         $jawaban = JwbKasus::with('kasus.kelas')->findOrFail($id);
-        abort_if(! $this->canManage($request->user(), $jawaban), 403);
+        $isOwner = $request->user()->isMahasiswa()
+            && $jawaban->MahasiswasID === $request->user()->mahasiswa->id;
+        abort_if(! $this->canManage($request->user(), $jawaban) && ! $isOwner, 403);
         $validated = $request->validate([
+            'KasusID' => [
+                'sometimes',
+                'integer',
+                'exists:kasus,KasusID',
+            ],
+            'JenisPerusahaan' => [
+                'sometimes',
+                'in:Manufaktur,Dagang,Jasa',
+            ],
+            'Periode' => [
+                'sometimes',
+                'date',
+            ],
+            'WaktuMulai' => [
+                'sometimes',
+                'date',
+            ],
+            'BatasWaktu' => [
+                'sometimes',
+                'date',
+                'after_or_equal:WaktuMulai',
+            ],
             'Nilai' => [
+                'sometimes',
                 'nullable',
                 'integer',
                 'min:0',
@@ -226,23 +249,17 @@ class JwbKasusController extends Controller
             ],
         ]);
 
-        $jawaban->update([
-            'Nilai' => $validated['Nilai'] ?? null,
+        $jawaban->update($validated);
+        $jawaban->load([
+            'kasus.kelas',
+            'kasus.client',
+            'mahasiswa.user',
         ]);
 
         return response()->json([
             'message' => 'Jawaban kasus berhasil diperbarui.',
 
-            'data' => [
-                'JwbKasusID' => $jawaban->JwbKasusID,
-                'MahasiswasID' => $jawaban->MahasiswasID,
-                'KasusID' => $jawaban->KasusID,
-                'JenisPerusahaan' => $jawaban->JenisPerusahaan,
-                'Periode' => $jawaban->Periode,
-                'WaktuMulai' => $jawaban->WaktuMulai,
-                'BatasWaktu' => $jawaban->BatasWaktu,
-                'Nilai' => $jawaban->Nilai,
-            ],
+            'data' => $jawaban,
         ]);
     }
 
