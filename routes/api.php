@@ -13,6 +13,7 @@ use App\Http\Controllers\JwbKasusController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\PerikatanController;
 use App\Http\Controllers\DetilVerifikasiController;
+use App\Http\Controllers\Api\IdentifikasiController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -51,6 +52,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
     Route::get('/perikatan/{id}', [PerikatanController::class, 'show']);
     Route::apiResource('detil-verifikasi', DetilVerifikasiController::class)->only(['index', 'show', 'update',]);
+
+    Route::get('/identifikasi/{jwbKasusId}', [IdentifikasiController::class, 'show']);
+    Route::put('/identifikasi/{jwbKasusId}', [IdentifikasiController::class, 'update']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);

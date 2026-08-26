@@ -58,12 +58,14 @@ classDiagram
     }
 
     class JwbKasus {
+        -Int JwbKasusID
+        -Int MahasiswaID
         -Int KasusID
-        -String SubmisID
-        -Date TanggalUpload
         -Int Nilai
-        -String NIM
-        -Blob File
+        -enum JenisPerusahaan
+        -Date Periode
+        -Date WaktuMulai
+        -Date BatasWaktu
     }
 
     class Kasus {
@@ -92,12 +94,93 @@ classDiagram
         -String LogoPerusahaan
     }
 
+    class PMPJ {
+        -Int PMPJID
+        -Int JwbKasusID
+        -String Nama
+        -String Jabatan
+        -String Alamat
+        -String BeneficialOwner
+        -Blob KTP
+        -Int ProfilPenggunaID
+        -Int ProfilBisnisID
+        -Int ProfilDomisiliID
+        -Int KriteriaID
+    }
+
+    class Identifikasi {
+        -Int IdentifikasiID
+        -Int JwbKasusID
+        -Int Tahun
+        -String OpiniAudit
+        -String NoSuratPengesahan
+        -String LaporanSPT
+        -String NoSuratKeputusan
+        -String Laporan Keuangan
+        -String TipePerikatan
+        -String SumberDana
+        -String JenisPerikatan
+        -String TujuanTransaksi
+        -String StandardAkutansi
+        -Int TotalAset
+        -String NamaKAP
+        -Int Pendapatan
+        -Int LabaRugi
+        -String KontakNama
+        -Int KontakNomor
+        -String KontakJabatan
+        -String KontakEmail
+        -Blob FileAkte
+        -Blob FileNPWP
+        -Blob FileStrukturOrg 
+    }
+
+    class Perikatan {
+        -int PerikatanID
+        -Int JwbKasusID
+        -Blob File
+    }
+
+    class Check {
+        -Int CheckID
+        -Int JwbKasusID
+        -Int DetailVerifikasiBox
+        -Int Checkbox2
+        -Int Checkbox3
+        -...
+        -Int Checkbox20
+    }
+
+    class ProfilPengguna {
+        -Int ProfilPenggunaID
+        -String Dropdown
+        -String Resiko
+    }
+
+    class ProfilBisnis {
+        -Int ProfilBisnisID
+        -String Dropdown
+        -String Resiko
+    }
+
+    class ProfilDomisili {
+        -Int ProfilDomisiliID
+        -String Dropdown
+        -String Resiko
+    }
+
+    class KriteriaKhusus {
+        -Int KriteriaID
+        -String Dropdown
+        -String Resiko
+    }
+
     %% Inheritance
     User <|-- Admin
     User <|-- Dosen
     User <|-- Mahasiswa
 
-    %% Admin management / dependency relationships
+    %% Admin management
     Admin ..> Dosen : Mengelola
     Admin ..> Mahasiswa : Mengelola
     Admin ..> Kelas : Mengelola
@@ -106,15 +189,27 @@ classDiagram
     Mahasiswa "1" -- "0..*" TrSiswa
     TrSiswa "0..*" -- "1" Kelas
 
-    %% Mahasiswa submits assignments
+    %% Mahasiswa mengumpulkan Kasus
     Mahasiswa "1" --> "0..*" JwbKasus : uploadTugas
 
-    %% Case / assignment relationships
+    %% Kasus
     Kasus "1" --> "0..*" JwbKasus
     Kasus "1" -- "1" Kelas
 
     %% Client relationship
     DataClient "1" --> "1" Kasus
+
+    %% JwbKasus & Audit
+    JwbKasus "1" --> "1" PMPJ
+    JwbKasus "1" --> "1" Identifikasi
+    JwbKasus "1" --> "0.." Perikatan
+    JwbKasus "1" --> "1" Check
+
+    %% PMPJ & Profil
+    PMPJ "0.." --> "1" ProfilPengguna
+    PMPJ "0.." --> "1" ProfilBisnis
+    PMPJ "0.." --> "1" ProfilDomisili
+    PMPJ "0.." --> "1" KriteriaKhusus
 ```
 
 &nbsp;
