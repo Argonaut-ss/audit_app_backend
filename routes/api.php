@@ -13,7 +13,7 @@ use App\Http\Controllers\JwbKasusController;
 // use App\Http\Controllers\AuditController; // API audits sudah tidak digunakan.
 use App\Http\Controllers\PerikatanController;
 use App\Http\Controllers\DetilVerifikasiController;
-use App\Http\Controllers\Api\IdentifikasiController;
+use App\Http\Controllers\IdentifikasiController;
 
 use App\Http\Controllers\KelasCardController;
 
