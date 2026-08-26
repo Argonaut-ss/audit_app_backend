@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\Kasus;
 use App\Models\JwbKasus;
 use App\Models\DataClient;
+use App\Models\Perikatan;
+use App\Models\DetilVerifikasi;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -180,6 +182,36 @@ class TestSeeder extends Seeder
             //         'File' => self::fakePdf(),
             //     ]
             // );
+
+            $jwbKasus1 = JwbKasus::updateOrCreate(
+                ['JwbKasusID' => 1],
+                [
+                    'MahasiswasID' => $mahasiswa1->id,
+                    'KasusID' => $kasus1->KasusID,
+                    'JenisPerusahaan' => 'Manufaktur',
+                    'Periode' => '2026-08-16',
+                    'WaktuMulai' => '2026-08-20',
+                    'BatasWaktu' => '2026-08-30',
+                    'Nilai' => null,
+                ]
+            );
+
+            Perikatan::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'FileProposal' => null,
+                    'FileSPK' => null,
+                    'FileSuratTugas' => null,
+                    'FilePenugasan' => null,
+                    'FileIndependensi' => null,
+                    'Pembuat' => null,
+                ]
+            );
+
+            DetilVerifikasi::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                []
+            );
         });
     }
 
