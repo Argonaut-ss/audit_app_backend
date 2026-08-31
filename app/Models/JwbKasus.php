@@ -74,13 +74,22 @@ class JwbKasus extends Model
     }
     
     public function identifikasi()
-{
+    {
     return $this->hasOne(
         Identifikasi::class,
         'JwbKasusID',
         'JwbKasusID'
     );
-}
+    }   
+
+    public function pmpj()
+    {
+        return $this->hasOne(
+            Pmpj::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
+    }
 
     public function scopeForUser($query, User $user)
     {
