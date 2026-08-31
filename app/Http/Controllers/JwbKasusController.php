@@ -6,6 +6,7 @@ use App\Models\JwbKasus;
 use App\Models\Perikatan;
 use App\Models\Kasus;
 use App\Models\DetilVerifikasi;
+use App\Models\Identifikasi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -158,12 +159,17 @@ class JwbKasusController extends Controller
 
              $detilVerifikasi = DetilVerifikasi::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,
-            ]); 
+            ]);
+
+            $identifikasi = Identifikasi::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
 
             return [
                 'jawaban' => $jawaban,
                 'perikatan' => $perikatan,
                 'detilVerifikasi' => $detilVerifikasi,
+                'identifikasi' => $identifikasi,
             ];
         });
 

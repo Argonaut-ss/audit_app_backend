@@ -11,6 +11,7 @@ use App\Models\JwbKasus;
 use App\Models\DataClient;
 use App\Models\Perikatan;
 use App\Models\DetilVerifikasi;
+use App\Models\Identifikasi;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -208,6 +209,11 @@ class TestSeeder extends Seeder
             );
 
             DetilVerifikasi::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                []
+            );
+
+            Identifikasi::updateOrCreate(
                 ['JwbKasusID' => $jwbKasus1->JwbKasusID],
                 []
             );

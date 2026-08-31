@@ -441,15 +441,12 @@ class IdentifikasiController extends Controller
             }
             
             // Identifikasi
-            $identifikasi =
-                $jwbKasus->identifikasi;
+            $identifikasi = $jwbKasus->identifikasi;
 
             if (!$identifikasi) {
-                $identifikasi =
-                    new Identifikasi();
-
-                $identifikasi->JwbKasusID =
-                    $jwbKasus->JwbKasusID;
+                return response()-> json([
+                    'message' => 'Data identifikasi belum di diinisialisasi untuk kasus ini.',
+                    ],404);
             }
 
 
