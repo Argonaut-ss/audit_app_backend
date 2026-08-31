@@ -1,11 +1,9 @@
 <?php
-// app/Models/Identifikasi.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Identifikasi extends Model
 {
@@ -13,9 +11,7 @@ class Identifikasi extends Model
 
     protected $table = 'identifikasi';
     protected $primaryKey = 'IdentifikasiID';
-    public $incrementing = true;
-    protected $keyType = 'int';
-
+    public $timestamps = false;
     protected $fillable = [
         'JwbKasusID',
         'Tahun',
@@ -42,6 +38,12 @@ class Identifikasi extends Model
         'FileStrukturOrg',
     ];
 
+    protected $hidden = [
+        'FileAkte',
+        'FileNPWP',
+        'FileStrukturOrg',
+    ];
+
     protected $casts = [
         'Tahun' => 'integer',
         'TotalAset' => 'integer',
@@ -49,8 +51,12 @@ class Identifikasi extends Model
         'LabaRugi' => 'integer',
     ];
 
-    public function jwbKasus(): BelongsTo
+    public function jwbKasus()
     {
-        return $this->belongsTo(JwbKasus::class, 'JwbKasusID', 'JwbKasusID');
+        return $this->belongsTo(
+            JwbKasus::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
     }
 }

@@ -1,6 +1,8 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -9,8 +11,7 @@ return new class extends Migration
     {
         Schema::create('identifikasi', function (Blueprint $table) {
             $table->id('IdentifikasiID');
-            $table->foreignId('JwbKasusID')->constrained('jwb_kasus', 'JwbKasusID')->cascadeOnDelete();
-            
+            $table->unsignedBigInteger('JwbKasusID')->unique();
             $table->year('Tahun')->nullable();
             $table->string('OpiniAudit')->nullable();
             $table->string('NoSuratPengesahan')->nullable();
@@ -26,24 +27,35 @@ return new class extends Migration
             $table->string('NamaKAP')->nullable();
             $table->unsignedBigInteger('Pendapatan')->nullable();
             $table->bigInteger('LabaRugi')->nullable();
-            
-            // Kontak Klien
             $table->string('KontakNama')->nullable();
             $table->string('KontakJabatan')->nullable();
             $table->string('KontakNomor')->nullable();
             $table->string('KontakEmail')->nullable();
             
-            // Dokumen Pendukung
-            $table->string('FileAkte')->nullable();
-            $table->string('FileNPWP')->nullable();
-            $table->string('FileStrukturOrg')->nullable();
-            
+            $table->foreign('JwbKasusID')
+                ->references('JwbKasusID')
+                ->on('jwb_kasus')
+                ->cascadeOnDelete();
+
             $table->timestamps();
         });
+
+        DB::statement('
+            ALTER TABLE identifikasi
+            ADD FileAkte MEDIUMBLOB NULL,
+            ADD FileNPWP MEDIUMBLOB NULL,
+            ADD FileStrukturOrg MEDIUMBLOB NULL
+        ');
     }
 
     public function down(): void
     {
+        Schema::table('identifikasi', function (Blueprint $table) {
+            $table->dropForeign([
+                'JwbKasusID',
+            ]);
+        });
+
         Schema::dropIfExists('identifikasi');
     }
 };
