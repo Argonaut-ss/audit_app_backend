@@ -68,7 +68,7 @@ class PmpjController extends Controller
         ]);
     }
 
-    public function fileKtp(Request $request, int $jwbKasusId): JsonResponse
+    public function fileKtp(Request $request, int $jwbKasusId)
     {
         $pmpj = Pmpj::where('JwbKasusID', $jwbKasusId)->first();
 
