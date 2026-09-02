@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -18,7 +19,8 @@ return new class extends Migration
             $table->string('NamaPerusahaan')->nullable();
             $table->text('AlamatPerusahaan')->nullable();
             $table->string('TahunPeriode')->nullable();
-            $table->string('FileKTP')->nullable();
+            $table->string('NamaFileKTP')->nullable();
+            $table->binary('FileKTP')->nullable();
 
             $table->foreign('JwbKasusID')
                 ->references('JwbKasusID')
@@ -27,6 +29,8 @@ return new class extends Migration
 
             $table->timestamps();
         });
+
+        DB::statement('ALTER TABLE pmpj MODIFY FileKTP MEDIUMBLOB NULL');
     }
 
     public function down(): void

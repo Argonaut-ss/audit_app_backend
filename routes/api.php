@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/pmpj/risk-config', [PmpjController::class, 'riskConfig']);
     Route::get('/pmpj/{jwbKasusId}', [PmpjController::class, 'show']);
+    Route::get('/pmpj/{jwbKasusId}/file-ktp', [PmpjController::class, 'fileKtp']);
     Route::put('/pmpj/{jwbKasusId}', [PmpjController::class, 'update']);
 
     // Helper Functions

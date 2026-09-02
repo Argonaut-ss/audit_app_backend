@@ -6,7 +6,6 @@ use App\Models\JwbKasus;
 use App\Models\Pmpj;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class PmpjController extends Controller
@@ -37,14 +36,68 @@ class PmpjController extends Controller
         $pmpj->AlamatPerusahaan = $defaultPerusahaan?->AlamatKantor ?? $defaultPerusahaan?->AlamatClient ?? $pmpj->AlamatPerusahaan;
         $pmpj->TahunPeriode = $jwbKasus?->Periode ? \Carbon\Carbon::parse($jwbKasus->Periode)->format('Y') : ($pmpj->TahunPeriode ?? null);
 
-        if ($pmpj->FileKTP) {
-            $pmpj->FileKTPUrl = Storage::url($pmpj->FileKTP);
-        }
+        $riskRows = $pmpj->riskRows
+            ->map(function ($row) {
+                return [
+                    'PmpjRiskRowID' => $row->PmpjRiskRowID,
+                    'profile_name' => $row->profile_name,
+                    'profile_type' => $row->profile_type,
+                    'selected_category' => $row->selected_category,
+                    'risk_level' => $row->risk_level,
+                    'sort_order' => $row->sort_order,
+                ];
+            })
+            ->values()
+            ->all();
 
         return response()->json([
             'success' => true,
-            'data' => $pmpj,
+            'data' => [
+                'PmpjID' => $pmpj->PmpjID,
+                'JwbKasusID' => $pmpj->JwbKasusID,
+                'Nama' => $pmpj->Nama,
+                'Jabatan' => $pmpj->Jabatan,
+                'Alamat' => $pmpj->Alamat,
+                'NamaPerusahaan' => $pmpj->NamaPerusahaan,
+                'AlamatPerusahaan' => $pmpj->AlamatPerusahaan,
+                'TahunPeriode' => $pmpj->TahunPeriode,
+                'NamaFileKTP' => $pmpj->NamaFileKTP,
+                'has_file_ktp' => ! is_null($pmpj->FileKTP),
+                'risk_rows' => $riskRows,
+            ],
         ]);
+    }
+
+    public function fileKtp(Request $request, int $jwbKasusId): JsonResponse
+    {
+        $pmpj = Pmpj::where('JwbKasusID', $jwbKasusId)->first();
+
+        if (! $pmpj || is_null($pmpj->FileKTP)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File KTP tidak ditemukan.',
+            ], 404);
+        }
+
+        $filename = $pmpj->NamaFileKTP ?: 'ktp-file';
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+        $contentType = match ($extension) {
+            'pdf' => 'application/pdf',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            default => 'application/octet-stream',
+        };
+
+        return response(
+            $pmpj->FileKTP,
+            200,
+            [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            ]
+        );
     }
 
     public function riskConfig(): JsonResponse
@@ -236,12 +289,10 @@ class PmpjController extends Controller
         }
 
         if ($request->hasFile('FileKTP')) {
-            if ($pmpj->FileKTP) {
-                Storage::disk('public')->delete($pmpj->FileKTP);
-            }
+            $file = $request->file('FileKTP');
 
-            $path = $request->file('FileKTP')->store("pmpj/{$jwbKasusId}", 'public');
-            $pmpj->FileKTP = $path;
+            $pmpj->FileKTP = file_get_contents($file->getRealPath());
+            $pmpj->NamaFileKTP = $file->getClientOriginalName();
         }
 
         $pmpj->NamaPerusahaan = $client?->NamaClient ?? $pmpj->NamaPerusahaan;
@@ -269,7 +320,28 @@ class PmpjController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data PMPJ berhasil disimpan.',
-            'data' => $pmpj,
+            'data' => [
+                'PmpjID' => $pmpj->PmpjID,
+                'JwbKasusID' => $pmpj->JwbKasusID,
+                'Nama' => $pmpj->Nama,
+                'Jabatan' => $pmpj->Jabatan,
+                'Alamat' => $pmpj->Alamat,
+                'NamaPerusahaan' => $pmpj->NamaPerusahaan,
+                'AlamatPerusahaan' => $pmpj->AlamatPerusahaan,
+                'TahunPeriode' => $pmpj->TahunPeriode,
+                'NamaFileKTP' => $pmpj->NamaFileKTP,
+                'has_file_ktp' => ! is_null($pmpj->FileKTP),
+                'risk_rows' => $pmpj->riskRows->map(function ($row) {
+                    return [
+                        'PmpjRiskRowID' => $row->PmpjRiskRowID,
+                        'profile_name' => $row->profile_name,
+                        'profile_type' => $row->profile_type,
+                        'selected_category' => $row->selected_category,
+                        'risk_level' => $row->risk_level,
+                        'sort_order' => $row->sort_order,
+                    ];
+                })->values()->all(),
+            ],
         ]);
     }
 }

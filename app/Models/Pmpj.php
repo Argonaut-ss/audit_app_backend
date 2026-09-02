@@ -22,6 +22,11 @@ class Pmpj extends Model
         'NamaPerusahaan',
         'AlamatPerusahaan',
         'TahunPeriode',
+        'NamaFileKTP',
+        'FileKTP',
+    ];
+
+    protected $hidden = [
         'FileKTP',
     ];
 
