@@ -16,11 +16,16 @@ return new class extends Migration
             $table->string('Nama')->nullable();
             $table->string('Jabatan')->nullable();
             $table->text('Alamat')->nullable();
+            $table->string('BeneficialOwner')->nullable();
             $table->string('NamaPerusahaan')->nullable();
             $table->text('AlamatPerusahaan')->nullable();
             $table->string('TahunPeriode')->nullable();
             $table->string('NamaFileKTP')->nullable();
             $table->binary('FileKTP')->nullable();
+            $table->string('KategoriPenggunaJasa')->nullable();
+            $table->string('KategoriBisnisPenggunaJasa')->nullable();
+            $table->string('KategoriDomisiliPenggunaJasa')->nullable();
+            $table->string('KategoriKhususTambahan')->nullable();
 
             $table->foreign('JwbKasusID')
                 ->references('JwbKasusID')

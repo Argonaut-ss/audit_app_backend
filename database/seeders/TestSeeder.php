@@ -143,7 +143,7 @@ class TestSeeder extends Seeder
                 [
                     'NamaClient' => 'PT Test Client',
                     'NamaKantor' => 'PT Test Client Office',
-                    'JenisClient' => 'Perusahaan',
+                    'JenisClient' => 'PT',
                     'NPWP' => '00.000.000.0-000.000',
                     'AlamatClient' => 'Jl. Test Client No. 1',
                     'AlamatKantor' => 'Jl. Test Office No. 1',
