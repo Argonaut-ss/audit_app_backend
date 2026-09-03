@@ -26,7 +26,7 @@ class PmpjController extends Controller
                 'JwbKasusID' => $jwbKasusId,
                 'Nama' => $identifikasi?->KontakNama,
                 'Jabatan' => $identifikasi?->KontakJabatan,
-                'Alamat' => $defaultPerusahaan?->AlamatClient,
+                'Alamat' => null,
                 'BeneficialOwner' => $identifikasi?->KontakNama,
                 'NamaPerusahaan' => $defaultPerusahaan?->NamaClient ?? $defaultPerusahaan?->NamaKantor ?? null,
                 'AlamatPerusahaan' => $defaultPerusahaan?->AlamatKantor ?? $defaultPerusahaan?->AlamatClient ?? null,
@@ -283,7 +283,7 @@ class PmpjController extends Controller
         if (! $pmpj->exists) {
             $pmpj->Nama = $identifikasi?->KontakNama;
             $pmpj->Jabatan = $identifikasi?->KontakJabatan;
-            $pmpj->Alamat = $client?->AlamatClient;
+            $pmpj->Alamat = null;
             $pmpj->BeneficialOwner = $identifikasi?->KontakNama;
         }
 
