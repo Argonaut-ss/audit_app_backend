@@ -138,7 +138,7 @@ class JwbKasusController extends Controller
          * =====================================================
          */
         
-        $result = DB::transaction(function () use ($mahasiswa, $validated) {
+        $result = DB::transaction(function () use ($mahasiswa, $validated, $kasus) {
             $jawaban = JwbKasus::create([
                 'MahasiswasID' => $mahasiswa->id,
                 'KasusID' => $validated['KasusID'],
