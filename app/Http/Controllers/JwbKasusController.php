@@ -7,6 +7,7 @@ use App\Models\Perikatan;
 use App\Models\Kasus;
 use App\Models\DetilVerifikasi;
 use App\Models\Identifikasi;
+use App\Models\Pmpj;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -148,6 +149,10 @@ class JwbKasusController extends Controller
                 'Nilai' => null,
             ]);
 
+            $pmpj = Pmpj::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
             $perikatan = Perikatan::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,
                 'FileProposal' => null,
@@ -170,6 +175,7 @@ class JwbKasusController extends Controller
                 'perikatan' => $perikatan,
                 'detilVerifikasi' => $detilVerifikasi,
                 'identifikasi' => $identifikasi,
+                'pmpj' => $pmpj,
             ];
         });
 
@@ -177,6 +183,7 @@ class JwbKasusController extends Controller
             'kasus.kelas',
             'kasus.client',
             'mahasiswa.user',
+            'pmpj',
         ]);
 
         /*

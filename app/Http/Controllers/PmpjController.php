@@ -16,23 +16,12 @@ class PmpjController extends Controller
             ->with(['kasus.client', 'identifikasi'])
             ->where('JwbKasusID', $jwbKasusId)
             ->firstOrFail();
-        $pmpj = Pmpj::where('JwbKasusID', $jwbKasusId)->first();
+        $pmpj = Pmpj::firstOrCreate([
+            'JwbKasusID' => $jwbKasusId,
+        ]);
 
         $defaultPerusahaan = $jwbKasus?->kasus?->client;
         $identifikasi = $jwbKasus->identifikasi;
-
-        if (! $pmpj) {
-            $pmpj = new Pmpj([
-                'JwbKasusID' => $jwbKasusId,
-                'Nama' => $identifikasi?->KontakNama,
-                'Jabatan' => $identifikasi?->KontakJabatan,
-                'Alamat' => null,
-                'BeneficialOwner' => $identifikasi?->KontakNama,
-                'NamaPerusahaan' => $defaultPerusahaan?->NamaClient ?? $defaultPerusahaan?->NamaKantor ?? null,
-                'AlamatPerusahaan' => $defaultPerusahaan?->AlamatKantor ?? $defaultPerusahaan?->AlamatClient ?? null,
-                'TahunPeriode' => $jwbKasus?->Periode ? \Carbon\Carbon::parse($jwbKasus->Periode)->format('Y') : null,
-            ]);
-        }
 
         $pmpj->NamaPerusahaan = $defaultPerusahaan?->NamaClient ?? $defaultPerusahaan?->NamaKantor ?? $pmpj->NamaPerusahaan;
         $pmpj->AlamatPerusahaan = $defaultPerusahaan?->AlamatKantor ?? $defaultPerusahaan?->AlamatClient ?? $pmpj->AlamatPerusahaan;
