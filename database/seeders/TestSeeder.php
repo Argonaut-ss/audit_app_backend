@@ -12,6 +12,7 @@ use App\Models\DataClient;
 use App\Models\Perikatan;
 use App\Models\DetilVerifikasi;
 use App\Models\Identifikasi;
+use App\Models\Pmpj;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -197,6 +198,8 @@ class TestSeeder extends Seeder
                 ]
             );
 
+            
+
             Perikatan::updateOrCreate(
                 ['JwbKasusID' => $jwbKasus1->JwbKasusID],
                 [
@@ -216,6 +219,15 @@ class TestSeeder extends Seeder
             Identifikasi::updateOrCreate(
                 ['JwbKasusID' => $jwbKasus1->JwbKasusID],
                 []
+            );
+
+            Pmpj::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'NamaPerusahaan' => $client1->NamaClient ?? $client1->NamaKantor,
+                    'AlamatPerusahaan' => $client1->AlamatKantor ?? $client1->AlamatClient,
+                    'TahunPeriode' => \Carbon\Carbon::parse($jwbKasus1->Periode)->format('Y'),
+                ]
             );
         });
     }

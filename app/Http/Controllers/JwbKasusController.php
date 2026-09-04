@@ -151,6 +151,9 @@ class JwbKasusController extends Controller
 
             $pmpj = Pmpj::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,
+                'NamaPerusahaan' => $kasus->client?->NamaClient ?? $kasus->client?->NamaKantor,
+                'AlamatPerusahaan' => $kasus->client?->AlamatKantor ?? $kasus->client?->AlamatClient,
+                'TahunPeriode' => \Carbon\Carbon::parse($jawaban->Periode)->format('Y'),
             ]);
 
             $perikatan = Perikatan::create([
