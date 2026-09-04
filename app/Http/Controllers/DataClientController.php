@@ -153,7 +153,7 @@ class DataClientController extends Controller
 
             'EmailClient' => [
                 'nullable',
-                'email',
+                'string',
                 'max:255',
             ],
 
@@ -183,7 +183,7 @@ class DataClientController extends Controller
 
             'EmailKantor' => [
                 'nullable',
-                'email',
+                'string',
                 'max:255',
             ],
 
