@@ -224,9 +224,6 @@ class TestSeeder extends Seeder
             Pmpj::updateOrCreate(
                 ['JwbKasusID' => $jwbKasus1->JwbKasusID],
                 [
-                    'NamaPerusahaan' => $client1->NamaClient ?? $client1->NamaKantor,
-                    'AlamatPerusahaan' => $client1->AlamatKantor ?? $client1->AlamatClient,
-                    'TahunPeriode' => \Carbon\Carbon::parse($jwbKasus1->Periode)->format('Y'),
                 ]
             );
         });
