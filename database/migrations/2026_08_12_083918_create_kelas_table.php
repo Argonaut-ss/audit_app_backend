@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('jam');
             $table->string('ruangan');
             $table->string('periode');
-            $table->enum('tipe_kelas', ['UTS', 'UAS', 'Tugas', 'Sandbox']);
+            $table->enum('tipe_kelas', ['Ujian', 'Tugas', 'Sandbox']);
             
             // Relasi ke tabel dosens (FK: dosen_id)
             $table->foreignId('dosen_id')->constrained('dosens')->cascadeOnDelete();
