@@ -386,6 +386,8 @@ class IdentifikasiController extends Controller
                 )) {
                     $clientData['AlamatClient'] =
                         $validated['AlamatKlien'];
+                    $clientData['AlamatKantor'] =
+                        $validated['AlamatKlien'];
                 }
 
                 if (array_key_exists(
@@ -505,6 +507,7 @@ class IdentifikasiController extends Controller
 
 
             $identifikasi->save();
+
         });
 
         // Return updated form data
@@ -693,7 +696,9 @@ class IdentifikasiController extends Controller
         }
 
         try {
-            return Carbon::parse($periode)->year;
+            $year = substr((string) $periode, 0, 4);
+
+            return is_numeric($year) ? (int) $year : null;
         } catch (\Throwable $e) {
             return null;
         }

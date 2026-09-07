@@ -21,12 +21,9 @@ class PmpjController extends Controller
         ]);
 
         $defaultPerusahaan = $jwbKasus?->kasus?->client;
-        $identifikasi = $jwbKasus->identifikasi;
-
-        $pmpj->NamaPerusahaan = $defaultPerusahaan?->NamaClient ?? $defaultPerusahaan?->NamaKantor ?? $pmpj->NamaPerusahaan;
-        $pmpj->AlamatPerusahaan = $defaultPerusahaan?->AlamatKantor ?? $defaultPerusahaan?->AlamatClient ?? $pmpj->AlamatPerusahaan;
-        $pmpj->TahunPeriode = $jwbKasus?->Periode ? \Carbon\Carbon::parse($jwbKasus->Periode)->format('Y') : ($pmpj->TahunPeriode ?? null);
-        $pmpj->save();
+        $namaPerusahaan = $defaultPerusahaan?->NamaClient ?? $defaultPerusahaan?->NamaKantor;
+        $alamatPerusahaan = $defaultPerusahaan?->AlamatClient ?? $defaultPerusahaan?->AlamatKantor;
+        $tahunPeriode = $this->getTahunAudit($jwbKasus?->Periode);
 
         return response()->json([
             'success' => true,
@@ -37,9 +34,9 @@ class PmpjController extends Controller
                 'Jabatan' => $pmpj->Jabatan,
                 'Alamat' => $pmpj->Alamat,
                 'BeneficialOwner' => $pmpj->BeneficialOwner,
-                'NamaPerusahaan' => $pmpj->NamaPerusahaan,
-                'AlamatPerusahaan' => $pmpj->AlamatPerusahaan,
-                'TahunPeriode' => $pmpj->TahunPeriode,
+                'NamaPerusahaan' => $namaPerusahaan,
+                'AlamatPerusahaan' => $alamatPerusahaan,
+                'TahunPeriode' => $tahunPeriode,
                 'NamaFileKTP' => $pmpj->NamaFileKTP,
                 'has_file_ktp' => ! is_null($pmpj->FileKTP),
                 'KategoriPenggunaJasa' => $pmpj->KategoriPenggunaJasa,
@@ -221,7 +218,7 @@ class PmpjController extends Controller
             'AlamatPerusahaan' => 'nullable|string|max:1000',
             'ProfilPenggunaJasa' => 'nullable|string|max:255',
             'ProfilDomisili' => 'nullable|string|max:1000',
-            'TahunPeriode' => 'nullable|string|max:50',
+            'TahunPeriode' => 'nullable|string',
             'FileKTP' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'KategoriPenggunaJasa' => 'nullable|string|max:255',
             'KategoriBisnisPenggunaJasa' => 'nullable|string|max:255',
@@ -247,34 +244,35 @@ class PmpjController extends Controller
             $client->NamaClient = $request->input('NamaPerusahaan');
         }
 
-        if ($request->has('AlamatPerusahaan') && $client) {
-            $client->AlamatKantor = $request->input('AlamatPerusahaan');
-        }
-
         if ($request->has('ProfilPenggunaJasa') && $client) {
             $client->JenisClient = $request->input('ProfilPenggunaJasa');
         }
 
-        if ($request->has('ProfilDomisili') && $client) {
-            $client->AlamatClient = $request->input('ProfilDomisili');
+        if ($client && ($request->has('AlamatPerusahaan') || $request->has('ProfilDomisili'))) {
+            $alamat = $request->has('AlamatPerusahaan')
+                ? $request->input('AlamatPerusahaan')
+                : $request->input('ProfilDomisili');
+            $client->AlamatClient = $alamat;
+            $client->AlamatKantor = $alamat;
         }
 
         if ($client && $client->isDirty()) {
             $client->save();
         }
 
-        if ($request->has('TahunPeriode')) {
-            $jwbKasus->Periode = \Carbon\Carbon::createFromFormat('Y', $request->input('TahunPeriode'))->toDateString();
+        if ($request->filled('TahunPeriode')) {
+            $tahun = trim($request->input('TahunPeriode'));
+            $jwbKasus->Periode = \Carbon\Carbon::createFromFormat(
+                'Y-m-d',
+                str_pad($tahun, 4, '0', STR_PAD_LEFT) . '-01-01'
+            )->toDateString();
             $jwbKasus->save();
         }
 
         $pmpj = Pmpj::firstOrNew(['JwbKasusID' => $jwbKasusId]);
 
         if (! $pmpj->exists) {
-            $pmpj->Nama = $identifikasi?->KontakNama;
-            $pmpj->Jabatan = $identifikasi?->KontakJabatan;
             $pmpj->Alamat = null;
-            $pmpj->BeneficialOwner = $identifikasi?->KontakNama;
         }
 
         $fields = [
@@ -296,10 +294,6 @@ class PmpjController extends Controller
             $pmpj->FileKTP = file_get_contents($file->getRealPath());
             $pmpj->NamaFileKTP = $file->getClientOriginalName();
         }
-
-        $pmpj->NamaPerusahaan = $client?->NamaClient;
-        $pmpj->AlamatPerusahaan = $client?->AlamatKantor ?? $client?->AlamatClient;
-        $pmpj->TahunPeriode = $jwbKasus->Periode ? \Carbon\Carbon::parse($jwbKasus->Periode)->format('Y') : null;
 
         $profileFields = [
             'KategoriPenggunaJasa',
@@ -326,9 +320,9 @@ class PmpjController extends Controller
                 'Jabatan' => $pmpj->Jabatan,
                 'Alamat' => $pmpj->Alamat,
                 'BeneficialOwner' => $pmpj->BeneficialOwner,
-                'NamaPerusahaan' => $pmpj->NamaPerusahaan,
-                'AlamatPerusahaan' => $pmpj->AlamatPerusahaan,
-                'TahunPeriode' => $pmpj->TahunPeriode,
+                'NamaPerusahaan' => $client?->NamaClient ?? $client?->NamaKantor,
+                'AlamatPerusahaan' => $client?->AlamatClient ?? $client?->AlamatKantor,
+                'TahunPeriode' => $this->getTahunAudit($jwbKasus->Periode),
                 'NamaFileKTP' => $pmpj->NamaFileKTP,
                 'has_file_ktp' => ! is_null($pmpj->FileKTP),
                 'KategoriPenggunaJasa' => $pmpj->KategoriPenggunaJasa,
@@ -340,5 +334,16 @@ class PmpjController extends Controller
                 'ProfilDomisili' => $client?->AlamatClient,
             ],
         ]);
+    }
+
+    private function getTahunAudit($periode): ?int
+    {
+        if (! $periode) {
+            return null;
+        }
+
+        $year = substr((string) $periode, 0, 4);
+
+        return is_numeric($year) ? (int) $year : null;
     }
 }
