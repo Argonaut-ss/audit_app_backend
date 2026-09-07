@@ -37,14 +37,11 @@ class KelasController extends Controller
     }
 
     public function store(StoreKelasRequest $request): JsonResponse
-
     {
         abort_if(! $request->user()->isAdmin(), 403);
-
         $data = DB::transaction(function () use ($request) {
             // 1. Simpan data Kelas
             $kelas = Kelas::create($request->validated());
-            
             // 2. Simpan relasi Mahasiswa (jika ada mahasiswa yang di-checklist)
             if ($request->has('mahasiswa_ids')) {
                 $kelas->mahasiswas()->sync($request->mahasiswa_ids);

@@ -68,7 +68,6 @@ class KasusController extends Controller
         return response()->json($kasus);
     }
 
-
     /**
      * =====================================================
      * STORE
@@ -122,7 +121,6 @@ class KasusController extends Controller
             ],
         ]);
 
-
         /*
          * Cari record Kelas berdasarkan:
          *
@@ -144,7 +142,6 @@ class KasusController extends Controller
             )
             ->first();
 
-
         if (!$kelas) {
             return response()->json([
                 'message' =>
@@ -155,7 +152,6 @@ class KasusController extends Controller
                     ' tidak ditemukan.',
             ], 404);
         }
-
 
         /*
          * Karena relasinya 1 : 1,
@@ -172,14 +168,11 @@ class KasusController extends Controller
                     ' sudah memiliki tugas.',
             ], 409);
         }
-
-
         $uploadedFile = $request->file('file');
 
         $fileContent = file_get_contents(
             $uploadedFile->getRealPath()
         );
-
 
         /*
          * Semua proses dibuat dalam satu transaction.
@@ -203,7 +196,6 @@ class KasusController extends Controller
                 ),
             ]);
 
-
             /*
              * Buat Kasus BARU.
              *
@@ -226,7 +218,6 @@ class KasusController extends Controller
                     $fileContent,
             ]);
 
-
             /*
              * Hubungkan Kasus dengan Kelas.
              *
@@ -244,14 +235,11 @@ class KasusController extends Controller
             ];
         });
 
-
         return response()->json([
-
             'message' =>
                 'Tugas berhasil dibuat.',
 
             'data' => [
-
                 'KasusID' =>
                     $result['kasus']->KasusID,
 
@@ -283,6 +271,130 @@ class KasusController extends Controller
         ], 201);
     }
 
+    /**
+     * =====================================================
+     * UPDATE
+     * =====================================================
+     */
+    public function update(Request $request, $id)
+    {
+        abort_if(! $request->user()->isAdmin(), 403);
+
+        $kasus = Kasus::with('client')->findOrFail($id);
+
+        $validated = $request->validate([
+            'NamaTugas' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'NamaClient' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'file' => [
+                'nullable',
+                'file',
+                'mimes:pdf',
+                'max:10240',
+            ],
+        ]);
+
+        DB::transaction(function () use (
+            $request,
+            $kasus,
+            $validated
+        ) {
+
+            /*
+            * =================================================
+            * UPDATE KASUS
+            * =================================================
+            */
+
+            $kasusData = [];
+
+            if (array_key_exists('NamaTugas', $validated)) {
+                $kasusData['NamaTugas'] =
+                    $validated['NamaTugas'];
+            }
+
+            /*
+            * Jika upload file baru:
+            *
+            * File      = isi file baru
+            * NamaFile  = nama asli file baru
+            */
+            if ($request->hasFile('file')) {
+
+                $uploadedFile = $request->file('file');
+
+                $kasusData['File'] =
+                    file_get_contents(
+                        $uploadedFile->getRealPath()
+                    );
+
+                $kasusData['NamaFile'] =
+                    $uploadedFile->getClientOriginalName();
+            }
+
+            if (!empty($kasusData)) {
+                $kasus->update($kasusData);
+            }
+
+
+            /*
+            * =================================================
+            * UPDATE NAMA CLIENT
+            * =================================================
+            */
+
+            if (
+                array_key_exists('NamaClient', $validated)
+                && $kasus->ClientID
+            ) {
+
+                DataClient::where(
+                    'ClientID',
+                    $kasus->ClientID
+                )->update([
+                    'NamaClient' =>
+                        trim($validated['NamaClient']),
+                ]);
+            }
+        });
+
+        $kasus->refresh();
+        $kasus->load('client');
+
+        return response()->json([
+            'message' => 'Tugas berhasil diperbarui.',
+
+            'data' => [
+                'KasusID' =>
+                    $kasus->KasusID,
+
+                'ClientID' =>
+                    $kasus->ClientID,
+
+                'NamaClient' =>
+                    $kasus->client
+                        ? $kasus->client->NamaClient
+                        : null,
+
+                'NamaTugas' =>
+                    $kasus->NamaTugas,
+
+                'NamaFile' =>
+                    $kasus->NamaFile,
+            ],
+        ]);
+    }
 
     /**
      * =====================================================
