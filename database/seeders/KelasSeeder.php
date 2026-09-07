@@ -46,7 +46,7 @@ class KelasSeeder extends Seeder
                 'jam' => '13.20 - 15.00',
                 'ruangan' => 'Kijang - B301',
                 'periode' => '2025 / 2026',
-                'tipe_kelas' => 'UTS',
+                'tipe_kelas' => 'Ujian',
                 'dosen_id' => $dosen2->id,
             ]);
             

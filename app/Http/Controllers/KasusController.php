@@ -99,7 +99,7 @@ class KasusController extends Controller
             'TipeKelas' => [
                 'required',
                 'string',
-                'in:UTS,UAS,Tugas,Sandbox',
+                'in:Ujian,Tugas,Sandbox',
             ],
 
             'NamaClient' => [

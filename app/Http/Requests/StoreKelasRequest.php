@@ -20,7 +20,7 @@ class StoreKelasRequest extends FormRequest
             'jam' => ['bail', 'required', 'string'],
             'ruangan' => ['bail', 'required', 'string'],
             'periode' => ['bail', 'required', 'string'],
-            'tipe_kelas' => ['bail', 'required', 'in:UTS,UAS,Tugas,Sandbox'],
+            'tipe_kelas' => ['bail', 'required', 'in:Ujian,Tugas,Sandbox'],
             'dosen_id' => ['bail', 'required', 'exists:dosens,id'],
             
             'mahasiswa_ids' => ['nullable', 'array'], 
