@@ -634,20 +634,52 @@ class IdentifikasiController extends Controller
             'KontakEmail' =>
                 $identifikasi->KontakEmail,
 
-            'has_file_akte' =>
-                !is_null(
-                    $identifikasi->FileAkte
-                ),
+            'dokumen' => [
 
-            'has_file_npwp' =>
-                !is_null(
-                    $identifikasi->FileNPWP
-                ),
+                'aktaPendirian' =>
+                    $this->fileResponse(
+                        $identifikasi->FileAkte
+                    ),
 
-            'has_file_struktur_org' =>
-                !is_null(
-                    $identifikasi->FileStrukturOrg
-                ),
+                'npwp' =>
+                    $this->fileResponse(
+                        $identifikasi->FileNPWP
+                    ),
+
+                'strukturOrganisasi' =>
+                    $this->fileResponse(
+                        $identifikasi->FileStrukturOrg
+                    ),
+
+            ],
+        ];
+    }
+
+    //ambil file blob buat response api
+    private function fileResponse(
+    ?string $file
+    ): ?array {
+
+        if (!$file) {
+            return null;
+        }
+
+        $finfo = new \finfo(
+            FILEINFO_MIME_TYPE
+        );
+
+        $mimeType = $finfo->buffer(
+            $file
+        );
+
+        return [
+            'exists' => true,
+
+            'mime' => $mimeType,
+
+            'data' => base64_encode(
+                $file
+            ),
         ];
     }
 
