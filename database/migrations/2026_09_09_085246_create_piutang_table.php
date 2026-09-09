@@ -10,9 +10,7 @@ return new class extends Migration
     {
         Schema::create('Piutang', function (Blueprint $table) {
             $table->id('PiutangID');
-
-            $table->unsignedBigInteger('JwbKasusID');
-
+            $table->unsignedBigInteger('JwbKasusID')->unique();
             $table->boolean('ProsedurCheck')->default(false);
             $table->boolean('DokumenCheck')->default(false);
             $table->boolean('KonfirmasiCheck')->default(false);
@@ -27,7 +25,7 @@ return new class extends Migration
             // FK ke JwbKasus
             $table->foreign('JwbKasusID')
                 ->references('JwbKasusID')
-                ->on('JwbKasus')
+                ->on('jwb_kasus')
                 ->cascadeOnDelete();
         });
     }
