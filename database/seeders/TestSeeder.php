@@ -13,6 +13,7 @@ use App\Models\Perikatan;
 use App\Models\DetilVerifikasi;
 use App\Models\Identifikasi;
 use App\Models\Pmpj;
+use App\Models\COA;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -224,6 +225,22 @@ class TestSeeder extends Seeder
             Pmpj::updateOrCreate(
                 ['JwbKasusID' => $jwbKasus1->JwbKasusID],
                 [
+                ]
+            );
+
+            COA::updateOrCreate(
+                ['COAID' => 1],
+                [
+                    'JwbKasusID' => $jwbKasus1->JwbKasusID,
+                    'NoAkun' => null,
+                    'NamaAkun' => null,
+                    'MappingGroup' => null,
+                    'MapKelompok' => null,
+                    'MappingTop' => null,
+                    'SubMappingTop' => null,
+                    'Saldo' => null,
+                    'PerBook' => null,
+                    'AuditSebelum' => null,
                 ]
             );
         });

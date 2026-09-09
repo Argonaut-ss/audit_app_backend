@@ -141,38 +141,41 @@ classDiagram
         -Blob File
     }
 
-    class Check {
+    class DetilVerifikasi {
         -Int CheckID
         -Int JwbKasusID
         -Int DetailVerifikasiBox
         -Int Checkbox2
         -Int Checkbox3
-        -...
+        ...
         -Int Checkbox20
     }
 
-    class ProfilPengguna {
-        -Int ProfilPenggunaID
-        -String Dropdown
-        -String Resiko
+    class COA {
+        -Int COAID
+        -Int JwbKasusID
+        -Int NoAkun
+        -String NamaAkun
+        -String MappingGroup
+        -String MapKelompok
+        -String MappingTop
+        -String SubMappingTop
+        -Enum Saldo
+        -Int PerBook
+        -Int AuditSebelum
     }
 
-    class ProfilBisnis {
-        -Int ProfilBisnisID
-        -String Dropdown
-        -String Resiko
-    }
-
-    class ProfilDomisili {
-        -Int ProfilDomisiliID
-        -String Dropdown
-        -String Resiko
-    }
-
-    class KriteriaKhusus {
-        -Int KriteriaID
-        -String Dropdown
-        -String Resiko
+    class Piutang {
+        -Int PiutangID
+        -Int JwbKasusID
+        -Bool ProsedurCheck
+        -Bool DokumenCheck
+        -Bool KonfirmasiCheck
+        -Bool RekapCheck
+        -Bool JurnalCheck
+        -Bool RekonsiliasiCheck
+        -Bool UmurCheck
+        -Bool ProsedurAltCheck
     }
 
     %% Inheritance
@@ -203,13 +206,9 @@ classDiagram
     JwbKasus "1" --> "1" PMPJ
     JwbKasus "1" --> "1" Identifikasi
     JwbKasus "1" --> "0.." Perikatan
-    JwbKasus "1" --> "1" Check
-
-    %% PMPJ & Profil
-    PMPJ "0.." --> "1" ProfilPengguna
-    PMPJ "0.." --> "1" ProfilBisnis
-    PMPJ "0.." --> "1" ProfilDomisili
-    PMPJ "0.." --> "1" KriteriaKhusus
+    JwbKasus "1" --> "1" DetilVerifikasi
+    JwbKasus "1" --> "0.." COA
+    JwbKasus "1" --> "1" Piutang
 ```
 
 &nbsp;

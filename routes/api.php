@@ -15,6 +15,7 @@ use App\Http\Controllers\PerikatanController;
 use App\Http\Controllers\DetilVerifikasiController;
 use App\Http\Controllers\IdentifikasiController;
 use App\Http\Controllers\PmpjController;
+use App\Http\Controllers\COAController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -34,38 +35,50 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('dosens/import', [DosenController::class, 'import']);
     Route::post('/perikatan/{id}', [PerikatanController::class, 'update']);
 
-    // CRUD
-    // Mendaftarkan seluruh route CRUD otomatis untuk setiap entitas
+    // Basic Routes
     // Route::apiResource('admin', AdminController::class);
     Route::apiResource('dosens', DosenController::class);
     Route::apiResource('mahasiswas', MahasiswaController::class);
-    
-    Route::apiResource('kasus', KasusController::class);
-    Route::apiResource('data-client', DataClientController::class);
-    Route::apiResource('jwb-kasus', JwbKasusController::class);
-    
     Route::apiResource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
-    
+
+    // Data Client Routes
+    Route::apiResource('data-client', DataClientController::class);
     Route::get('/data-client/{id}/logo-kantor', [DataClientController::class, 'logoKantor']);
     Route::get('/data-client/{id}/logo-perusahaan', [DataClientController::class, 'logoPerusahaan']);
-    // Route::apiResource('audits', AuditController::class)->only(['index', 'store', 'update']);
 
+    // Tugas Routes
+    Route::apiResource('kasus', KasusController::class);
+    Route::apiResource('jwb-kasus', JwbKasusController::class);
+    // Route::apiResource('audits', AuditController::class)->only(['index', 'store', 'update']);
     Route::get('kasus/{id}/file', [KasusController::class, 'file']);
     Route::get('/perikatan/{id}', [PerikatanController::class, 'show']);
     Route::delete('/perikatan/{id}/{file}', [PerikatanController::class, 'destroy']);
     Route::apiResource('detil-verifikasi', DetilVerifikasiController::class)->only(['index', 'show', 'update',]);
 
+    // Identifikasi Routes
     Route::get('/identifikasi/{jwbKasusId}', [IdentifikasiController::class, 'show']);
     Route::put('/identifikasi/{jwbKasusId}', [IdentifikasiController::class, 'update']);
 
+    // PMPJ Routes
     Route::get('/pmpj/risk-config', [PmpjController::class, 'riskConfig']);
     Route::get('/pmpj/{jwbKasusId}', [PmpjController::class, 'show']);
     Route::get('/pmpj/{jwbKasusId}/file-ktp', [PmpjController::class, 'fileKtp']);
     Route::put('/pmpj/{jwbKasusId}', [PmpjController::class, 'update']);
 
+    // COA Routes
+    Route::post('/coa/import', [COAController::class, 'import']);
+    Route::post('/coa', [COAController::class, 'store']);
+    Route::put('/coa/{coa}', [COAController::class, 'update']);
+    Route::delete('/coa/{coa}', [COAController::class, 'destroy']);
+
+    Route::delete(
+        '/jwb-kasus/{JwbKasusID}/coa',
+        [COAController::class, 'destroyAll']
+    );
+});
+
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);
-});
 
 // Health check
 Route::get('/health', function () {
