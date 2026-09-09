@@ -1,0 +1,45 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('coa', function (Blueprint $table) {
+            $table->id('COAID');
+            $table->unsignedBigInteger('JwbKasusID');
+
+            $table->integer('NoAkun')->nullable();
+            $table->string('NamaAkun')->nullable();
+            $table->string('MappingGroup')->nullable();
+            $table->string('MapKelompok')->nullable();
+            $table->string('MappingTop')->nullable();
+            $table->string('SubMappingTop')->nullable();
+
+            $table->enum('Saldo', [
+                'Debit',
+                'Kredit',
+            ])->nullable();
+
+            $table->integer('PerBook')->nullable();
+            $table->integer('AuditSebelum')->nullable();
+
+            $table->foreign('JwbKasusID')
+                ->references('JwbKasusID')
+                ->on('jwb_kasus')
+                ->cascadeOnDelete();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('coa', function (Blueprint $table) {
+            $table->dropForeign(['JwbKasusID']);
+        });
+
+        Schema::dropIfExists('coa');
+    }
+};
