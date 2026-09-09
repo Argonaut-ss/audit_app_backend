@@ -170,6 +170,10 @@ class JwbKasusController extends Controller
                 'JwbKasusID' => $jawaban->JwbKasusID,
             ]);
 
+            $piutang = Piutang::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
             return [
                 'jawaban' => $jawaban,
                 'perikatan' => $perikatan,
