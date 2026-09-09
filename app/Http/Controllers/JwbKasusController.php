@@ -8,6 +8,7 @@ use App\Models\Kasus;
 use App\Models\DetilVerifikasi;
 use App\Models\Identifikasi;
 use App\Models\Pmpj;
+use App\Models\Piutang;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
