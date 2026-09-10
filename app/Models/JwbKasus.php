@@ -91,6 +91,15 @@ class JwbKasus extends Model
         );
     }
 
+    public function piutang()
+    {
+        return $this->hasOne(
+            Piutang::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
+    }
+
     public function coa()
 {
     return $this->hasMany(
