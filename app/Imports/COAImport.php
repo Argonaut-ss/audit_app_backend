@@ -26,52 +26,42 @@ class COAImport implements ToCollection, WithHeadingRow
         foreach ($rows as $index => $row) {
             $rowNum = $index + 2;
 
-            $requiredFields = [
-                'jwbkasusid',
-                'noakun',
-                'namaakun',
-                'mappinggroup',
-                'mapkelompok',
-                'mappingtop',
-                'submappingtop',
-                'saldo',
-                'perbook',
-                'auditsebelum',
-            ];
-
-            $missing = false;
-
-            foreach ($requiredFields as $field) {
-                if (
-                    ! isset($row[$field]) ||
-                    trim((string) $row[$field]) === ''
-                ) {
-                    $missing = true;
-                    break;
-                }
-            }
-
-            if ($missing) {
+            // JwbKasusID is the only required field because it is
+            // needed to determine which case the COA belongs to
+            // and whether the user has access to it.
+            if (
+                ! isset($row['jwbkasusid']) ||
+                trim((string) $row['jwbkasusid']) === ''
+            ) {
                 $skipped[] = [
                     'row' => $rowNum,
-                    'reason' => 'Missing required fields',
+                    'reason' => 'Missing required field: JwbKasusID',
                 ];
 
                 continue;
             }
 
             $jwbKasusID = (int) $row['jwbkasusid'];
-            $noAkun = (int) $row['noakun'];
-            $saldo = ucfirst(strtolower(trim((string) $row['saldo'])));
 
-            if (! in_array($saldo, ['Debit', 'Kredit'], true)) {
-                $skipped[] = [
-                    'row' => $rowNum,
-                    'no_akun' => $noAkun,
-                    'reason' => 'Saldo must be Debit or Kredit',
-                ];
+            // Match the controller's Saldo validation:
+            // nullable, but if provided it must be Debit or Kredit.
+            $saldo = null;
 
-                continue;
+            if (
+                isset($row['saldo']) &&
+                trim((string) $row['saldo']) !== ''
+            ) {
+                $saldo = ucfirst(strtolower(trim((string) $row['saldo'])));
+
+                if (! in_array($saldo, ['Debit', 'Kredit'], true)) {
+                    $skipped[] = [
+                        'row' => $rowNum,
+                        'no_akun' => $this->nullableInt($row['noakun'] ?? null),
+                        'reason' => 'Saldo must be Debit or Kredit',
+                    ];
+
+                    continue;
+                }
             }
 
             $jwbKasus = JwbKasus::forUser($this->user)
@@ -81,7 +71,7 @@ class COAImport implements ToCollection, WithHeadingRow
             if (! $jwbKasus) {
                 $skipped[] = [
                     'row' => $rowNum,
-                    'no_akun' => $noAkun,
+                    'no_akun' => $this->nullableInt($row['noakun'] ?? null),
                     'reason' => 'JwbKasus not found or access denied',
                 ];
 
@@ -91,15 +81,15 @@ class COAImport implements ToCollection, WithHeadingRow
             try {
                 COA::create([
                     'JwbKasusID' => $jwbKasusID,
-                    'NoAkun' => $noAkun,
-                    'NamaAkun' => (string) $row['namaakun'],
-                    'MappingGroup' => (string) $row['mappinggroup'],
-                    'MapKelompok' => (string) $row['mapkelompok'],
-                    'MappingTop' => (string) $row['mappingtop'],
-                    'SubMappingTop' => (string) $row['submappingtop'],
+                    'NoAkun' => $this->nullableInt($row['noakun'] ?? null),
+                    'NamaAkun' => $this->nullableString($row['namaakun'] ?? null),
+                    'MappingGroup' => $this->nullableString($row['mappinggroup'] ?? null),
+                    'MapKelompok' => $this->nullableString($row['mapkelompok'] ?? null),
+                    'MappingTop' => $this->nullableString($row['mappingtop'] ?? null),
+                    'SubMappingTop' => $this->nullableString($row['submappingtop'] ?? null),
                     'Saldo' => $saldo,
-                    'PerBook' => (int) $row['perbook'],
-                    'AuditSebelum' => (int) $row['auditsebelum'],
+                    'PerBook' => $this->nullableInt($row['perbook'] ?? null),
+                    'AuditSebelum' => $this->nullableInt($row['auditsebelum'] ?? null),
                 ]);
 
                 $imported++;
@@ -114,7 +104,7 @@ class COAImport implements ToCollection, WithHeadingRow
 
                 $skipped[] = [
                     'row' => $rowNum,
-                    'no_akun' => $noAkun,
+                    'no_akun' => $this->nullableInt($row['noakun'] ?? null),
                     'reason' => 'Database error: ' . $e->getMessage(),
                 ];
             }
@@ -125,5 +115,23 @@ class COAImport implements ToCollection, WithHeadingRow
             'skipped' => $skipped,
             'total' => $rows->count(),
         ]);
+    }
+
+    private function nullableInt($value): ?int
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+
+        return (int) $value;
+    }
+
+    private function nullableString($value): ?string
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+
+        return (string) $value;
     }
 }
