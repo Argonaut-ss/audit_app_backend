@@ -70,6 +70,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('coa', COAController::class)->only(['index', 'store', 'update', 'destroy',]);
     Route::delete('/jwb-kasus/{JwbKasusID}/coa',[COAController::class, 'destroyAll']);
     
+    Route::get('/piutang/{piutang}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'index']);
+    Route::post('/piutang/{piutang}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'store']);
+    Route::put('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'update']);
+    Route::delete('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'destroy']);
+
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
 });
