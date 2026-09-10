@@ -19,6 +19,7 @@ class COA extends Model
         'JwbKasusID',
         'NoAkun',
         'NamaAkun',
+        'NamaLain',
         'MappingGroup',
         'MapKelompok',
         'MappingTop',
@@ -30,9 +31,8 @@ class COA extends Model
 
     protected $casts = [
         'JwbKasusID' => 'integer',
-        'NoAkun' => 'integer',
-        'PerBook' => 'integer',
-        'AuditSebelum' => 'integer',
+        'PerBook' => 'decimal:2',
+        'AuditSebelum' => 'decimal:2',
     ];
 
     /*

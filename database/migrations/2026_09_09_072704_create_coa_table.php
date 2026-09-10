@@ -10,10 +10,12 @@ return new class extends Migration
     {
         Schema::create('coa', function (Blueprint $table) {
             $table->id('COAID');
+
             $table->unsignedBigInteger('JwbKasusID');
 
-            $table->integer('NoAkun')->nullable();
+            $table->string('NoAkun')->nullable();
             $table->string('NamaAkun')->nullable();
+            $table->string('NamaLain')->nullable();
             $table->string('MappingGroup')->nullable();
             $table->string('MapKelompok')->nullable();
             $table->string('MappingTop')->nullable();
@@ -24,8 +26,8 @@ return new class extends Migration
                 'Kredit',
             ])->nullable();
 
-            $table->integer('PerBook')->nullable();
-            $table->integer('AuditSebelum')->nullable();
+            $table->decimal('PerBook', 20, 2)->nullable();
+            $table->decimal('AuditSebelum', 20, 2)->nullable();
 
             $table->foreign('JwbKasusID')
                 ->references('JwbKasusID')

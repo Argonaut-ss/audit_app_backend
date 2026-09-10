@@ -3,7 +3,6 @@
 namespace App\Imports;
 
 use App\Models\COA;
-use App\Models\JwbKasus;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -13,9 +12,17 @@ class COAImport implements ToCollection, WithHeadingRow
 {
     protected $user;
 
-    public function __construct($user)
+    protected int $jwbKasusID;
+
+    public function __construct($user, int $jwbKasusID)
     {
         $this->user = $user;
+        $this->jwbKasusID = $jwbKasusID;
+    }
+
+    public function headingRow(): int
+    {
+        return 3;
     }
 
     public function collection(Collection $rows): void
@@ -24,72 +31,67 @@ class COAImport implements ToCollection, WithHeadingRow
         $imported = 0;
 
         foreach ($rows as $index => $row) {
-            $rowNum = $index + 2;
+            $rowNum = $index + 4;
 
-            // JwbKasusID is the only required field because it is
-            // needed to determine which case the COA belongs to
-            // and whether the user has access to it.
-            if (
-                ! isset($row['jwbkasusid']) ||
-                trim((string) $row['jwbkasusid']) === ''
-            ) {
-                $skipped[] = [
-                    'row' => $rowNum,
-                    'reason' => 'Missing required field: JwbKasusID',
-                ];
+            $saldo = $this->nullableString($row['saldo_normal'] ?? null);
 
-                continue;
-            }
-
-            $jwbKasusID = (int) $row['jwbkasusid'];
-
-            // Match the controller's Saldo validation:
-            // nullable, but if provided it must be Debit or Kredit.
-            $saldo = null;
-
-            if (
-                isset($row['saldo']) &&
-                trim((string) $row['saldo']) !== ''
-            ) {
-                $saldo = ucfirst(strtolower(trim((string) $row['saldo'])));
+            if ($saldo !== null) {
+                $saldo = ucfirst(strtolower($saldo));
 
                 if (! in_array($saldo, ['Debit', 'Kredit'], true)) {
                     $skipped[] = [
                         'row' => $rowNum,
-                        'no_akun' => $this->nullableInt($row['noakun'] ?? null),
-                        'reason' => 'Saldo must be Debit or Kredit',
+                        'no_akun' => $this->nullableString(
+                            $row['no_akun'] ?? null
+                        ),
+                        'reason' => 'Saldo Normal must be debit or kredit',
                     ];
 
                     continue;
                 }
             }
 
-            $jwbKasus = JwbKasus::forUser($this->user)
-                ->where('JwbKasusID', $jwbKasusID)
-                ->first();
-
-            if (! $jwbKasus) {
-                $skipped[] = [
-                    'row' => $rowNum,
-                    'no_akun' => $this->nullableInt($row['noakun'] ?? null),
-                    'reason' => 'JwbKasus not found or access denied',
-                ];
-
-                continue;
-            }
-
             try {
                 COA::create([
-                    'JwbKasusID' => $jwbKasusID,
-                    'NoAkun' => $this->nullableInt($row['noakun'] ?? null),
-                    'NamaAkun' => $this->nullableString($row['namaakun'] ?? null),
-                    'MappingGroup' => $this->nullableString($row['mappinggroup'] ?? null),
-                    'MapKelompok' => $this->nullableString($row['mapkelompok'] ?? null),
-                    'MappingTop' => $this->nullableString($row['mappingtop'] ?? null),
-                    'SubMappingTop' => $this->nullableString($row['submappingtop'] ?? null),
+                    'JwbKasusID' => $this->jwbKasusID,
+
+                    'NoAkun' => $this->nullableString(
+                        $row['no_akun'] ?? null
+                    ),
+
+                    'NamaAkun' => $this->nullableString(
+                        $row['nama_akun'] ?? null
+                    ),
+
+                    'NamaLain' => $this->nullableString(
+                        $row['nama_lain'] ?? null
+                    ),
+
+                    'MappingGroup' => $this->nullableString(
+                        $row['mapping_group_akun'] ?? null
+                    ),
+
+                    'MapKelompok' => $this->nullableString(
+                        $row['mapping_kelompok_akun'] ?? null
+                    ),
+
+                    'MappingTop' => $this->nullableString(
+                        $row['mapping_top_schedule'] ?? null
+                    ),
+
+                    'SubMappingTop' => $this->nullableString(
+                        $row['sub_mapping_top_schedule'] ?? null
+                    ),
+
                     'Saldo' => $saldo,
-                    'PerBook' => $this->nullableInt($row['perbook'] ?? null),
-                    'AuditSebelum' => $this->nullableInt($row['auditsebelum'] ?? null),
+
+                    'PerBook' => $this->nullableDecimal(
+                        $row['per_book'] ?? null
+                    ),
+
+                    'AuditSebelum' => $this->nullableDecimal(
+                        $row['audited_sebelum'] ?? null
+                    ),
                 ]);
 
                 $imported++;
@@ -104,7 +106,9 @@ class COAImport implements ToCollection, WithHeadingRow
 
                 $skipped[] = [
                     'row' => $rowNum,
-                    'no_akun' => $this->nullableInt($row['noakun'] ?? null),
+                    'no_akun' => $this->nullableString(
+                        $row['no_akun'] ?? null
+                    ),
                     'reason' => 'Database error: ' . $e->getMessage(),
                 ];
             }
@@ -117,21 +121,27 @@ class COAImport implements ToCollection, WithHeadingRow
         ]);
     }
 
-    private function nullableInt($value): ?int
-    {
-        if ($value === null || trim((string) $value) === '') {
-            return null;
-        }
-
-        return (int) $value;
-    }
-
     private function nullableString($value): ?string
     {
         if ($value === null || trim((string) $value) === '') {
             return null;
         }
 
-        return (string) $value;
+        return trim((string) $value);
+    }
+
+    private function nullableDecimal($value): ?float
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+
+        if (! is_numeric($value)) {
+            throw new \InvalidArgumentException(
+                'Value must be numeric'
+            );
+        }
+
+        return (float) $value;
     }
 }

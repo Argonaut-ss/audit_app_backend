@@ -14,16 +14,21 @@ class COAController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'JwbKasusID' => ['required', 'integer', 'exists:jwb_kasus,JwbKasusID'],
-            'NoAkun' => ['nullable', 'integer'],
+            'JwbKasusID' => [
+                'required',
+                'integer',
+                'exists:jwb_kasus,JwbKasusID',
+            ],
+            'NoAkun' => ['nullable', 'string', 'max:255'],
             'NamaAkun' => ['nullable', 'string', 'max:255'],
+            'NamaLain' => ['nullable', 'string', 'max:255'],
             'MappingGroup' => ['nullable', 'string', 'max:255'],
             'MapKelompok' => ['nullable', 'string', 'max:255'],
             'MappingTop' => ['nullable', 'string', 'max:255'],
             'SubMappingTop' => ['nullable', 'string', 'max:255'],
             'Saldo' => ['nullable', 'in:Debit,Kredit'],
-            'PerBook' => ['nullable', 'integer'],
-            'AuditSebelum' => ['nullable', 'integer'],
+            'PerBook' => ['nullable', 'numeric'],
+            'AuditSebelum' => ['nullable', 'numeric'],
         ]);
 
         $jwbKasus = JwbKasus::forUser($request->user())
@@ -34,6 +39,7 @@ class COAController extends Controller
             'JwbKasusID' => $jwbKasus->JwbKasusID,
             'NoAkun' => $request->NoAkun,
             'NamaAkun' => $request->NamaAkun,
+            'NamaLain' => $request->NamaLain,
             'MappingGroup' => $request->MappingGroup,
             'MapKelompok' => $request->MapKelompok,
             'MappingTop' => $request->MappingTop,
@@ -54,15 +60,16 @@ class COAController extends Controller
         COA $coa
     ): JsonResponse {
         $request->validate([
-            'NoAkun' => ['nullable', 'integer'],
+            'NoAkun' => ['nullable', 'string', 'max:255'],
             'NamaAkun' => ['nullable', 'string', 'max:255'],
+            'NamaLain' => ['nullable', 'string', 'max:255'],
             'MappingGroup' => ['nullable', 'string', 'max:255'],
             'MapKelompok' => ['nullable', 'string', 'max:255'],
             'MappingTop' => ['nullable', 'string', 'max:255'],
             'SubMappingTop' => ['nullable', 'string', 'max:255'],
             'Saldo' => ['nullable', 'in:Debit,Kredit'],
-            'PerBook' => ['nullable', 'integer'],
-            'AuditSebelum' => ['nullable', 'integer'],
+            'PerBook' => ['nullable', 'numeric'],
+            'AuditSebelum' => ['nullable', 'numeric'],
         ]);
 
         JwbKasus::forUser($request->user())
@@ -72,6 +79,7 @@ class COAController extends Controller
         $coa->update([
             'NoAkun' => $request->NoAkun,
             'NamaAkun' => $request->NamaAkun,
+            'NamaLain' => $request->NamaLain,
             'MappingGroup' => $request->MappingGroup,
             'MapKelompok' => $request->MapKelompok,
             'MappingTop' => $request->MappingTop,
@@ -121,6 +129,11 @@ class COAController extends Controller
     public function import(Request $request): JsonResponse
     {
         $request->validate([
+            'JwbKasusID' => [
+                'required',
+                'integer',
+                'exists:jwb_kasus,JwbKasusID',
+            ],
             'file' => [
                 'required',
                 'file',
@@ -129,8 +142,15 @@ class COAController extends Controller
             ],
         ]);
 
+        $jwbKasus = JwbKasus::forUser($request->user())
+            ->where('JwbKasusID', $request->JwbKasusID)
+            ->firstOrFail();
+
         Excel::import(
-            new COAImport($request->user()),
+            new COAImport(
+                $request->user(),
+                $jwbKasus->JwbKasusID
+            ),
             $request->file('file')
         );
 
@@ -148,4 +168,48 @@ class COAController extends Controller
             'skipped_rows' => $result['skipped'],
         ]);
     }
+    
+    public function index(Request $request): JsonResponse
+{
+    $request->validate([
+        'JwbKasusID' => [
+            'required',
+            'integer',
+            'exists:jwb_kasus,JwbKasusID',
+        ],
+        'search' => ['nullable', 'string'],
+        'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+    ]);
+
+    $jwbKasus = JwbKasus::forUser($request->user())
+        ->where('JwbKasusID', $request->JwbKasusID)
+        ->firstOrFail();
+
+    $query = COA::where(
+        'JwbKasusID',
+        $jwbKasus->JwbKasusID
+    );
+
+    if ($search = $request->get('search')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('NoAkun', 'like', "%{$search}%")
+                ->orWhere('NamaAkun', 'like', "%{$search}%")
+                ->orWhere('NamaLain', 'like', "%{$search}%");
+        });
+    }
+
+    $coas = $query
+        ->orderBy('COAID')
+        ->paginate($request->get('per_page', 10));
+
+    return response()->json([
+        'data' => $coas->items(),
+        'meta' => [
+            'current_page' => $coas->currentPage(),
+            'last_page' => $coas->lastPage(),
+            'per_page' => $coas->perPage(),
+            'total' => $coas->total(),
+        ],
+    ]);
+}
 }

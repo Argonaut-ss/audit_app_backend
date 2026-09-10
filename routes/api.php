@@ -67,14 +67,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // COA Routes
     Route::post('/coa/import', [COAController::class, 'import']);
-    Route::post('/coa', [COAController::class, 'store']);
-    Route::put('/coa/{coa}', [COAController::class, 'update']);
-    Route::delete('/coa/{coa}', [COAController::class, 'destroy']);
-
-    Route::delete(
-        '/jwb-kasus/{JwbKasusID}/coa',
-        [COAController::class, 'destroyAll']
-    );
+    Route::apiResource('coa', COAController::class)->only(['index', 'store', 'update', 'destroy',]);
+    Route::delete('/jwb-kasus/{JwbKasusID}/coa',[COAController::class, 'destroyAll']);
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
