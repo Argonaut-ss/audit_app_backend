@@ -228,6 +228,20 @@ class TestSeeder extends Seeder
                 ]
             );
 
+            Piutang::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'ProsedurCheck' => false,
+                    'DokumenCheck' => false,
+                    'KonfirmasiCheck' => false,
+                    'RekapCheck' => false,
+                    'JurnalCheck' => false,
+                    'RekonsiliasiCheck' => false,
+                    'UmurCheck' => false,
+                    'ProsedurAltCheck' => false,
+                ]
+            );
+
             COA::updateOrCreate(
                 ['COAID' => 1],
                 [
