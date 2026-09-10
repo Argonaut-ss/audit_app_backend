@@ -16,6 +16,7 @@ use App\Http\Controllers\DetilVerifikasiController;
 use App\Http\Controllers\IdentifikasiController;
 use App\Http\Controllers\PmpjController;
 use App\Http\Controllers\COAController;
+use App\Http\Controllers\PiutangController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -64,6 +65,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pmpj/{jwbKasusId}', [PmpjController::class, 'show']);
     Route::get('/pmpj/{jwbKasusId}/file-ktp', [PmpjController::class, 'fileKtp']);
     Route::put('/pmpj/{jwbKasusId}', [PmpjController::class, 'update']);
+
+    // Piutang Routes
+    Route::get('/piutang/{jwbKasusId}', [PiutangController::class, 'show']);
+    Route::put('/piutang/{jwbKasusId}', [PiutangController::class, 'update']);
 
     // COA Routes
     Route::post('/coa/import', [COAController::class, 'import']);
