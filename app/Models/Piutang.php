@@ -51,4 +51,13 @@ class Piutang extends Model
             'PiutangID'
         );
     }
+
+    public function konfirmasiPiutang()
+    {
+        return $this->hasMany(
+            KonfirmasiPiutang::class,
+            'PiutangID',
+            'PiutangID'
+        );
+    }
 }

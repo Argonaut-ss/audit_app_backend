@@ -17,6 +17,7 @@ use App\Http\Controllers\IdentifikasiController;
 use App\Http\Controllers\PmpjController;
 use App\Http\Controllers\COAController;
 use App\Http\Controllers\PiutangController;
+use App\Http\Controllers\KonfirmasiPiutangController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -79,6 +80,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/piutang/{piutang}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'store']);
     Route::put('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'update']);
     Route::delete('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'destroy']);
+
+    Route::apiResource('konfirmasi-piutang', KonfirmasiPiutangController::class);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
