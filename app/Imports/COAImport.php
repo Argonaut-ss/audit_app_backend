@@ -39,12 +39,16 @@ class COAImport implements ToCollection, WithHeadingRow
             );
 
             /*
+             * Only import rows that have a No Akun.
+             */
+            if ($noAkun === null) {
+                continue;
+            }
+
+            /*
              * Check duplicate NoAkun inside this Excel file.
              */
-            if (
-                $noAkun !== null &&
-                isset($seenNoAkun[$noAkun])
-            ) {
+            if (isset($seenNoAkun[$noAkun])) {
                 $skipped[] = [
                     'row' => $rowNum,
                     'no_akun' => $noAkun,
@@ -58,7 +62,6 @@ class COAImport implements ToCollection, WithHeadingRow
              * Check duplicate NoAkun already stored in DB.
              */
             if (
-                $noAkun !== null &&
                 COA::where('JwbKasusID', $this->jwbKasusID)
                     ->where('NoAkun', $noAkun)
                     ->exists()
@@ -131,9 +134,7 @@ class COAImport implements ToCollection, WithHeadingRow
                     ),
                 ]);
 
-                if ($noAkun !== null) {
-                    $seenNoAkun[$noAkun] = true;
-                }
+                $seenNoAkun[$noAkun] = true;
 
                 $imported++;
             } catch (\Throwable $e) {
