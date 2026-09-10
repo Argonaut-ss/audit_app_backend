@@ -42,4 +42,13 @@ class Piutang extends Model
             'JwbKasusID'
         );
     }
+
+    public function rekonsiliasiPiutang()
+    {
+        return $this->hasMany(
+            RekonsiliasiPiutang::class,
+            'PiutangID',
+            'PiutangID'
+        );
+    }
 }
