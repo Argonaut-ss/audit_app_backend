@@ -75,11 +75,11 @@ Route::middleware('auth:sanctum')->group(function () {
         '/jwb-kasus/{JwbKasusID}/coa',
         [COAController::class, 'destroyAll']
     );
-});
-
+    
     // Helper Functions
-    Route::get('/kelas-card', [KelasCardController::class, 'index']);
-
+    Route::get('/kelas-card', [KelasCardController::class, 'index']);    
+});
+    
 // Health check
 Route::get('/health', function () {
     return response()->json([
