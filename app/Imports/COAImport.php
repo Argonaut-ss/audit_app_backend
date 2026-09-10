@@ -29,11 +29,52 @@ class COAImport implements ToCollection, WithHeadingRow
     {
         $skipped = [];
         $imported = 0;
+        $seenNoAkun = [];
 
         foreach ($rows as $index => $row) {
             $rowNum = $index + 4;
 
-            $saldo = $this->nullableString($row['saldo_normal'] ?? null);
+            $noAkun = $this->nullableString(
+                $row['no_akun'] ?? null
+            );
+
+            /*
+             * Check duplicate NoAkun inside this Excel file.
+             */
+            if (
+                $noAkun !== null &&
+                isset($seenNoAkun[$noAkun])
+            ) {
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'no_akun' => $noAkun,
+                    'reason' => 'No Akun is duplicated in the import file',
+                ];
+
+                continue;
+            }
+
+            /*
+             * Check duplicate NoAkun already stored in DB.
+             */
+            if (
+                $noAkun !== null &&
+                COA::where('JwbKasusID', $this->jwbKasusID)
+                    ->where('NoAkun', $noAkun)
+                    ->exists()
+            ) {
+                $skipped[] = [
+                    'row' => $rowNum,
+                    'no_akun' => $noAkun,
+                    'reason' => 'No Akun already exists for this JwbKasus',
+                ];
+
+                continue;
+            }
+
+            $saldo = $this->nullableString(
+                $row['saldo_normal'] ?? null
+            );
 
             if ($saldo !== null) {
                 $saldo = ucfirst(strtolower($saldo));
@@ -41,9 +82,7 @@ class COAImport implements ToCollection, WithHeadingRow
                 if (! in_array($saldo, ['Debit', 'Kredit'], true)) {
                     $skipped[] = [
                         'row' => $rowNum,
-                        'no_akun' => $this->nullableString(
-                            $row['no_akun'] ?? null
-                        ),
+                        'no_akun' => $noAkun,
                         'reason' => 'Saldo Normal must be debit or kredit',
                     ];
 
@@ -55,9 +94,7 @@ class COAImport implements ToCollection, WithHeadingRow
                 COA::create([
                     'JwbKasusID' => $this->jwbKasusID,
 
-                    'NoAkun' => $this->nullableString(
-                        $row['no_akun'] ?? null
-                    ),
+                    'NoAkun' => $noAkun,
 
                     'NamaAkun' => $this->nullableString(
                         $row['nama_akun'] ?? null
@@ -94,6 +131,10 @@ class COAImport implements ToCollection, WithHeadingRow
                     ),
                 ]);
 
+                if ($noAkun !== null) {
+                    $seenNoAkun[$noAkun] = true;
+                }
+
                 $imported++;
             } catch (\Throwable $e) {
                 Log::warning(
@@ -106,9 +147,7 @@ class COAImport implements ToCollection, WithHeadingRow
 
                 $skipped[] = [
                     'row' => $rowNum,
-                    'no_akun' => $this->nullableString(
-                        $row['no_akun'] ?? null
-                    ),
+                    'no_akun' => $noAkun,
                     'reason' => 'Database error: ' . $e->getMessage(),
                 ];
             }

@@ -29,6 +29,11 @@ return new class extends Migration
             $table->decimal('PerBook', 20, 2)->nullable();
             $table->decimal('AuditSebelum', 20, 2)->nullable();
 
+            $table->unique(
+                ['JwbKasusID', 'NoAkun'],
+                'coa_jwb_kasus_no_akun_unique'
+            );
+
             $table->foreign('JwbKasusID')
                 ->references('JwbKasusID')
                 ->on('jwb_kasus')

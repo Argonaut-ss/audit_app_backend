@@ -7,10 +7,55 @@ use App\Models\COA;
 use App\Models\JwbKasus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class COAController extends Controller
 {
+    public function index(Request $request): JsonResponse
+    {
+        $request->validate([
+            'JwbKasusID' => [
+                'required',
+                'integer',
+                'exists:jwb_kasus,JwbKasusID',
+            ],
+            'search' => ['nullable', 'string'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        $jwbKasus = JwbKasus::forUser($request->user())
+            ->where('JwbKasusID', $request->JwbKasusID)
+            ->firstOrFail();
+
+        $query = COA::where(
+            'JwbKasusID',
+            $jwbKasus->JwbKasusID
+        );
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('NoAkun', 'like', "%{$search}%")
+                    ->orWhere('NamaAkun', 'like', "%{$search}%")
+                    ->orWhere('NamaLain', 'like', "%{$search}%");
+            });
+        }
+
+        $coas = $query
+            ->orderBy('COAID')
+            ->paginate($request->get('per_page', 10));
+
+        return response()->json([
+            'data' => $coas->items(),
+            'meta' => [
+                'current_page' => $coas->currentPage(),
+                'last_page' => $coas->lastPage(),
+                'per_page' => $coas->perPage(),
+                'total' => $coas->total(),
+            ],
+        ]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $request->validate([
@@ -19,7 +64,18 @@ class COAController extends Controller
                 'integer',
                 'exists:jwb_kasus,JwbKasusID',
             ],
-            'NoAkun' => ['nullable', 'string', 'max:255'],
+            'NoAkun' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('coa', 'NoAkun')
+                    ->where(
+                        fn ($query) => $query->where(
+                            'JwbKasusID',
+                            $request->JwbKasusID
+                        )
+                    ),
+            ],
             'NamaAkun' => ['nullable', 'string', 'max:255'],
             'NamaLain' => ['nullable', 'string', 'max:255'],
             'MappingGroup' => ['nullable', 'string', 'max:255'],
@@ -60,7 +116,19 @@ class COAController extends Controller
         COA $coa
     ): JsonResponse {
         $request->validate([
-            'NoAkun' => ['nullable', 'string', 'max:255'],
+            'NoAkun' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('coa', 'NoAkun')
+                    ->where(
+                        fn ($query) => $query->where(
+                            'JwbKasusID',
+                            $coa->JwbKasusID
+                        )
+                    )
+                    ->ignore($coa->COAID, 'COAID'),
+            ],
             'NamaAkun' => ['nullable', 'string', 'max:255'],
             'NamaLain' => ['nullable', 'string', 'max:255'],
             'MappingGroup' => ['nullable', 'string', 'max:255'],
@@ -168,48 +236,4 @@ class COAController extends Controller
             'skipped_rows' => $result['skipped'],
         ]);
     }
-    
-    public function index(Request $request): JsonResponse
-{
-    $request->validate([
-        'JwbKasusID' => [
-            'required',
-            'integer',
-            'exists:jwb_kasus,JwbKasusID',
-        ],
-        'search' => ['nullable', 'string'],
-        'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-    ]);
-
-    $jwbKasus = JwbKasus::forUser($request->user())
-        ->where('JwbKasusID', $request->JwbKasusID)
-        ->firstOrFail();
-
-    $query = COA::where(
-        'JwbKasusID',
-        $jwbKasus->JwbKasusID
-    );
-
-    if ($search = $request->get('search')) {
-        $query->where(function ($q) use ($search) {
-            $q->where('NoAkun', 'like', "%{$search}%")
-                ->orWhere('NamaAkun', 'like', "%{$search}%")
-                ->orWhere('NamaLain', 'like', "%{$search}%");
-        });
-    }
-
-    $coas = $query
-        ->orderBy('COAID')
-        ->paginate($request->get('per_page', 10));
-
-    return response()->json([
-        'data' => $coas->items(),
-        'meta' => [
-            'current_page' => $coas->currentPage(),
-            'last_page' => $coas->lastPage(),
-            'per_page' => $coas->perPage(),
-            'total' => $coas->total(),
-        ],
-    ]);
-}
 }
