@@ -20,6 +20,7 @@ class KonfirmasiPiutang extends Model
         'KotaCustomer',
         'Jumlah',
         'File',
+        'NamaFile',
     ];
 
     protected $hidden = [

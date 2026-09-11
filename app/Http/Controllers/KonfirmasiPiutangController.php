@@ -83,9 +83,9 @@ class KonfirmasiPiutangController extends Controller
         $item->Jumlah = $validated['Jumlah'];
 
         if ($request->hasFile('File')) {
-            $item->File = file_get_contents(
-                $request->file('File')->getRealPath()
-            );
+            $file = $request->file('File');
+            $item->File = file_get_contents($file->getRealPath());
+            $item->NamaFile = $file->getClientOriginalName();
         }
 
         $item->save();
@@ -131,9 +131,9 @@ class KonfirmasiPiutangController extends Controller
         $konfirmasiPiutang->fill($validated);
 
         if ($request->hasFile('File')) {
-            $konfirmasiPiutang->File = file_get_contents(
-                $request->file('File')->getRealPath()
-            );
+            $file = $request->file('File');
+            $konfirmasiPiutang->File = file_get_contents($file->getRealPath());
+            $konfirmasiPiutang->NamaFile = $file->getClientOriginalName();
         }
 
         $konfirmasiPiutang->save();

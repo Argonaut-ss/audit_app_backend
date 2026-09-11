@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('KotaCustomer');
             $table->integer('Jumlah');
             $table->binary('File')->nullable();
+            $table->string('NamaFile')->nullable();
             $table->timestamps();
 
             $table->foreign('PiutangID')
