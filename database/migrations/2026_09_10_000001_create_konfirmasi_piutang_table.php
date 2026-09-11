@@ -25,8 +25,6 @@ return new class extends Migration
                 ->on('Piutang')
                 ->cascadeOnDelete();
         });
-
-        DB::statement('ALTER TABLE KonfirmasiPiutang MODIFY File MEDIUMBLOB NULL');
     }
 
     public function down(): void

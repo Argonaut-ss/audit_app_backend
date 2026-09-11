@@ -171,8 +171,7 @@ class IdentifikasiController extends Controller
             'SektorUsaha' => [
                 'sometimes',
                 'nullable',
-                'string',
-                'max:255',
+                'in:Manufaktur,Dagang,Jasa',
             ],
 
             'WaktuPeriode' => [

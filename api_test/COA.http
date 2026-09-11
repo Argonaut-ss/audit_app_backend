@@ -1,0 +1,90 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+# Health Check
+GET {{baseUrl}}/health
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+### Get All COA
+GET {{baseUrl}}/coa?JwbKasusID=1
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+### Create COA
+POST {{baseUrl}}/coa
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+Content-Type: {{contentType}}
+
+{
+  "JwbKasusID": 1,
+  "NoAkun": "1001",
+  "NamaAkun": "Kas",
+  "MappingGroup": "Aset Lancar",
+  "MapKelompok": "Kas dan Setara Kas",
+  "MappingTop": "Aset",
+  "SubMappingTop": "Kas",
+  "Saldo": "Debit",
+  "PerBook": 10000000,
+  "AuditSebelum": 9500000
+}
+
+### Update COA
+PUT {{baseUrl}}/coa/1
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+Content-Type: {{contentType}}
+
+{
+  "NamaAkun": "Kas dan Bank",
+  "MappingGroup": "Aset Lancar",
+  "MapKelompok": "Kas dan Setara Kas",
+  "MappingTop": "Aset",
+  "SubMappingTop": "Kas",
+  "Saldo": "Kredit",
+  "PerBook": 12000000,
+  "AuditSebelum": 10000000
+}
+
+### Delete One COA
+DELETE {{baseUrl}}/coa/1
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+### Delete All COA
+DELETE {{baseUrl}}/jwb-kasus/1/coa
+Authorization: Bearer {{adminToken}}
+Accept: application/json
