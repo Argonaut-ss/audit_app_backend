@@ -81,6 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'update']);
     Route::delete('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'destroy']);
 
+    Route::get('/konfirmasi-piutang/{id}/file', [KonfirmasiPiutangController::class, 'file']);
     Route::apiResource('konfirmasi-piutang', KonfirmasiPiutangController::class);
 
     // Helper Functions

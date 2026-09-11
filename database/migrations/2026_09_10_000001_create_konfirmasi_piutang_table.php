@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('Jumlah');
             $table->binary('File')->nullable();
             $table->string('NamaFile')->nullable();
+            $table->string('TipeFile')->nullable();
             $table->timestamps();
 
             $table->foreign('PiutangID')

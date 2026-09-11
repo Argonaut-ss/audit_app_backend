@@ -41,6 +41,35 @@ class KonfirmasiPiutangController extends Controller
         ]);
     }
 
+    public function file(Request $request, $id)
+    {
+        $konfirmasiPiutang = KonfirmasiPiutang::findOrFail($id);
+
+        JwbKasus::forUser($request->user())
+            ->where('JwbKasusID', $konfirmasiPiutang->piutang->JwbKasusID)
+            ->firstOrFail();
+
+        if (is_null($konfirmasiPiutang->File)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File konfirmasi piutang tidak ditemukan.',
+            ], 404);
+        }
+
+        $filename = basename($konfirmasiPiutang->NamaFile ?: 'konfirmasi-piutang-file');
+        $contentType = $konfirmasiPiutang->TipeFile ?: 'application/octet-stream';
+
+        return response(
+            $konfirmasiPiutang->File,
+            200,
+            [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'attachment; filename="' . addslashes($filename) . '"',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            ]
+        );
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -86,6 +115,7 @@ class KonfirmasiPiutangController extends Controller
             $file = $request->file('File');
             $item->File = file_get_contents($file->getRealPath());
             $item->NamaFile = $file->getClientOriginalName();
+            $item->TipeFile = $file->getMimeType();
         }
 
         $item->save();
@@ -134,6 +164,7 @@ class KonfirmasiPiutangController extends Controller
             $file = $request->file('File');
             $konfirmasiPiutang->File = file_get_contents($file->getRealPath());
             $konfirmasiPiutang->NamaFile = $file->getClientOriginalName();
+            $konfirmasiPiutang->TipeFile = $file->getMimeType();
         }
 
         $konfirmasiPiutang->save();
