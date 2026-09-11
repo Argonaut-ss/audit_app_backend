@@ -59,8 +59,10 @@ class KonfirmasiPiutangController extends Controller
         $filename = basename($konfirmasiPiutang->NamaFile ?: 'konfirmasi-piutang-file');
         $contentType = $konfirmasiPiutang->TipeFile ?: 'application/octet-stream';
 
+        $fileContent = $konfirmasiPiutang->File;
+
         return response(
-            $konfirmasiPiutang->File,
+            $fileContent,
             200,
             [
                 'Content-Type' => $contentType,
@@ -113,7 +115,8 @@ class KonfirmasiPiutangController extends Controller
 
         if ($request->hasFile('File')) {
             $file = $request->file('File');
-            $item->File = file_get_contents($file->getRealPath());
+            $fileContent = file_get_contents($file->getRealPath());
+            $item->File = $fileContent;
             $item->NamaFile = $file->getClientOriginalName();
             $item->TipeFile = $file->getMimeType();
         }
@@ -162,7 +165,8 @@ class KonfirmasiPiutangController extends Controller
 
         if ($request->hasFile('File')) {
             $file = $request->file('File');
-            $konfirmasiPiutang->File = file_get_contents($file->getRealPath());
+            $fileContent = file_get_contents($file->getRealPath());
+            $konfirmasiPiutang->File = $fileContent;
             $konfirmasiPiutang->NamaFile = $file->getClientOriginalName();
             $konfirmasiPiutang->TipeFile = $file->getMimeType();
         }
