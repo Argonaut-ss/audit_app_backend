@@ -10,6 +10,7 @@ use App\Models\Kasus;
 use App\Models\JwbKasus;
 use App\Models\DataClient;
 use App\Models\Perikatan;
+use App\Models\Piutang;
 use App\Models\DetilVerifikasi;
 use App\Models\Identifikasi;
 use App\Models\Pmpj;

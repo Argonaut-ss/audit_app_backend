@@ -89,6 +89,7 @@ class KonfirmasiPiutangController extends Controller
         }
 
         $item->save();
+        $this->KonfirmasiCheck($piutang);
 
         return response()->json([
             'success' => true,
@@ -136,6 +137,7 @@ class KonfirmasiPiutangController extends Controller
         }
 
         $konfirmasiPiutang->save();
+        $this->KonfirmasiCheck($konfirmasiPiutang->piutang);
 
         return response()->json([
             'success' => true,
@@ -153,10 +155,19 @@ class KonfirmasiPiutangController extends Controller
             ->firstOrFail();
 
         $konfirmasiPiutang->delete();
+        $this->KonfirmasiCheck($konfirmasiPiutang->piutang);
 
         return response()->json([
             'success' => true,
             'message' => 'Data konfirmasi piutang berhasil dihapus.',
+        ]);
+    }
+
+    private function KonfirmasiCheck(Piutang $piutang): void
+    {
+        $hasKonfirmasi = $piutang->konfirmasiPiutang()->exists();
+        $piutang->updateQuietly([
+            'KonfirmasiCheck' => $hasKonfirmasi,
         ]);
     }
 }
