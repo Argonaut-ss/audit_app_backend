@@ -18,7 +18,7 @@ class RekonsiliasiPiutang extends Model
 
     protected $fillable = [
         'PiutangID',
-        'NamaCustomer',
+        'KonfirmasiPiutangID',
         'NomorFaktur',
         'TanggalFaktur',
         'SaldoBuku',
@@ -29,11 +29,21 @@ class RekonsiliasiPiutang extends Model
 
     protected $casts = [
         'PiutangID' => 'integer',
-        'SaldoBuku' => 'decimal:2',
-        'SaldoCustomer' => 'decimal:2',
-        'Selisih' => 'decimal:2',
+        'KonfirmasiPiutangID' => 'integer',
+        'SaldoBuku' => 'integer',
+        'SaldoCustomer' => 'integer',
+        'Selisih' => 'integer',
         'TanggalFaktur' => 'date',
     ];
+
+    public function konfirmasiPiutang(): BelongsTo
+    {
+        return $this->belongsTo(
+            KonfirmasiPiutang::class,
+            'KonfirmasiPiutangID',
+            'KonfirmasiPiutangID'
+        );
+    }
 
     public function piutang(): BelongsTo
     {

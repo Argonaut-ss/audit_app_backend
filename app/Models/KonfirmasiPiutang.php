@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class KonfirmasiPiutang extends Model
 {
@@ -32,6 +33,15 @@ class KonfirmasiPiutang extends Model
         'PiutangID' => 'integer',
         'Jumlah' => 'integer',
     ];
+
+    public function rekonsiliasiPiutang(): HasMany
+    {
+        return $this->hasMany(
+            RekonsiliasiPiutang::class,
+            'KonfirmasiPiutangID',
+            'KonfirmasiPiutangID'
+        );
+    }
 
     public function piutang(): BelongsTo
     {

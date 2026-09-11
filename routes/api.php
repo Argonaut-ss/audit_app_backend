@@ -18,6 +18,7 @@ use App\Http\Controllers\PmpjController;
 use App\Http\Controllers\COAController;
 use App\Http\Controllers\PiutangController;
 use App\Http\Controllers\KonfirmasiPiutangController;
+use App\Http\Controllers\RekonsiliasiPiutangController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -76,6 +77,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('coa', COAController::class)->only(['index', 'store', 'update', 'destroy',]);
     Route::delete('/jwb-kasus/{JwbKasusID}/coa',[COAController::class, 'destroyAll']);
     
+    Route::get('/jwb-kasus/{jwbKasusId}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'indexByJwbKasus']);
+    Route::post('/jwb-kasus/{jwbKasusId}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'storeByJwbKasus']);
     Route::get('/piutang/{piutang}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'index']);
     Route::post('/piutang/{piutang}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'store']);
     Route::put('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'update']);

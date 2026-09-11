@@ -15,6 +15,7 @@ use App\Models\DetilVerifikasi;
 use App\Models\Identifikasi;
 use App\Models\Pmpj;
 use App\Models\COA;
+use App\Models\KonfirmasiPiutang;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -229,12 +230,12 @@ class TestSeeder extends Seeder
                 ]
             );
 
-            Piutang::updateOrCreate(
+            $piutang = Piutang::updateOrCreate(
                 ['JwbKasusID' => $jwbKasus1->JwbKasusID],
                 [
                     'ProsedurCheck' => false,
                     'DokumenCheck' => false,
-                    'KonfirmasiCheck' => false,
+                    'KonfirmasiCheck' => true,
                     'RekapCheck' => false,
                     'JurnalCheck' => false,
                     'RekonsiliasiCheck' => false,
@@ -242,6 +243,20 @@ class TestSeeder extends Seeder
                     'ProsedurAltCheck' => false,
                 ]
             );
+
+            foreach ([
+                ['NamaCustomer' => 'Toko Kebak', 'KotaCustomer' => 'Jakarta', 'Jumlah' => 500000000],
+                ['NamaCustomer' => 'Toko Makmur Jaya', 'KotaCustomer' => 'Bandung', 'Jumlah' => 350000000],
+                ['NamaCustomer' => 'Toko Sumber Rezeki', 'KotaCustomer' => 'Surabaya', 'Jumlah' => 250000000],
+            ] as $customer) {
+                KonfirmasiPiutang::updateOrCreate(
+                    [
+                        'PiutangID' => $piutang->PiutangID,
+                        'NamaCustomer' => $customer['NamaCustomer'],
+                    ],
+                    $customer
+                );
+            }
 
             COA::updateOrCreate(
                 ['COAID' => 1],
