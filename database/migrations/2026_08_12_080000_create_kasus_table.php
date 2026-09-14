@@ -14,7 +14,6 @@ return new class extends Migration
             $table->unsignedBigInteger('ClientID');
             $table->string('NamaTugas');
             $table->string('NamaFile');
-            $table->binary('File');
         });
 
 
@@ -24,6 +23,9 @@ return new class extends Migration
                 ->on('data_client')
                 ->restrictOnDelete();
         });
+
+
+        DB::statement('ALTER TABLE kasus ADD File MEDIUMBLOB NOT NULL');
     }
 
 
