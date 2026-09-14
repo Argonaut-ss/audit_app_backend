@@ -31,6 +31,7 @@ return new class extends Migration
 
             $table->timestamps();
         });
+        DB::statement('ALTER TABLE pmpj MODIFY FileKTP MEDIUMBLOB NULL');
     }
 
     public function down(): void

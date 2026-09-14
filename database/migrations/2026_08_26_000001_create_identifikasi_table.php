@@ -32,9 +32,9 @@ return new class extends Migration
             $table->string('KontakNomor')->nullable();
             $table->string('KontakEmail')->nullable();
             
-            $table->binary('FileAkte')->nullable();
-            $table->binary('FileNPWP')->nullable();
-            $table->binary('FileStrukturOrg')->nullable();
+            // $table->binary('FileAkte')->nullable();
+            // $table->binary('FileNPWP')->nullable();
+            // $table->binary('FileStrukturOrg')->nullable();
             
             $table->foreign('JwbKasusID')
                 ->references('JwbKasusID')
@@ -43,6 +43,13 @@ return new class extends Migration
 
             $table->timestamps();
         });
+
+        DB::statement('
+            ALTER TABLE identifikasi
+            ADD FileAkte MEDIUMBLOB NULL,
+            ADD FileNPWP MEDIUMBLOB NULL,
+            ADD FileStrukturOrg MEDIUMBLOB NULL
+        ');
     }
 
     public function down(): void
