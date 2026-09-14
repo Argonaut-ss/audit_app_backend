@@ -29,6 +29,7 @@ return new class extends Migration
             $table->binary("LogoPerusahaan")->nullable();
         });
     }
+    
 
     public function down(): void
     {
