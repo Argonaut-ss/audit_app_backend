@@ -53,7 +53,7 @@ Content-Type: multipart/form-data; boundary=----FormBoundary
 Content-Disposition: form-data; name="file"; filename="mahasiswa_import.csv"
 Content-Type: text/csv
 
-< ./mahasiswa_import.csv
+< ../test_uploads/mahasiswa_import.csv
 ------FormBoundary--
 
 ### b. Import dosen CSV/Excel
@@ -65,5 +65,22 @@ Content-Type: multipart/form-data; boundary=----FormBoundary
 Content-Disposition: form-data; name="file"; filename="dosen_import.csv"
 Content-Type: text/csv
 
-< ./dosen_import.csv
+< ../test_uploads/dosen_import.csv
 ------FormBoundary--
+
+### c. Import COA
+### Test lewat REST/CURL agak sulit buat upload file begini, lbh baik lewat UI
+POST {{baseUrl}}/coa/import
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+Content-Type: multipart/form-data; boundary=----COAImportBoundary
+
+------COAImportBoundary
+Content-Disposition: form-data; name="JwbKasusID"
+
+1
+------COAImportBoundary
+Content-Disposition: form-data; name="file"; filename="coa.xlsx"
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+file: @../test_uploads/coa.xlsx
+------COAImportBoundary--

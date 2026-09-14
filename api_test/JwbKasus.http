@@ -68,7 +68,7 @@ Content-Disposition: form-data; name="KasusID"
 Content-Disposition: form-data; name="file"; filename="jawaban-test.pdf"
 Content-Type: application/pdf
 
-< ./test.pdf
+< ../test_uploads/test.pdf
 ------FormBoundary--
 
 ### Test Duplicate Submission
@@ -85,7 +85,7 @@ Content-Disposition: form-data; name="KasusID"
 Content-Disposition: form-data; name="file"; filename="duplicate.pdf"
 Content-Type: application/pdf
 
-< ./test.pdf
+< ../test_uploads/test.pdf
 ------FormBoundary--
 
 ### Penilaian

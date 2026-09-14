@@ -1,0 +1,81 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+
+# Health Check (no Auth)
+GET {{baseUrl}}/health
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+### Login - Dosen
+# @name dosenLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wono.jair@binus.edu",
+  "password": "Wono123"
+}
+
+### Get Perikatan
+GET {{baseUrl}}/perikatan/1
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+### Update Perikatan — with files
+POST {{baseUrl}}/perikatan/1
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="FileProposal"; filename="proposal.pdf"
+Content-Type: application/pdf
+
+< ../test_uploads/test.pdf
+------FormBoundary
+Content-Disposition: form-data; name="FileSPK"; filename="spk.pdf"
+Content-Type: application/pdf
+
+< ../test_uploads/test.pdf
+------FormBoundary
+Content-Disposition: form-data; name="FileSuratTugas"; filename="surat-tugas.pdf"
+Content-Type: application/pdf
+
+< ../test_uploads/test.pdf
+------FormBoundary
+Content-Disposition: form-data; name="FilePenugasan"; filename="penugasan.pdf"
+Content-Type: application/pdf
+
+< ../test_uploads/test.pdf
+------FormBoundary
+Content-Disposition: form-data; name="FileIndependensi"; filename="independensi.pdf"
+Content-Type: application/pdf
+
+< ../test_uploads/test.pdf
+------FormBoundary--
+
+### Delete file — Perikatan
+DELETE {{baseUrl}}/perikatan/1/FileProposal
+Authorization: Bearer {{adminToken}}
+Accept: application/json
