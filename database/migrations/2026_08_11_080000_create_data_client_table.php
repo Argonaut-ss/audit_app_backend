@@ -25,15 +25,9 @@ return new class extends Migration
             $table->string('URLKantor')->nullable();
             $table->string('NamaLogoKantor')->nullable();
             $table->string('NamaLogoPerusahaan')->nullable();
+            $table->binary("LogoKantor")->nullable();
+            $table->binary("LogoPerusahaan")->nullable();
         });
-
-        DB::statement(
-            'ALTER TABLE data_client ADD LogoKantor MEDIUMBLOB NULL'
-        );
-
-        DB::statement(
-            'ALTER TABLE data_client ADD LogoPerusahaan MEDIUMBLOB NULL'
-        );
     }
 
     public function down(): void

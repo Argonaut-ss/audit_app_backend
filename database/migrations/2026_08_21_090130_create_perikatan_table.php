@@ -13,20 +13,17 @@ return new class extends Migration
             $table->id('PerikatanID');
             $table->unsignedBigInteger('JwbKasusID')->unique();
 
+            $table->binary('FileProposal')->nullable();
+            $table->binary('FileSPK')->nullable();
+            $table->binary('FileSuratTugas')->nullable();
+            $table->binary('FilePenugasan')->nullable();
+            $table->binary('FileIndependensi')->nullable();
+
             $table->foreign('JwbKasusID')
                 ->references('JwbKasusID')
                 ->on('jwb_kasus')
                 ->cascadeOnDelete();
         });
-
-        DB::statement('
-            ALTER TABLE perikatan
-            ADD FileProposal MEDIUMBLOB NULL,
-            ADD FileSPK MEDIUMBLOB NULL,
-            ADD FileSuratTugas MEDIUMBLOB NULL,
-            ADD FilePenugasan MEDIUMBLOB NULL,
-            ADD FileIndependensi MEDIUMBLOB NULL
-        ');
     }
 
     public function down(): void

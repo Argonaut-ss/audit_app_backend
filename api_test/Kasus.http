@@ -83,7 +83,7 @@ Industry Industries
 Content-Disposition: form-data; name="file"; filename="test.pdf"
 Content-Type: application/pdf
 
-< ./test.pdf
+< ../test_uploads/test.pdf
 ------FormBoundary--
 
 ### d. Akses file kasus
