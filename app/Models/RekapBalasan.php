@@ -5,43 +5,41 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class KonfirmasiPiutang extends Model
+class RekapBalasan extends Model
 {
     use HasFactory;
 
-    protected $table = 'KonfirmasiPiutang';
+    protected $table = 'rekap_balasan';
 
-    protected $primaryKey = 'KonfirmasiPiutangID';
+    protected $primaryKey = 'RekapBalasanID';
 
     protected $fillable = [
         'PiutangID',
-        'NamaCustomer',
-        'KotaCustomer',
-        'Jumlah',
-        'File',
+        'KonfirmasiPiutangID',
+        'SaldoBB',
+        'TanggalKirim',
+        'MetodeKirim',
+        'TanggalJawab',
+        'SaldoJawab',
+        'FileBukti',
         'NamaFile',
         'TipeFile',
+        'Status',
     ];
 
     protected $hidden = [
-        'File',
+        'FileBukti',
     ];
 
     protected $casts = [
         'PiutangID' => 'integer',
-        'Jumlah' => 'integer',
+        'KonfirmasiPiutangID' => 'integer',
+        'SaldoBB' => 'integer',
+        'TanggalKirim' => 'date',
+        'TanggalJawab' => 'date',
+        'SaldoJawab' => 'integer',
     ];
-
-    public function rekonsiliasiPiutang(): HasMany
-    {
-        return $this->hasMany(
-            RekonsiliasiPiutang::class,
-            'KonfirmasiPiutangID',
-            'KonfirmasiPiutangID'
-        );
-    }
 
     public function piutang(): BelongsTo
     {
@@ -52,10 +50,10 @@ class KonfirmasiPiutang extends Model
         );
     }
 
-    public function rekapBalasan(): HasMany
+    public function konfirmasiPiutang(): BelongsTo
     {
-        return $this->hasMany(
-            RekapBalasan::class,
+        return $this->belongsTo(
+            KonfirmasiPiutang::class,
             'KonfirmasiPiutangID',
             'KonfirmasiPiutangID'
         );
