@@ -7,37 +7,26 @@ use App\Models\Piutang;
 use App\Models\RekapBalasan;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class RekapBalasanController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
         $query = RekapBalasan::query()->with(['piutang', 'konfirmasiPiutang']);
-        if ($user && ! $user->hasRole('admin')) {
-            $jwbKasusIds = JwbKasus::forUser($user)->pluck('JwbKasusID');
-            $query->whereHas('piutang', function ($q) use ($jwbKasusIds) {
-                $q->whereIn('JwbKasusID', $jwbKasusIds);
-            });
-        }
+        $query->whereHas('piutang.JwbKasus', function ($query) use ($request) {
+            $query->forUser($request->user());
+        });
 
         return response()->json($query->get());
     }
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
         $data = RekapBalasan::with(['piutang', 'konfirmasiPiutang'])->findOrFail($id);
 
-        if ($user && ! $user->hasRole('admin')) {
-            $allowed = JwbKasus::forUser($user)
-                ->where('JwbKasusID', $data->piutang?->JwbKasusID)
-                ->exists();
-            if (! $allowed) {
-                abort(403, 'Unauthorized');
-            }
-        }
+        JwbKasus::forUser($request->user())
+            ->where('JwbKasusID', $data->piutang?->JwbKasusID)
+            ->firstOrFail();
 
         return response()->json($data);
     }
@@ -45,14 +34,9 @@ class RekapBalasanController extends Controller
     public function file(Request $request, int $id)
     {
         $item = RekapBalasan::findOrFail($id);
-        if ($request->user() && ! $request->user()->hasRole('admin')) {
-            $allowed = JwbKasus::forUser($request->user())
-                ->where('JwbKasusID', $item->piutang?->JwbKasusID)
-                ->exists();
-            if (! $allowed) {
-                abort(403, 'Unauthorized');
-            }
-        }
+        JwbKasus::forUser($request->user())
+            ->where('JwbKasusID', $item->piutang?->JwbKasusID)
+            ->firstOrFail();
         if (is_null($item->FileBukti)) {
             return response()->json([
                 'success' => false,
@@ -91,14 +75,9 @@ class RekapBalasanController extends Controller
         ]);
 
         $piutang = Piutang::findOrFail($validated['PiutangID']);
-        if ($request->user() && ! $request->user()->hasRole('admin')) {
-            $allowed = JwbKasus::forUser($request->user())
-                ->where('JwbKasusID', $piutang->JwbKasusID)
-                ->exists();
-            if (! $allowed) {
-                abort(403, 'Unauthorized');
-            }
-        }
+        JwbKasus::forUser($request->user())
+            ->where('JwbKasusID', $piutang->JwbKasusID)
+            ->firstOrFail();
 
         $file = $request->file('FileBukti');
         if ($file) {
@@ -118,15 +97,9 @@ class RekapBalasanController extends Controller
         $rekap = RekapBalasan::findOrFail($id);
         $piutang = $rekap->piutang;
 
-        if ($request->user() && ! $request->user()->hasRole('admin')) {
-            $allowed = JwbKasus::forUser($request->user())
-                ->where('JwbKasusID', $piutang?->JwbKasusID)
-                ->exists();
-
-            if (! $allowed) {
-                abort(403, 'Unauthorized');
-            }
-        }
+        JwbKasus::forUser($request->user())
+            ->where('JwbKasusID', $piutang?->JwbKasusID)
+            ->firstOrFail();
 
         $validated = $request->validate([
             'KonfirmasiPiutangID' => ['nullable', 'exists:KonfirmasiPiutang,KonfirmasiPiutangID'],
@@ -157,14 +130,9 @@ class RekapBalasanController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $rekap = RekapBalasan::findOrFail($id);
-        if ($request->user() && ! $request->user()->hasRole('admin')) {
-            $allowed = JwbKasus::forUser($request->user())
-                ->where('JwbKasusID', $rekap->piutang?->JwbKasusID)
-                ->exists();
-            if (! $allowed) {
-                abort(403, 'Unauthorized');
-            }
-        }
+        JwbKasus::forUser($request->user())
+            ->where('JwbKasusID', $rekap->piutang?->JwbKasusID)
+            ->firstOrFail();
 
         $rekap->delete();
         $this->rekapCheck($rekap->piutang);
