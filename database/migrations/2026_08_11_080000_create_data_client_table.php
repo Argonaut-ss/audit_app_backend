@@ -35,6 +35,7 @@ return new class extends Migration
             'ALTER TABLE data_client ADD LogoPerusahaan MEDIUMBLOB NULL'
         );
     }
+    
 
     public function down(): void
     {
