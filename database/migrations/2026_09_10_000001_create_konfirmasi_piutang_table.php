@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('NamaCustomer');
             $table->string('KotaCustomer');
             $table->integer('Jumlah');
-            $table->binary('File')->nullable();
             $table->string('NamaFile')->nullable();
             $table->string('TipeFile')->nullable();
             $table->timestamps();
@@ -25,7 +24,7 @@ return new class extends Migration
                 ->on('Piutang')
                 ->cascadeOnDelete();
         });
-        DB::statement('ALTER TABLE KonfirmasiPiutang MODIFY File MEDIUMBLOB NULL');
+        DB::statement('ALTER TABLE KonfirmasiPiutang ADD File MEDIUMBLOB NULL');
     }
 
     public function down(): void

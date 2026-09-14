@@ -19,6 +19,7 @@ use App\Http\Controllers\COAController;
 use App\Http\Controllers\PiutangController;
 use App\Http\Controllers\KonfirmasiPiutangController;
 use App\Http\Controllers\RekonsiliasiPiutangController;
+use App\Http\Controllers\RekapBalasanController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -86,6 +87,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/konfirmasi-piutang/{id}/file', [KonfirmasiPiutangController::class, 'file']);
     Route::apiResource('konfirmasi-piutang', KonfirmasiPiutangController::class);
+
+    Route::get('/rekap-balasan/{id}/file', [RekapBalasanController::class, 'file']);
+    Route::apiResource('rekap-balasan', RekapBalasanController::class);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

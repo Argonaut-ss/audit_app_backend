@@ -60,4 +60,13 @@ class Piutang extends Model
             'PiutangID'
         );
     }
+
+    public function rekapBalasan()
+    {
+        return $this->hasMany(
+            RekapBalasan::class,
+            'PiutangID',
+            'PiutangID'
+        );
+    }
 }
