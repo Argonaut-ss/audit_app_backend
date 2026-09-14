@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('MetodeKirim')->nullable();
             $table->date('TanggalJawab')->nullable();
             $table->bigInteger('SaldoJawab')->default(0);
+            $table->bigInteger('Selisih')->default(0);
             $table->string('NamaFile')->nullable();
             $table->string('TipeFile')->nullable();
             $table->enum('Status', ['terbalas', 'tidak terbalas'])->nullable();

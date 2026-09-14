@@ -22,6 +22,7 @@ class RekapBalasan extends Model
         'MetodeKirim',
         'TanggalJawab',
         'SaldoJawab',
+        'Selisih',
         'FileBukti',
         'NamaFile',
         'TipeFile',
@@ -39,6 +40,7 @@ class RekapBalasan extends Model
         'TanggalKirim' => 'date',
         'TanggalJawab' => 'date',
         'SaldoJawab' => 'integer',
+        'Selisih' => 'integer',
     ];
 
     public function piutang(): BelongsTo
