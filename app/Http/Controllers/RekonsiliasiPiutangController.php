@@ -11,13 +11,15 @@ use Illuminate\Http\Request;
 
 class RekonsiliasiPiutangController extends Controller
 {
-    protected function resolvePiutangFromJwbKasus(Request $request, int $jwbKasusId): Piutang
+    protected function resolveAuthorizedPiutang(Request $request, int $piutangId): Piutang
     {
+        $piutang = Piutang::findOrFail($piutangId);
+
         JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $jwbKasusId)
+            ->where('JwbKasusID', $piutang->JwbKasusID)
             ->firstOrFail();
 
-        return Piutang::firstOrCreate(['JwbKasusID' => $jwbKasusId]);
+        return $piutang;
     }
 
     protected function customerOptions(Piutang $piutang): array
@@ -103,9 +105,12 @@ class RekonsiliasiPiutangController extends Controller
         ];
     }
 
-    public function indexByJwbKasus(Request $request, int $jwbKasusId): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $piutang = $this->resolvePiutangFromJwbKasus($request, $jwbKasusId);
+        $validated = $request->validate([
+            'PiutangID' => ['required', 'integer', 'exists:Piutang,PiutangID'],
+        ]);
+        $piutang = $this->resolveAuthorizedPiutang($request, $validated['PiutangID']);
 
         return response()->json([
             'success' => true,
@@ -114,33 +119,16 @@ class RekonsiliasiPiutangController extends Controller
         ]);
     }
 
-    public function storeByJwbKasus(Request $request, int $jwbKasusId): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $piutang = $this->resolvePiutangFromJwbKasus($request, $jwbKasusId);
-        $item = $this->storeItem($piutang, $request->validate($this->storeValidationRules()));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Data rekonsiliasi piutang berhasil disimpan.',
-            'data' => $this->serializeItem($item),
-        ], 201);
-    }
-
-    public function index(Request $request, Piutang $piutang): JsonResponse
-    {
-        $this->resolvePiutangFromJwbKasus($request, $piutang->JwbKasusID);
-
-        return response()->json([
-            'success' => true,
-            'data' => $this->indexData($piutang),
-            'customer_options' => $this->customerOptions($piutang),
+        $validated = $request->validate([
+            'PiutangID' => ['required', 'integer', 'exists:Piutang,PiutangID'],
+            ...$this->storeValidationRules(),
         ]);
-    }
+        $piutang = $this->resolveAuthorizedPiutang($request, $validated['PiutangID']);
+        unset($validated['PiutangID']);
 
-    public function store(Request $request, Piutang $piutang): JsonResponse
-    {
-        $piutang = $this->resolvePiutangFromJwbKasus($request, $piutang->JwbKasusID);
-        $item = $this->storeItem($piutang, $request->validate($this->storeValidationRules()));
+        $item = $this->storeItem($piutang, $validated);
 
         return response()->json([
             'success' => true,
@@ -149,13 +137,9 @@ class RekonsiliasiPiutangController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, Piutang $piutang, RekonsiliasiPiutang $rekonsiliasiPiutang): JsonResponse
+    public function update(Request $request, RekonsiliasiPiutang $rekonsiliasiPiutang): JsonResponse
     {
-        JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $piutang->JwbKasusID)
-            ->firstOrFail();
-
-        abort_unless($rekonsiliasiPiutang->PiutangID === $piutang->PiutangID, 404);
+        $piutang = $this->resolveAuthorizedPiutang($request, $rekonsiliasiPiutang->PiutangID);
 
         $validated = $request->validate([
             'KonfirmasiPiutangID' => ['sometimes', 'integer', 'exists:KonfirmasiPiutang,KonfirmasiPiutangID'],
@@ -183,14 +167,9 @@ class RekonsiliasiPiutangController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, Piutang $piutang, RekonsiliasiPiutang $rekonsiliasiPiutang): JsonResponse
+    public function destroy(Request $request, RekonsiliasiPiutang $rekonsiliasiPiutang): JsonResponse
     {
-        JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $piutang->JwbKasusID)
-            ->firstOrFail();
-
-        abort_unless($rekonsiliasiPiutang->PiutangID === $piutang->PiutangID, 404);
-
+        $this->resolveAuthorizedPiutang($request, $rekonsiliasiPiutang->PiutangID);
         $rekonsiliasiPiutang->delete();
 
         return response()->json([

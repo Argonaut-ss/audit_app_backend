@@ -21,6 +21,7 @@ use App\Http\Controllers\KonfirmasiPiutangController;
 use App\Http\Controllers\RekonsiliasiPiutangController;
 use App\Http\Controllers\RekapBalasanController;
 use App\Http\Controllers\AnalisisUmurPiutangController;
+use App\Http\Controllers\JurnalKoreksiPiutangController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -79,15 +80,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('coa', COAController::class)->only(['index', 'store', 'update', 'destroy',]);
     Route::delete('/jwb-kasus/{JwbKasusID}/coa',[COAController::class, 'destroyAll']);
     
-    Route::get('/jwb-kasus/{jwbKasusId}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'indexByJwbKasus']);
-    Route::post('/jwb-kasus/{jwbKasusId}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'storeByJwbKasus']);
-    Route::get('/piutang/{piutang}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'index']);
-    Route::post('/piutang/{piutang}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'store']);
-    Route::put('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'update']);
-    Route::delete('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'destroy']);
+    // Rekonsiliasi Piutang Routes
+    Route::apiResource('rekonsiliasi-piutang', RekonsiliasiPiutangController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['rekonsiliasi-piutang' => 'rekonsiliasiPiutang']);
 
-    Route::get('/jwb-kasus/{jwbKasusId}/analisis-umur-piutang', [AnalisisUmurPiutangController::class, 'indexByJwbKasus']);
-    Route::post('/jwb-kasus/{jwbKasusId}/analisis-umur-piutang', [AnalisisUmurPiutangController::class, 'syncByJwbKasus']);
+    // Analisis Umur Piutang Routes
+    Route::apiResource('analisis-umur-piutang', AnalisisUmurPiutangController::class)
+        ->only(['index', 'store']);
+
+    // Jurnal Koreksi Piutang Routes
+    Route::apiResource('jurnal-koreksi-piutang', JurnalKoreksiPiutangController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['jurnal-koreksi-piutang' => 'jurnalKoreksi']);
 
     Route::get('/konfirmasi-piutang/{id}/file', [KonfirmasiPiutangController::class, 'file']);
     Route::apiResource('konfirmasi-piutang', KonfirmasiPiutangController::class);

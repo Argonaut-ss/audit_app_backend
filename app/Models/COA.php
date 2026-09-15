@@ -49,4 +49,13 @@ class COA extends Model
             'JwbKasusID'
         );
     }
+
+    public function pembayaranJurnalKoreksi()
+    {
+        return $this->hasMany(
+            PembayaranJurnalKoreksi::class,
+            'COAID',
+            'COAID'
+        );
+    }
 }

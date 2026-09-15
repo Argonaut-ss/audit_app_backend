@@ -12,15 +12,15 @@ use Illuminate\Support\Facades\DB;
 
 class AnalisisUmurPiutangController extends Controller
 {
-    protected function resolvePiutangFromJwbKasus(Request $request, int $jwbKasusId): Piutang
+    protected function resolveAuthorizedPiutang(Request $request, int $piutangId): Piutang
     {
+        $piutang = Piutang::findOrFail($piutangId);
+
         JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $jwbKasusId)
+            ->where('JwbKasusID', $piutang->JwbKasusID)
             ->firstOrFail();
 
-        return Piutang::firstOrCreate([
-            'JwbKasusID' => $jwbKasusId,
-        ]);
+        return $piutang;
     }
 
     protected function buildResponseData(Piutang $piutang): array
@@ -56,9 +56,12 @@ class AnalisisUmurPiutangController extends Controller
         ];
     }
 
-    public function indexByJwbKasus(Request $request, int $jwbKasusId): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $piutang = $this->resolvePiutangFromJwbKasus($request, $jwbKasusId);
+        $validated = $request->validate([
+            'PiutangID' => ['required', 'integer', 'exists:Piutang,PiutangID'],
+        ]);
+        $piutang = $this->resolveAuthorizedPiutang($request, $validated['PiutangID']);
 
         return response()->json([
             'success' => true,
@@ -66,18 +69,17 @@ class AnalisisUmurPiutangController extends Controller
         ]);
     }
 
-    public function syncByJwbKasus(Request $request, int $jwbKasusId): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $piutang = $this->resolvePiutangFromJwbKasus($request, $jwbKasusId);
-
         $validated = $request->validate([
+            'PiutangID' => ['required', 'integer', 'exists:Piutang,PiutangID'],
             'rows' => ['required', 'array', 'min:1'],
             'rows.*.KelompokUmur' => ['required', 'string', 'distinct', 'in:1-30,31-60,61-90,>90'],
             'rows.*.Jumlah' => ['required', 'integer', 'min:0'],
             'rows.*.Kerugian' => ['required', 'integer', 'min:0', 'max:100'],
             'SaldoBB' => ['required', 'integer'],
         ]);
-
+        $piutang = $this->resolveAuthorizedPiutang($request, $validated['PiutangID']);
         $rows = $validated['rows'];
         $saldoBB = $validated['SaldoBB'];
         $saldoAuditor = (int) array_sum(array_map(

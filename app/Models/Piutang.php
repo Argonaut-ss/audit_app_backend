@@ -79,4 +79,13 @@ class Piutang extends Model
             'PiutangID'
         );
     }
+
+    public function jurnalKoreksi()
+    {
+        return $this->hasMany(
+            JurnalKoreksi::class,
+            'PiutangID',
+            'PiutangID'
+        );
+    }
 }
