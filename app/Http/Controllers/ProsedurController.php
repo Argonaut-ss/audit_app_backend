@@ -17,7 +17,7 @@ class ProsedurController extends Controller
     public function index(Piutang $piutang): JsonResponse
     {
         $prosedurs = $piutang->prosedurs()
-            ->orderBy('no_urut')
+            ->orderBy('id')
             ->get();
 
         return response()->json([
@@ -36,7 +36,6 @@ class ProsedurController extends Controller
         $validated = $request->validate([
             'prosedur_id' => ['nullable', 'integer', 'exists:prosedurs,id'],
             'piutang_id' => ['required', 'integer', 'exists:piutangs,id'],
-            'no_urut' => ['required', 'integer', 'min:1'],
             'nama_prosedur' => ['required', 'string'],
             'index' => ['nullable', 'string', 'max:255'],
             'tanggal' => ['required', 'date'],
@@ -54,7 +53,6 @@ class ProsedurController extends Controller
             }
 
             $prosedur->update([
-                'no_urut' => $validated['no_urut'],
                 'nama_prosedur' => $validated['nama_prosedur'],
                 'index' => $validated['index'] ?? null,
                 'tanggal' => $validated['tanggal'],
@@ -69,7 +67,6 @@ class ProsedurController extends Controller
 
         $prosedur = Prosedur::create([
             'piutang_id' => $validated['piutang_id'],
-            'no_urut' => $validated['no_urut'],
             'nama_prosedur' => $validated['nama_prosedur'],
             'index' => $validated['index'] ?? null,
             'tanggal' => $validated['tanggal'],

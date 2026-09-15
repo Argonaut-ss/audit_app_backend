@@ -15,7 +15,6 @@ return new class extends Migration
                 ->constrained('piutangs')
                 ->cascadeOnDelete();
 
-            $table->unsignedInteger('no_urut');
             $table->string('nama_prosedur');
             $table->string('index')->nullable();
             $table->date('tanggal');

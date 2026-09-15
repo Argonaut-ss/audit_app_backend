@@ -9,7 +9,6 @@ class Prosedur extends Model
 {
     protected $fillable = [
         'piutang_id',
-        'no_urut',
         'nama_prosedur',
         'index',
         'tanggal',

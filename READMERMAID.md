@@ -301,7 +301,6 @@ classDiagram
     class Prosedur {
         -Int ProsedurID
         -Int PiutangID
-        -Int NoUrut
         -String NamaProsedur
         -String Index
         -Date Tanggal
