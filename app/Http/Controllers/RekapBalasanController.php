@@ -13,7 +13,11 @@ class RekapBalasanController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Piutang::query()->with([
-            'konfirmasiPiutang:KonfirmasiPiutangID,PiutangID,NamaCustomer,Jumlah',
+            'konfirmasiPiutang' => function ($query) {
+                $query
+                    ->select('KonfirmasiPiutangID', 'PiutangID', 'NamaCustomer', 'Jumlah')
+                    ->whereDoesntHave('rekapBalasan');
+            },
             'rekapBalasan.konfirmasiPiutang:KonfirmasiPiutangID,PiutangID,NamaCustomer,Jumlah',
         ]);
         $query->whereHas('JwbKasus', function ($query) use ($request) {
@@ -83,6 +87,19 @@ class RekapBalasanController extends Controller
             ->where('JwbKasusID', $piutang->JwbKasusID)
             ->firstOrFail();
 
+        if (!empty($validated['KonfirmasiPiutangID'])) {
+            $konfirmasiPiutang = $piutang->konfirmasiPiutang()
+                ->whereKey($validated['KonfirmasiPiutangID'])
+                ->whereDoesntHave('rekapBalasan')
+                ->exists();
+
+            if (!$konfirmasiPiutang) {
+                return response()->json([
+                    'message' => 'Konfirmasi piutang tidak tersedia untuk Piutang ini atau sudah digunakan.',
+                ], 422);
+            }
+        }
+
         $file = $request->file('FileBukti');
         if ($file) {
             $validated['FileBukti'] = file_get_contents($file->getRealPath());
@@ -118,6 +135,21 @@ class RekapBalasanController extends Controller
             'NamaFile' => ['nullable', 'string', 'max:255'],
             'TipeFile' => ['nullable', 'string', 'max:255'],
         ]);
+
+        if (array_key_exists('KonfirmasiPiutangID', $validated) && $validated['KonfirmasiPiutangID'] !== null) {
+            $konfirmasiPiutang = $piutang->konfirmasiPiutang()
+                ->whereKey($validated['KonfirmasiPiutangID'])
+                ->whereDoesntHave('rekapBalasan', function ($query) use ($rekap) {
+                    $query->where('RekapBalasanID', '!=', $rekap->getKey());
+                })
+                ->exists();
+
+            if (!$konfirmasiPiutang) {
+                return response()->json([
+                    'message' => 'Konfirmasi piutang tidak tersedia untuk Piutang ini atau sudah digunakan.',
+                ], 422);
+            }
+        }
 
         $file = $request->file('FileBukti');
         if ($file) {
