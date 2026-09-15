@@ -11,9 +11,12 @@ return new class extends Migration
         Schema::create('prosedurs', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('piutang_id')
-                ->constrained('piutangs')
-                ->cascadeOnDelete();
+            $table->unsignedBigInteger('piutang_id');
+
+            $table->foreign('piutang_id')
+                ->references('PiutangID')
+                ->on('Piutang')
+                ->onDelete('cascade');
 
             $table->string('nama_prosedur');
             $table->string('index')->nullable();

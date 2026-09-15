@@ -22,6 +22,6 @@ class Prosedur extends Model
 
     public function piutang(): BelongsTo
     {
-        return $this->belongsTo(Piutang::class);
+        return $this->belongsTo(Piutang::class, 'piutang_id', 'PiutangID');
     }
 }
