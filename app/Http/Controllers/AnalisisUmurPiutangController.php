@@ -23,6 +23,15 @@ class AnalisisUmurPiutangController extends Controller
         return $piutang;
     }
 
+    private function analisisUmurCheck(Piutang $piutang): void
+    {
+        $hasAnalisisUmur = $piutang->analisisUmur()->exists();
+
+        $piutang->updateQuietly([
+            'UmurCheck' => $hasAnalisisUmur,
+        ]);
+    }
+
     protected function buildResponseData(Piutang $piutang): array
     {
         $analisisUmur = $piutang->analisisUmur()
@@ -99,7 +108,7 @@ class AnalisisUmurPiutangController extends Controller
 
             $analisisUmur->hasilAnalisisUmur()->delete();
             $analisisUmur->hasilAnalisisUmur()->createMany($rows);
-            $piutang->updateQuietly(['UmurCheck' => true]);
+            $this->analisisUmurCheck($piutang);
         });
 
         return response()->json([

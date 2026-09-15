@@ -22,6 +22,15 @@ class RekonsiliasiPiutangController extends Controller
         return $piutang;
     }
 
+    private function rekonsiliasiCheck(Piutang $piutang): void
+    {
+        $hasRekonsiliasi = $piutang->rekonsiliasiPiutang()->exists();
+
+        $piutang->updateQuietly([
+            'RekonsiliasiCheck' => $hasRekonsiliasi,
+        ]);
+    }
+
     protected function customerOptions(Piutang $piutang): array
     {
         return $piutang->konfirmasiPiutang()
@@ -129,6 +138,7 @@ class RekonsiliasiPiutangController extends Controller
         unset($validated['PiutangID']);
 
         $item = $this->storeItem($piutang, $validated);
+        $this->rekonsiliasiCheck($piutang);
 
         return response()->json([
             'success' => true,
@@ -159,6 +169,7 @@ class RekonsiliasiPiutangController extends Controller
         }
 
         $rekonsiliasiPiutang->update($validated);
+        $this->rekonsiliasiCheck($piutang);
 
         return response()->json([
             'success' => true,
@@ -169,8 +180,9 @@ class RekonsiliasiPiutangController extends Controller
 
     public function destroy(Request $request, RekonsiliasiPiutang $rekonsiliasiPiutang): JsonResponse
     {
-        $this->resolveAuthorizedPiutang($request, $rekonsiliasiPiutang->PiutangID);
+        $piutang = $this->resolveAuthorizedPiutang($request, $rekonsiliasiPiutang->PiutangID);
         $rekonsiliasiPiutang->delete();
+        $this->rekonsiliasiCheck($piutang);
 
         return response()->json([
             'success' => true,

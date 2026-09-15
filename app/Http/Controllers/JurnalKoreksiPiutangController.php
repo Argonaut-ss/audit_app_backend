@@ -23,6 +23,15 @@ class JurnalKoreksiPiutangController extends Controller
         return $piutang;
     }
 
+    private function jurnalKoreksiCheck(Piutang $piutang): void
+    {
+        $hasJurnalKoreksi = $piutang->jurnalKoreksi()->exists();
+
+        $piutang->updateQuietly([
+            'JurnalCheck' => $hasJurnalKoreksi,
+        ]);
+    }
+
     protected function serializeItem(JurnalKoreksi $jurnalKoreksi): array
     {
         $jurnalKoreksi->loadMissing('pembayaranJurnalKoreksi.coa');
@@ -132,7 +141,7 @@ class JurnalKoreksiPiutangController extends Controller
             ]);
 
             $item->pembayaranJurnalKoreksi()->createMany($validated['pembayaran']);
-            $piutang->updateQuietly(['JurnalCheck' => true]);
+            $this->jurnalKoreksiCheck($piutang);
 
             return $item;
         });
@@ -150,11 +159,12 @@ class JurnalKoreksiPiutangController extends Controller
         $validated = $request->validate($this->validationRules());
         $this->validatePaymentsForCase($validated['pembayaran'], $piutang->JwbKasusID);
 
-        DB::transaction(function () use ($jurnalKoreksi, $validated): void {
+        DB::transaction(function () use ($jurnalKoreksi, $piutang, $validated): void {
             $jurnalKoreksi->update([
                 'Keterangan' => $validated['Keterangan'] ?? null,
             ]);
             $this->syncPembayaran($jurnalKoreksi, $validated['pembayaran']);
+            $this->jurnalKoreksiCheck($piutang);
         });
 
         return response()->json([
@@ -170,9 +180,7 @@ class JurnalKoreksiPiutangController extends Controller
 
         DB::transaction(function () use ($jurnalKoreksi, $piutang): void {
             $jurnalKoreksi->delete();
-            $piutang->updateQuietly([
-                'JurnalCheck' => $piutang->jurnalKoreksi()->exists(),
-            ]);
+            $this->jurnalKoreksiCheck($piutang);
         });
 
         return response()->json([
