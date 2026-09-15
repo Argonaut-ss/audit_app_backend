@@ -14,7 +14,7 @@ return new class extends Migration
             $table->unsignedBigInteger('PiutangID');
             $table->string('NamaCustomer');
             $table->string('KotaCustomer');
-            $table->integer('Jumlah');
+            $table->unsignedBigInteger('Jumlah');
             $table->string('NamaFile')->nullable();
             $table->string('TipeFile')->nullable();
             $table->timestamps();
