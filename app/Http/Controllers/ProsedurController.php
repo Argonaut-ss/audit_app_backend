@@ -18,7 +18,7 @@ class ProsedurController extends Controller
     {
         $prosedurs = $piutang->prosedurs()
             ->orderBy('id')
-            ->get();
+            ->paginate(10);
 
         return response()->json([
             'message' => 'Prosedur retrieved successfully.',

@@ -23,6 +23,7 @@ class Piutang extends Model
         'RekonsiliasiCheck',
         'UmurCheck',
         'ProsedurAltCheck',
+        'Kesimpulan',
     ];
 
     protected $casts = [
@@ -91,7 +92,11 @@ class Piutang extends Model
     }
 
     public function prosedurs(): HasMany
-{
-    return $this->hasMany(Prosedur::class);
-}
+    {
+        return $this->hasMany(
+            Prosedur::class,
+            'PiutangID',
+            'PiutangID'
+        );
+    }
 }

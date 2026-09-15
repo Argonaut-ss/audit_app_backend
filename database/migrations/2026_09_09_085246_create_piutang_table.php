@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('Piutang', function (Blueprint $table) {
             $table->id('PiutangID');
+
             $table->unsignedBigInteger('JwbKasusID')->unique();
+
             $table->boolean('ProsedurCheck')->default(false);
             $table->boolean('DokumenCheck')->default(false);
             $table->boolean('KonfirmasiCheck')->default(false);
@@ -19,6 +21,8 @@ return new class extends Migration
             $table->boolean('RekonsiliasiCheck')->default(false);
             $table->boolean('UmurCheck')->default(false);
             $table->boolean('ProsedurAltCheck')->default(false);
+
+            $table->text('Kesimpulan')->nullable();
 
             $table->timestamps();
 

@@ -40,6 +40,7 @@ class PiutangController extends Controller
                 'RekonsiliasiCheck' => $piutang->RekonsiliasiCheck,
                 'UmurCheck' => $piutang->UmurCheck,
                 'ProsedurAltCheck' => $piutang->ProsedurAltCheck,
+                'Kesimpulan' => $piutang->Kesimpulan,
             ],
         ]);
     }
@@ -90,12 +91,18 @@ class PiutangController extends Controller
                 'sometimes',
                 'boolean',
             ],
+            'Kesimpulan' => [
+                'sometimes',
+                'nullable',
+                'string',
+            ],
         ]);
 
         $piutang = Piutang::where(
             'JwbKasusID',
             $jwbKasusId
         )->firstOrFail();
+
         $piutang->fill($validated);
         $piutang->save();
 
@@ -112,6 +119,7 @@ class PiutangController extends Controller
                 'RekonsiliasiCheck' => $piutang->RekonsiliasiCheck,
                 'UmurCheck' => $piutang->UmurCheck,
                 'ProsedurAltCheck' => $piutang->ProsedurAltCheck,
+                'Kesimpulan' => $piutang->Kesimpulan,
             ],
         ]);
     }
