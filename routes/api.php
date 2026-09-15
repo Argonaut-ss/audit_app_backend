@@ -22,6 +22,7 @@ use App\Http\Controllers\RekonsiliasiPiutangController;
 use App\Http\Controllers\RekapBalasanController;
 use App\Http\Controllers\AnalisisUmurPiutangController;
 use App\Http\Controllers\JurnalKoreksiPiutangController;
+use App\Http\Controllers\ProsedurController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -99,6 +100,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/rekap-balasan/{id}/file', [RekapBalasanController::class, 'file']);
     Route::apiResource('rekap-balasan', RekapBalasanController::class);
+
+    // Prosedur Routes
+    Route::get('/piutangs/{piutang}/prosedur',[ProsedurController::class, 'index']);
+    Route::post('/prosedur',[ProsedurController::class, 'store']);
+    Route::delete('/prosedur/{prosedur}',[ProsedurController::class, 'destroy']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

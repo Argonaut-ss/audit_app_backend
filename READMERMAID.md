@@ -1,7 +1,7 @@
 ```mermaid
 classDiagram
-    direction TB
 
+    %% Inheritance / User Hierarchy
     class User {
         -Int UserID
         -String Password
@@ -12,6 +12,8 @@ classDiagram
     }
 
     class Admin {
+        -Int AdminID
+        -Int UserID
         -String NomorAdmin
         +kelolaMahasiswa()
         +kelolaDosen()
@@ -20,6 +22,8 @@ classDiagram
     }
 
     class Dosen {
+        -Int DosenID
+        -Int UserID
         -String KodeDosen
         +viewKelas()
         +viewMahasiswa()
@@ -28,20 +32,23 @@ classDiagram
     }
 
     class Mahasiswa {
+        -Int MahasiswaID
+        -Int UserID
         -String NIM
         +viewKelas()
         +viewMahasiswa()
         +viewTugas()
-        +uploadTugas()
+        +uploadJwbTugas()
         +viewNilaiTugas()
     }
 
-    class TrSiswa {
-        -string NIM
-        -string KelasID
-    }
+    User <|-- Admin
+    User <|-- Dosen
+    User <|-- Mahasiswa
 
+    %% Core Academic Entities
     class Kelas {
+        -Int KelasID
         -String KodeKelas
         -String KodeRuangan
         -Enum TipeKelas
@@ -56,6 +63,19 @@ classDiagram
         +getDosen()
     }
 
+    class TrSiswa {
+        -string MahasiswaID
+        -string KelasID
+    }
+
+    class Kasus {
+        -Int KasusID
+        -Int ClientID
+        -String NamaTugas
+        -String NamaFile
+        -Blob File
+    }
+
     class JwbKasus {
         -Int JwbKasusID
         -Int MahasiswaID
@@ -67,14 +87,12 @@ classDiagram
         -Date BatasWaktu
     }
 
-    class Kasus {
-        -Int ClientID
-        -Int KasusID
-        -String NamaTugas
-        -String NamaFile
-        -Blob File
-    }
+    Mahasiswa "1" -- "0..*" TrSiswa
+    Kelas "1" -- "0..*" TrSiswa
+    Kelas "1" -- "1*" Kasus
+    Kasus "1" -- "0..*" JwbKasus
 
+    %% Client & General Data
     class DataClient {
         -Int ClientID
         -String NPWP
@@ -89,24 +107,13 @@ classDiagram
         -String EmailKantor
         -String URLClient
         -String URLKantor
-        -String LogoKantor
-        -String LogoPerusahaan
+        -Blob LogoKantor
+        -Blob LogoPerusahaan
     }
 
-    class PMPJ {
-        -Int PMPJID
-        -Int JwbKasusID
-        -String Nama
-        -String Jabatan
-        -String Alamat
-        -String BeneficialOwner
-        -Blob KTP
-        -Int ProfilPenggunaID
-        -Int ProfilBisnisID
-        -Int ProfilDomisiliID
-        -Int KriteriaID
-    }
+    DataClient "1" -- "1" Kasus
 
+    %% Case Details & Audit Steps
     class Identifikasi {
         -Int IdentifikasiID
         -Int JwbKasusID
@@ -115,12 +122,12 @@ classDiagram
         -String NoSuratPengesahan
         -String LaporanSPT
         -String NoSuratKeputusan
-        -String Laporan Keuangan
+        -String LaporanKeuangan
         -String TipePerikatan
         -String SumberDana
         -String JenisPerikatan
         -String TujuanTransaksi
-        -String StandardAkutansi
+        -String StandarAkutansi
         -Int TotalAset
         -String NamaKAP
         -Int Pendapatan
@@ -129,27 +136,55 @@ classDiagram
         -Int KontakNomor
         -String KontakJabatan
         -String KontakEmail
-        -Blob FileAkte
+        -Blob FileAset
         -Blob FileNPWP
-        -Blob FileStrukturOrg 
+        -Blob FileStrukturOrg
     }
 
     class Perikatan {
-        -int PerikatanID
+        -Int PerikatanID
         -Int JwbKasusID
-        -Blob File
+        -Blob FileProposal
+        -Blob FileSPK
+        -Blob FileSuratTugas
+        -Blob FilePenugasan
+        -Blob FileIndependensi
+        -String Pembuat
     }
 
-    class DetilVerifikasi {
+    class DetailVerifikasi {
         -Int CheckID
         -Int JwbKasusID
         -Int DetailVerifikasiBox
         -Int Checkbox2
         -Int Checkbox3
-        ...
         -Int Checkbox20
     }
 
+    class PMPJ {
+        -Int PMPJID
+        -Int JwbKasusID
+        -String Nama
+        -String Jabatan
+        -String Alamat
+        -String NamaPerusahaan
+        -String AlamatPerusahaan
+        -String BeneficialOwner
+        -String TahunPeriode
+        -String NamaFileKTP
+        -Blob FileKTP
+        -String KategoriPenggunaJasa
+        -String KategoriBisnisPenggunaJasa
+        -String KategoriDomisiliPenggunaJasa
+        -String KategoriKhususTambahan
+    }
+
+    JwbKasus "1" -- "1" Identifikasi
+    JwbKasus "1" -- "1" Perikatan
+    JwbKasus "1" -- "1" DetailVerifikasi
+    JwbKasus "1" -- "1" PMPJ
+
+    %% Financial / COA Setup
     class COA {
         -Int COAID
         -Int JwbKasusID
@@ -164,6 +199,33 @@ classDiagram
         -Int AuditSebelum
     }
 
+    class AnalisisUmur {
+        -Int AnalisisUmurID
+        -Int PiutangID
+        -Int SaldoAuditor
+        -Int SaldoBG
+        -Int Selisih
+    }
+
+    class HasilAnalisisUmur {
+        -Int HasilAnalisisUmurID
+        -Int AnalisisUmurID
+        -Enum KelompokUmur
+        -Int Jumlah
+        -Int Kerugian
+    }
+
+    class Dokumen {
+        -Int DokumenID
+        -Int PiutangID
+        -enum NamaFile
+        -Mediumblob File
+    }
+
+    JwbKasus "1" -- "0..*" COA
+    AnalisisUmur "1" -- "0..*" HasilAnalisisUmur
+
+    %% Receivables (Piutang) & Reconciliation Module
     class Piutang {
         -Int PiutangID
         -Int JwbKasusID
@@ -174,38 +236,94 @@ classDiagram
         -Bool JurnalCheck
         -Bool RekonsiliasiCheck
         -Bool UmurCheck
-        -Bool ProsedurAltCheck
+        -Bool ProsedurAllCheck
     }
 
-    %% Inheritance
-    User <|-- Admin
-    User <|-- Dosen
-    User <|-- Mahasiswa
+    class RekapBalasan {
+        -Int RekapBalasanID
+        -Int PiutangID
+        -Int KonfirmasiPiutangID
+        -Int SaldoBB
+        -Date TanggalKirim
+        -String MetodeKirim
+        -Date TanggalJawab
+        -Int SaldoJawab
+        -Int Selisih
+        -Mediumblob FileBukti
+        -enum Status
+    }
 
-    %% Admin management
-    Admin ..> Dosen : Mengelola
-    Admin ..> Mahasiswa : Mengelola
-    Admin ..> Kelas : Mengelola
+    class Rekonsiliasi {
+        -Int RekonsiliasiID
+        -Int PiutangID
+        -String NomorFaktur
+        -Date TanggalFaktur
+        -Int SaldoBuku
+        -Int SaldoCustomer
+        -Int Selisih
+        -String Keterangan
+    }
 
-    %% Dosen - Mahasiswa - Kelas
-    Mahasiswa "1" -- "0..*" TrSiswa
-    TrSiswa "0..*" -- "1" Kelas
+    class ProsedurAlternatif {
+        -Int ProsedurAlternatifID
+        -Int PiutangID
+        -Int KonfirmasiPiutangID
+        -Int SaldoAkhir
+        -Bool KonfirmasiBayar
+        -String BuktiBayar
+        -Int SaldoBata
+        -MediumBlob FileBukti
+    }
 
-    %% Mahasiswa mengumpulkan Kasus
-    Mahasiswa "1" --> "0..*" JwbKasus : uploadTugas
+    class KonfirmasiPiutang {
+        -Int KonfirmasiPiutangID
+        -Int PiutangID
+        -String NamaCustomer
+        -String KotaCustomer
+        -Int Jumlah
+        -Mediumblob File
+        -String NamaFile
+    }
 
-    %% Kasus
-    Kasus "1" --> "0..*" JwbKasus
-    Kasus "1" -- "1" Kelas
+    JwbKasus "1" -- "1" Piutang
+    Piutang "1" -- "0..*" RekapBalasan
+    Piutang "1" -- "0..*" Rekonsiliasi
+    Piutang "1" -- "0..*" ProsedurAlternatif
+    Piutang "1" -- "0..*" KonfirmasiPiutang
+    Piutang "1" -- "1" Dokumen
 
-    %% Client relationship
-    DataClient "1" --> "1" Kasus
+    KonfirmasiPiutang "1" -- "1" RekapBalasan
+    KonfirmasiPiutang "1" -- "1" ProsedurAlternatif
+    KonfirmasiPiutang "1" -- "0..*" Rekonsiliasi
+    RekapBalasan "1" -- "1" ProsedurAlternatif
 
-    %% JwbKasus & Audit
-    JwbKasus "1" --> "1" PMPJ
-    JwbKasus "1" --> "1" Identifikasi
-    JwbKasus "1" --> "0.." Perikatan
-    JwbKasus "1" --> "1" DetilVerifikasi
-    JwbKasus "1" --> "0.." COA
-    JwbKasus "1" --> "1" Piutang
+    %% Audit Adjustment / Procedure Entries
+    class Prosedur {
+        -Int ProsedurID
+        -Int PiutangID
+        -Int NoUrut
+        -String NamaProsedur
+        -String Index
+        -Date Tanggal
+        -Bool Checkbox
+    }
+
+    class JurnalKoreksi {
+        -Int JurnalKoreksiID
+        -Int PiutangID
+        -String Keterangan
+    }
+
+    class Pembayaran {
+        -Int PembayaranID
+        -Int JurnalKoreksiID
+        -Int COAID
+        -Int Debet
+        -Int Kredit
+    }
+
+    Piutang "1" -- "0..*" Prosedur
+    Piutang "1" -- "0..*" JurnalKoreksi
+    JurnalKoreksi "1" -- "0..*" Pembayaran
+    COA "1" -- "0..*" Pembayaran
 ```
