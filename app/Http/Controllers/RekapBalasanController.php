@@ -12,11 +12,11 @@ class RekapBalasanController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = RekapBalasan::query()->with([
-            'piutang',
-            'konfirmasiPiutang:KonfirmasiPiutangID,NamaCustomer,Jumlah',
+        $query = Piutang::query()->with([
+            'konfirmasiPiutang:KonfirmasiPiutangID,PiutangID,NamaCustomer,Jumlah',
+            'rekapBalasan.konfirmasiPiutang:KonfirmasiPiutangID,PiutangID,NamaCustomer,Jumlah',
         ]);
-        $query->whereHas('piutang.JwbKasus', function ($query) use ($request) {
+        $query->whereHas('JwbKasus', function ($query) use ($request) {
             $query->forUser($request->user());
         });
 
