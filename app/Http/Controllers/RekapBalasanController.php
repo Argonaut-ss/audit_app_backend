@@ -13,18 +13,29 @@ class RekapBalasanController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Piutang::query()->with([
-            'konfirmasiPiutang' => function ($query) {
-                $query
-                    ->select('KonfirmasiPiutangID', 'PiutangID', 'NamaCustomer', 'Jumlah')
-                    ->whereDoesntHave('rekapBalasan');
-            },
+            'konfirmasiPiutang:KonfirmasiPiutangID,PiutangID,NamaCustomer,Jumlah',
             'rekapBalasan.konfirmasiPiutang:KonfirmasiPiutangID,PiutangID,NamaCustomer,Jumlah',
         ]);
         $query->whereHas('JwbKasus', function ($query) use ($request) {
             $query->forUser($request->user());
         });
 
-        return response()->json($query->get());
+        $items = $query->get();
+
+        $items->each(function (Piutang $piutang) {
+            $usedKonfirmasiPiutangIds = $piutang->rekapBalasan
+                ->pluck('KonfirmasiPiutangID')
+                ->filter();
+
+            $piutang->setRelation(
+                'konfirmasiPiutangTersedia',
+                $piutang->konfirmasiPiutang
+                    ->whereNotIn('KonfirmasiPiutangID', $usedKonfirmasiPiutangIds)
+                    ->values()
+            );
+        });
+
+        return response()->json($items);
     }
 
     public function show(Request $request, int $id): JsonResponse
