@@ -17,9 +17,7 @@ class RekonsiliasiPiutangController extends Controller
             ->where('JwbKasusID', $jwbKasusId)
             ->firstOrFail();
 
-        return Piutang::firstOrCreate([
-            'JwbKasusID' => $jwbKasusId,
-        ]);
+        return Piutang::firstOrCreate(['JwbKasusID' => $jwbKasusId]);
     }
 
     protected function customerOptions(Piutang $piutang): array
@@ -98,9 +96,9 @@ class RekonsiliasiPiutangController extends Controller
             'KonfirmasiPiutangID' => ['required', 'integer', 'exists:KonfirmasiPiutang,KonfirmasiPiutangID'],
             'NomorFaktur' => ['required', 'string', 'max:255'],
             'TanggalFaktur' => ['required', 'date'],
-            'SaldoBuku' => ['required', 'numeric'],
-            'SaldoCustomer' => ['required', 'numeric'],
-            'Selisih' => ['required', 'numeric'],
+            'SaldoBuku' => ['required', 'integer'],
+            'SaldoCustomer' => ['required', 'integer'],
+            'Selisih' => ['required', 'integer'],
             'Keterangan' => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -163,9 +161,9 @@ class RekonsiliasiPiutangController extends Controller
             'KonfirmasiPiutangID' => ['sometimes', 'integer', 'exists:KonfirmasiPiutang,KonfirmasiPiutangID'],
             'NomorFaktur' => ['sometimes', 'string', 'max:255'],
             'TanggalFaktur' => ['sometimes', 'date'],
-            'SaldoBuku' => ['sometimes', 'numeric'],
-            'SaldoCustomer' => ['sometimes', 'numeric'],
-            'Selisih' => ['sometimes', 'numeric'],
+            'SaldoBuku' => ['sometimes', 'integer'],
+            'SaldoCustomer' => ['sometimes', 'integer'],
+            'Selisih' => ['sometimes', 'integer'],
             'Keterangan' => ['nullable', 'string', 'max:255'],
         ]);
 

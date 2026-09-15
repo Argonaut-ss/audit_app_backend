@@ -11,11 +11,13 @@ return new class extends Migration
         Schema::create('rekonsiliasi_piutang', function (Blueprint $table) {
             $table->id('RekonsiliasiPiutangID');
             $table->unsignedBigInteger('PiutangID');
+            $table->unsignedBigInteger('KonfirmasiPiutangID')
+                ->nullable();
             $table->string('NomorFaktur');
             $table->date('TanggalFaktur');
-            $table->integer('SaldoBuku')->default(0);
-            $table->integer('SaldoCustomer')->default(0);
-            $table->integer('Selisih')->default(0);
+            $table->bigInteger('SaldoBuku')->default(0);
+            $table->bigInteger('SaldoCustomer')->default(0);
+            $table->bigInteger('Selisih')->default(0);
             $table->string('Keterangan')->nullable();
             $table->timestamps();
 
@@ -25,6 +27,18 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->index('PiutangID');
+            $table->index(
+                'KonfirmasiPiutangID',
+                'rekonsiliasi_piutang_konfirmasi_piutang_id_idx'
+            );
+
+            $table->foreign(
+                'KonfirmasiPiutangID',
+                'rekonsiliasi_piutang_konfirmasi_piutang_id_fk'
+            )
+                ->references('KonfirmasiPiutangID')
+                ->on('KonfirmasiPiutang')
+                ->nullOnDelete();
         });
     }
 

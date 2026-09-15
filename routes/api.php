@@ -20,6 +20,7 @@ use App\Http\Controllers\PiutangController;
 use App\Http\Controllers\KonfirmasiPiutangController;
 use App\Http\Controllers\RekonsiliasiPiutangController;
 use App\Http\Controllers\RekapBalasanController;
+use App\Http\Controllers\AnalisisUmurPiutangController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -84,6 +85,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/piutang/{piutang}/rekonsiliasi-piutang', [RekonsiliasiPiutangController::class, 'store']);
     Route::put('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'update']);
     Route::delete('/piutang/{piutang}/rekonsiliasi-piutang/{rekonsiliasiPiutang}', [RekonsiliasiPiutangController::class, 'destroy']);
+
+    Route::get('/jwb-kasus/{jwbKasusId}/analisis-umur-piutang', [AnalisisUmurPiutangController::class, 'indexByJwbKasus']);
+    Route::post('/jwb-kasus/{jwbKasusId}/analisis-umur-piutang', [AnalisisUmurPiutangController::class, 'syncByJwbKasus']);
 
     Route::get('/konfirmasi-piutang/{id}/file', [KonfirmasiPiutangController::class, 'file']);
     Route::apiResource('konfirmasi-piutang', KonfirmasiPiutangController::class);

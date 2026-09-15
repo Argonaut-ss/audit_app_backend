@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Piutang extends Model
 {
@@ -65,6 +66,15 @@ class Piutang extends Model
     {
         return $this->hasMany(
             RekapBalasan::class,
+            'PiutangID',
+            'PiutangID'
+        );
+    }
+
+    public function analisisUmur(): HasOne
+    {
+        return $this->hasOne(
+            AnalisisUmur::class,
             'PiutangID',
             'PiutangID'
         );
