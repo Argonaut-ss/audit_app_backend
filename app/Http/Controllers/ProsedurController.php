@@ -29,41 +29,17 @@ class ProsedurController extends Controller
     /**
      * POST /api/prosedur
      *
-     * Create a new procedure entry or update an existing one.
+     * Create a new procedure entry.
      */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'prosedur_id' => ['nullable', 'integer', 'exists:prosedurs,id'],
             'piutang_id' => ['required', 'integer', 'exists:piutangs,id'],
             'nama_prosedur' => ['required', 'string'],
             'index' => ['nullable', 'string', 'max:255'],
             'tanggal' => ['required', 'date'],
             'checkbox' => ['required', 'boolean'],
         ]);
-
-        if (!empty($validated['prosedur_id'])) {
-            $prosedur = Prosedur::findOrFail($validated['prosedur_id']);
-
-            // Prevent editing an entry under a different piutang.
-            if ($prosedur->piutang_id !== (int) $validated['piutang_id']) {
-                return response()->json([
-                    'message' => 'The procedure does not belong to the specified piutang.',
-                ], 422);
-            }
-
-            $prosedur->update([
-                'nama_prosedur' => $validated['nama_prosedur'],
-                'index' => $validated['index'] ?? null,
-                'tanggal' => $validated['tanggal'],
-                'checkbox' => $validated['checkbox'],
-            ]);
-
-            return response()->json([
-                'message' => 'Prosedur updated successfully.',
-                'data' => $prosedur->fresh(),
-            ], 200);
-        }
 
         $prosedur = Prosedur::create([
             'piutang_id' => $validated['piutang_id'],
@@ -77,6 +53,43 @@ class ProsedurController extends Controller
             'message' => 'Prosedur created successfully.',
             'data' => $prosedur,
         ], 201);
+    }
+
+    /**
+     * PUT/PATCH /api/prosedur/{prosedur}
+     *
+     * Update an existing procedure entry.
+     */
+    public function update(
+        Request $request,
+        Prosedur $prosedur
+    ): JsonResponse {
+        $validated = $request->validate([
+            'piutang_id' => ['required', 'integer', 'exists:piutangs,id'],
+            'nama_prosedur' => ['required', 'string'],
+            'index' => ['nullable', 'string', 'max:255'],
+            'tanggal' => ['required', 'date'],
+            'checkbox' => ['required', 'boolean'],
+        ]);
+
+        // Prevent editing an entry under a different piutang.
+        if ($prosedur->piutang_id !== (int) $validated['piutang_id']) {
+            return response()->json([
+                'message' => 'The procedure does not belong to the specified piutang.',
+            ], 422);
+        }
+
+        $prosedur->update([
+            'nama_prosedur' => $validated['nama_prosedur'],
+            'index' => $validated['index'] ?? null,
+            'tanggal' => $validated['tanggal'],
+            'checkbox' => $validated['checkbox'],
+        ]);
+
+        return response()->json([
+            'message' => 'Prosedur updated successfully.',
+            'data' => $prosedur->fresh(),
+        ], 200);
     }
 
     /**

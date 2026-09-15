@@ -104,6 +104,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Prosedur Routes
     Route::get('/piutangs/{piutang}/prosedur',[ProsedurController::class, 'index']);
     Route::post('/prosedur',[ProsedurController::class, 'store']);
+    Route::put('/prosedur/{prosedur}',[ProsedurController::class, 'update']);
+
     Route::delete('/prosedur/{prosedur}',[ProsedurController::class, 'destroy']);
 
     // Helper Functions
