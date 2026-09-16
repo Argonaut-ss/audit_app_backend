@@ -15,6 +15,7 @@ class Dokumen extends Model
         'PiutangID',
         'TipeFile',
         'NamaFile',
+        'NamaFileUpload',
         'File',
     ];
 
