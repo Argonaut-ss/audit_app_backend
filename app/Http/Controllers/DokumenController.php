@@ -18,7 +18,7 @@ class DokumenController extends Controller
     public function index(int $piutangId): JsonResponse
     {
         $dokumen = Dokumen::where('PiutangID', $piutangId)
-            ->get([
+            ->select([
                 'DokumenID',
                 'PiutangID',
                 'TipeFile',
@@ -27,7 +27,8 @@ class DokumenController extends Controller
                 'Alasan',
                 'created_at',
                 'updated_at',
-            ]);
+            ])
+            ->paginate(10);
 
         return response()->json([
             'message' => 'Data dokumen berhasil diambil.',
