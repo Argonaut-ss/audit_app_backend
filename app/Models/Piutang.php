@@ -95,7 +95,7 @@ class Piutang extends Model
     {
         return $this->hasMany(
             Prosedur::class,
-            'PiutangID',
+            'piutang_id',
             'PiutangID'
         );
     }
