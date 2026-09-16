@@ -24,6 +24,7 @@ use App\Http\Controllers\ProsedurAlternatifController;
 use App\Http\Controllers\AnalisisUmurPiutangController;
 use App\Http\Controllers\JurnalKoreksiPiutangController;
 use App\Http\Controllers\ProsedurController;
+use App\Http\Controllers\DokumenController;
 
 use App\Http\Controllers\KelasCardController;
 
