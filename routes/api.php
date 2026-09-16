@@ -20,6 +20,7 @@ use App\Http\Controllers\PiutangController;
 use App\Http\Controllers\KonfirmasiPiutangController;
 use App\Http\Controllers\RekonsiliasiPiutangController;
 use App\Http\Controllers\RekapBalasanController;
+use App\Http\Controllers\ProsedurAlternatifController;
 use App\Http\Controllers\AnalisisUmurPiutangController;
 use App\Http\Controllers\JurnalKoreksiPiutangController;
 use App\Http\Controllers\ProsedurController;
@@ -100,6 +101,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/rekap-balasan/{id}/file', [RekapBalasanController::class, 'file']);
     Route::apiResource('rekap-balasan', RekapBalasanController::class);
+
+    Route::get('/prosedur-alternatif/{id}/file', [ProsedurAlternatifController::class, 'file']);
+    Route::apiResource('prosedur-alternatif', ProsedurAlternatifController::class);
 
     // Prosedur Routes
     Route::get('/piutangs/{piutang}/prosedur',[ProsedurController::class, 'index']);

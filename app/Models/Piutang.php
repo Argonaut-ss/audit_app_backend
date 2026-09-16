@@ -73,6 +73,15 @@ class Piutang extends Model
         );
     }
 
+    public function prosedurAlternatif(): HasMany
+    {
+        return $this->hasMany(
+            ProsedurAlternatif::class,
+            'PiutangID',
+            'PiutangID'
+        );
+    }
+
     public function analisisUmur(): HasOne
     {
         return $this->hasOne(

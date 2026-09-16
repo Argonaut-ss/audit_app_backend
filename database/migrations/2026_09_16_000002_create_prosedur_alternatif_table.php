@@ -9,19 +9,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('RekapBalasan', function (Blueprint $table) {
-            $table->id('RekapBalasanID');
+        Schema::create('ProsedurAlternatif', function (Blueprint $table) {
+            $table->id('ProsedurAlternatifID');
             $table->unsignedBigInteger('PiutangID');
-            $table->unsignedBigInteger('KonfirmasiPiutangID')->nullable();
-            $table->bigInteger('SaldoBB')->default(0);
-            $table->date('TanggalKirim')->nullable();
-            $table->string('MetodeKirim')->nullable();
-            $table->date('TanggalJawab')->nullable();
-            $table->bigInteger('SaldoJawab')->default(0);
-            $table->bigInteger('Selisih')->default(0);
+            $table->unsignedBigInteger('KonfirmasiPiutangID');
+            $table->bigInteger('SaldoAkhir')->nullable();
+            $table->boolean('KonfirmasiBayar')->nullable();
+            $table->string('BuktiBayar')->nullable();
+            $table->bigInteger('SaldoBata')->nullable();
             $table->string('NamaFile')->nullable();
             $table->string('TipeFile')->nullable();
-            $table->enum('Status', ['terbalas', 'tidak terbalas'])->nullable();
             $table->timestamps();
 
             $table->foreign('PiutangID')
@@ -32,22 +29,22 @@ return new class extends Migration
             $table->foreign('KonfirmasiPiutangID')
                 ->references('KonfirmasiPiutangID')
                 ->on('KonfirmasiPiutang')
-                ->nullOnDelete();
+                ->cascadeOnDelete();
 
-            $table->index('PiutangID');
+            $table->unique(['PiutangID', 'KonfirmasiPiutangID']);
             $table->index('KonfirmasiPiutangID');
         });
 
-        DB::statement('ALTER TABLE RekapBalasan ADD FileBukti MEDIUMBLOB NULL');
+        DB::statement('ALTER TABLE ProsedurAlternatif ADD FileBukti MEDIUMBLOB NULL');
     }
 
     public function down(): void
     {
-        Schema::table('RekapBalasan', function (Blueprint $table) {
+        Schema::table('ProsedurAlternatif', function (Blueprint $table) {
             $table->dropForeign(['PiutangID']);
             $table->dropForeign(['KonfirmasiPiutangID']);
         });
 
-        Schema::dropIfExists('RekapBalasan');
+        Schema::dropIfExists('ProsedurAlternatif');
     }
 };
