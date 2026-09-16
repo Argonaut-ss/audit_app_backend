@@ -75,9 +75,6 @@ class JurnalKoreksiPiutangController extends Controller
 
     protected function validatePaymentsForCase(array $pembayaran, int $jwbKasusId): void
     {
-        $totalDebet = 0;
-        $totalKredit = 0;
-
         foreach ($pembayaran as $item) {
             COA::query()
                 ->where('COAID', $item['COAID'])
@@ -90,13 +87,6 @@ class JurnalKoreksiPiutangController extends Controller
             if (($debet === 0 && $kredit === 0) || ($debet > 0 && $kredit > 0)) {
                 abort(422, 'Setiap pembayaran harus memiliki salah satu nilai Debet atau Kredit yang lebih dari nol.');
             }
-
-            $totalDebet += $debet;
-            $totalKredit += $kredit;
-        }
-
-        if ($totalDebet !== $totalKredit) {
-            abort(422, 'Total Debet dan Total Kredit harus sama.');
         }
     }
 
