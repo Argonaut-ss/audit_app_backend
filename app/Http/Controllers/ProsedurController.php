@@ -34,7 +34,7 @@ class ProsedurController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'piutang_id' => ['required', 'integer', 'exists:piutangs,id'],
+            'piutang_id' => ['required', 'integer', 'exists:Piutang,PiutangID'],
             'nama_prosedur' => ['required', 'string'],
             'index' => ['nullable', 'string', 'max:255'],
             'tanggal' => ['required', 'date'],
@@ -65,7 +65,7 @@ class ProsedurController extends Controller
         Prosedur $prosedur
     ): JsonResponse {
         $validated = $request->validate([
-            'piutang_id' => ['required', 'integer', 'exists:piutangs,id'],
+            'piutang_id' => ['required', 'integer', 'exists:Piutang,PiutangID'],
             'nama_prosedur' => ['required', 'string'],
             'index' => ['nullable', 'string', 'max:255'],
             'tanggal' => ['required', 'date'],
