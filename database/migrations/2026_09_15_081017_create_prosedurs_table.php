@@ -25,7 +25,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->index(['piutang_id', 'no_urut']);
+            $table->index(['piutang_id']);
         });
     }
 
