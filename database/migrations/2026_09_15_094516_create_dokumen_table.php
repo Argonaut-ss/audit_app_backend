@@ -26,10 +26,14 @@ return new class extends Migration
 
             $table->string('NamaFile');
             $table->string('NamaFileUpload')->nullable();
-            $table->mediumBlob('File');
+            $table->binary('File')->nullable();
 
             $table->timestamps();
         });
+
+        DB::statement(
+            'ALTER TABLE `dokumen` MODIFY `File` MEDIUMBLOB NULL'
+        );
     }
 
     /**
