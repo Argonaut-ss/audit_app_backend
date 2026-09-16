@@ -60,4 +60,13 @@ class KonfirmasiPiutang extends Model
             'KonfirmasiPiutangID'
         );
     }
+
+    public function prosedurAlternatif(): HasMany
+    {
+        return $this->hasMany(
+            ProsedurAlternatif::class,
+            'KonfirmasiPiutangID',
+            'KonfirmasiPiutangID'
+        );
+    }
 }

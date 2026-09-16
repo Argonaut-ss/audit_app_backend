@@ -6,27 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class RekapBalasan extends Model
+class ProsedurAlternatif extends Model
 {
     use HasFactory;
 
-    protected $table = 'RekapBalasan';
+    protected $table = 'ProsedurAlternatif';
 
-    protected $primaryKey = 'RekapBalasanID';
+    protected $primaryKey = 'ProsedurAlternatifID';
 
     protected $fillable = [
         'PiutangID',
         'KonfirmasiPiutangID',
-        'SaldoBB',
-        'TanggalKirim',
-        'MetodeKirim',
-        'TanggalJawab',
-        'SaldoJawab',
-        'Selisih',
+        'SaldoAkhir',
+        'KonfirmasiBayar',
+        'BuktiBayar',
+        'SaldoBata',
         'FileBukti',
         'NamaFile',
         'TipeFile',
-        'Status',
     ];
 
     protected $hidden = [
@@ -36,11 +33,9 @@ class RekapBalasan extends Model
     protected $casts = [
         'PiutangID' => 'integer',
         'KonfirmasiPiutangID' => 'integer',
-        'SaldoBB' => 'integer',
-        'TanggalKirim' => 'date',
-        'TanggalJawab' => 'date',
-        'SaldoJawab' => 'integer',
-        'Selisih' => 'integer',
+        'SaldoAkhir' => 'integer',
+        'KonfirmasiBayar' => 'boolean',
+        'SaldoBata' => 'integer',
     ];
 
     public function piutang(): BelongsTo
@@ -60,4 +55,5 @@ class RekapBalasan extends Model
             'KonfirmasiPiutangID'
         );
     }
+
 }
