@@ -105,8 +105,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/piutangs/{piutang}/prosedur',[ProsedurController::class, 'index']);
     Route::post('/prosedur',[ProsedurController::class, 'store']);
     Route::put('/prosedur/{prosedur}',[ProsedurController::class, 'update']);
-
     Route::delete('/prosedur/{prosedur}',[ProsedurController::class, 'destroy']);
+
+    // Dokumen Routes
+    Route::get('dokumen/piutang/{piutangId}',[DokumenController::class, 'index']);
+    Route::post('dokumen/piutang/{piutangId}',[DokumenController::class, 'store']);
+    Route::get('dokumen/{dokumenId}',[DokumenController::class, 'show']);
+    Route::put('dokumen/{dokumenId}',[DokumenController::class, 'update']);
+    Route::delete('dokumen/{dokumenId}',[DokumenController::class, 'destroy']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
