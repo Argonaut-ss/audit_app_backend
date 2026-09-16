@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('DokumenID');
 
             $table->foreignId('PiutangID')
-                ->constrained('piutang', 'PiutangID')
+                ->constrained('Piutang', 'PiutangID')
                 ->cascadeOnDelete();
 
             $table->enum('TipeFile', [
@@ -33,10 +33,14 @@ return new class extends Migration
 
             $table->text('Alasan')->nullable();
 
-            $table->mediumBlob('File')->nullable();
+            $table->binary('File')->nullable();
 
             $table->timestamps();
         });
+
+        DB::statement(
+            'ALTER TABLE `dokumen` MODIFY `File` MEDIUMBLOB NULL'
+        );
     }
 
     /**
