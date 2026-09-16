@@ -218,8 +218,12 @@ classDiagram
     class Dokumen {
         -Int DokumenID
         -Int PiutangID
-        -enum NamaFile
+        -Enum TipeFile
+        -String NamaFile
+        -Enum TersediaDokumen
+        -String Alasan
         -Mediumblob File
+}
     }
 
     JwbKasus "1" -- "0..*" COA
@@ -290,7 +294,7 @@ classDiagram
     Piutang "1" -- "0..*" Rekonsiliasi
     Piutang "1" -- "0..*" ProsedurAlternatif
     Piutang "1" -- "0..*" KonfirmasiPiutang
-    Piutang "1" -- "1" Dokumen
+    Piutang "1" -- "0..*" Dokumen
 
     KonfirmasiPiutang "1" -- "1" RekapBalasan
     KonfirmasiPiutang "1" -- "1" ProsedurAlternatif
