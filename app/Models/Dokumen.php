@@ -15,8 +15,6 @@ class Dokumen extends Model
         'PiutangID',
         'TipeFile',
         'NamaFile',
-        'TersediaDokumen',
-        'Alasan',
         'File',
     ];
 

@@ -23,8 +23,7 @@ class DokumenController extends Controller
                 'PiutangID',
                 'TipeFile',
                 'NamaFile',
-                'TersediaDokumen',
-                'Alasan',
+                'NamaFileUpload',
                 'created_at',
                 'updated_at',
             ])
@@ -59,21 +58,8 @@ class DokumenController extends Controller
                 'max:255',
             ],
 
-            'TersediaDokumen' => [
-                'required',
-                Rule::in([
-                    'Ya',
-                    'Tidak',
-                ]),
-            ],
-
-            'Alasan' => [
-                'nullable',
-                'string',
-            ],
-
             'File' => [
-                'nullable',
+                'required',
                 'file',
                 'mimes:pdf',
                 'max:16384',
@@ -90,8 +76,7 @@ class DokumenController extends Controller
         $data = $validator->validated();
 
         /*
-         * If TipeFile is Lain-lain, NamaFile must come
-         * from the user's custom text input.
+         * Lain-lain requires a custom name.
          */
         if ($data['TipeFile'] === 'Lain-lain') {
             if (empty($data['NamaFile'])) {
@@ -102,8 +87,7 @@ class DokumenController extends Controller
         }
 
         /*
-         * If TipeFile is Rincian or Buku Besar,
-         * assign the default document name.
+         * Default names for predefined document types.
          */
         if ($data['TipeFile'] === 'Rincian') {
             $data['NamaFile'] = 'Rincian.pdf';
@@ -114,49 +98,23 @@ class DokumenController extends Controller
         }
 
         /*
-         * If the document is unavailable:
-         * - Alasan is required
-         * - File must not be uploaded
-         */
-        if ($data['TersediaDokumen'] === 'Tidak') {
-            if (empty($data['Alasan'])) {
-                return response()->json([
-                    'message' => 'Alasan wajib diisi jika dokumen tidak tersedia.',
-                ], 422);
-            }
-
-            $data['File'] = null;
-        }
-
-        /*
-         * If the document is available:
-         * - File is required
-         * - Alasan is not needed
-         */
-        if ($data['TersediaDokumen'] === 'Ya') {
-            if (!$request->hasFile('File')) {
-                return response()->json([
-                    'message' => 'File wajib diupload jika dokumen tersedia.',
-                ], 422);
-            }
-
-            $data['Alasan'] = null;
-        }
-
-        /*
          * Store the actual uploaded PDF as MEDIUMBLOB.
          */
-        if ($request->hasFile('File')) {
-            $data['File'] = $request->file('File')->get();
-        }
+        $uploadedFile = $request->file('File');
+
+        $data['File'] = $uploadedFile->get();
+
+        /*
+         * Store the original uploaded filename separately.
+         */
+        $data['NamaFileUpload'] = $uploadedFile->getClientOriginalName();
 
         $dokumen = Dokumen::create([
             'PiutangID' => $piutangId,
             'TipeFile' => $data['TipeFile'],
             'NamaFile' => $data['NamaFile'],
-            'TersediaDokumen' => $data['TersediaDokumen'],
-            'Alasan' => $data['Alasan'] ?? null,
-            'File' => $data['File'] ?? null,
+            'NamaFileUpload' => $data['NamaFileUpload'],
+            'File' => $data['File'],
         ]);
 
         return response()->json([
@@ -166,8 +124,7 @@ class DokumenController extends Controller
                 'PiutangID' => $dokumen->PiutangID,
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
-                'TersediaDokumen' => $dokumen->TersediaDokumen,
-                'Alasan' => $dokumen->Alasan,
+                'NamaFileUpload' => $dokumen->NamaFileUpload,
             ],
         ], 201);
     }
@@ -194,8 +151,7 @@ class DokumenController extends Controller
                 'PiutangID' => $dokumen->PiutangID,
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
-                'TersediaDokumen' => $dokumen->TersediaDokumen,
-                'Alasan' => $dokumen->Alasan,
+                'NamaFileUpload' => $dokumen->NamaFileUpload,
                 'created_at' => $dokumen->created_at,
                 'updated_at' => $dokumen->updated_at,
             ],
@@ -231,19 +187,6 @@ class DokumenController extends Controller
                 'nullable',
                 'string',
                 'max:255',
-            ],
-
-            'TersediaDokumen' => [
-                'required',
-                Rule::in([
-                    'Ya',
-                    'Tidak',
-                ]),
-            ],
-
-            'Alasan' => [
-                'nullable',
-                'string',
             ],
 
             'File' => [
@@ -286,46 +229,26 @@ class DokumenController extends Controller
         }
 
         /*
-         * If unavailable, require reason and clear file.
-         */
-        if ($data['TersediaDokumen'] === 'Tidak') {
-            if (empty($data['Alasan'])) {
-                return response()->json([
-                    'message' => 'Alasan wajib diisi jika dokumen tidak tersedia.',
-                ], 422);
-            }
-
-            $data['File'] = null;
-        }
-
-        /*
-         * If available, require a file.
-         */
-        if ($data['TersediaDokumen'] === 'Ya') {
-            if (!$request->hasFile('File') && !$dokumen->File) {
-                return response()->json([
-                    'message' => 'File wajib diupload jika dokumen tersedia.',
-                ], 422);
-            }
-
-            $data['Alasan'] = null;
-        }
-
-        /*
-         * Only replace the stored blob if a new file is uploaded.
+         * Only replace the stored blob and filename if a new file is uploaded.
          */
         if ($request->hasFile('File')) {
-            $data['File'] = $request->file('File')->get();
-        } elseif ($data['TersediaDokumen'] === 'Ya') {
+            $uploadedFile = $request->file('File');
+
+            $data['File'] = $uploadedFile->get();
+            $data['NamaFileUpload'] = $uploadedFile->getClientOriginalName();
+        } else {
+            /*
+             * Preserve the existing uploaded file and original filename.
+             */
             $data['File'] = $dokumen->File;
+            $data['NamaFileUpload'] = $dokumen->NamaFileUpload;
         }
 
         $dokumen->update([
             'TipeFile' => $data['TipeFile'],
             'NamaFile' => $data['NamaFile'],
-            'TersediaDokumen' => $data['TersediaDokumen'],
-            'Alasan' => $data['Alasan'] ?? null,
-            'File' => $data['File'] ?? null,
+            'NamaFileUpload' => $data['NamaFileUpload'],
+            'File' => $data['File'],
         ]);
 
         return response()->json([
@@ -335,8 +258,7 @@ class DokumenController extends Controller
                 'PiutangID' => $dokumen->PiutangID,
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
-                'TersediaDokumen' => $dokumen->TersediaDokumen,
-                'Alasan' => $dokumen->Alasan,
+                'NamaFileUpload' => $dokumen->NamaFileUpload,
             ],
         ]);
     }

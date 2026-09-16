@@ -25,22 +25,11 @@ return new class extends Migration
             ]);
 
             $table->string('NamaFile');
-
-            $table->enum('TersediaDokumen', [
-                'Ya',
-                'Tidak',
-            ]);
-
-            $table->text('Alasan')->nullable();
-
-            $table->binary('File')->nullable();
+            $table->string('NamaFileUpload')->nullable();
+            $table->mediumBlob('File');
 
             $table->timestamps();
         });
-
-        DB::statement(
-            'ALTER TABLE `dokumen` MODIFY `File` MEDIUMBLOB NULL'
-        );
     }
 
     /**
