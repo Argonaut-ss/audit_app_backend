@@ -12,12 +12,19 @@ use Illuminate\Validation\ValidationException;
 
 class RekapBalasanController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
+
     public function index(Request $request): JsonResponse
     {
         $query = Piutang::query()->with([
             'konfirmasiPiutang:KonfirmasiPiutangID,PiutangID,NamaCustomer,Jumlah',
             'rekapBalasan.konfirmasiPiutang:KonfirmasiPiutangID,PiutangID,NamaCustomer,Jumlah',
         ]);
+
         $query->whereHas('JwbKasus', function ($query) use ($request) {
             $query->forUser($request->user());
         });
@@ -25,14 +32,19 @@ class RekapBalasanController extends Controller
         $items = $query->get();
 
         $items->each(function (Piutang $piutang) {
-            $usedKonfirmasiPiutangIds = $piutang->rekapBalasan
+            $usedKonfirmasiPiutangIds = $piutang
+                ->rekapBalasan
                 ->pluck('KonfirmasiPiutangID')
                 ->filter();
 
             $piutang->setRelation(
                 'konfirmasiPiutangTersedia',
-                $piutang->konfirmasiPiutang
-                    ->whereNotIn('KonfirmasiPiutangID', $usedKonfirmasiPiutangIds)
+                $piutang
+                    ->konfirmasiPiutang
+                    ->whereNotIn(
+                        'KonfirmasiPiutangID',
+                        $usedKonfirmasiPiutangIds
+                    )
                     ->values()
             );
         });
@@ -40,23 +52,50 @@ class RekapBalasanController extends Controller
         return response()->json($items);
     }
 
-    public function show(Request $request, int $id): JsonResponse
-    {
-        $data = RekapBalasan::with(['piutang', 'konfirmasiPiutang'])->findOrFail($id);
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW
+    |--------------------------------------------------------------------------
+    */
+
+    public function show(
+        Request $request,
+        int $id
+    ): JsonResponse {
+        $data = RekapBalasan::with([
+            'piutang',
+            'konfirmasiPiutang',
+        ])->findOrFail($id);
 
         JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $data->piutang?->JwbKasusID)
+            ->where(
+                'JwbKasusID',
+                $data->piutang?->JwbKasusID
+            )
             ->firstOrFail();
 
         return response()->json($data);
     }
 
-    public function file(Request $request, int $id)
-    {
+    /*
+    |--------------------------------------------------------------------------
+    | FILE
+    |--------------------------------------------------------------------------
+    */
+
+    public function file(
+        Request $request,
+        int $id
+    ) {
         $item = RekapBalasan::findOrFail($id);
+
         JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $item->piutang?->JwbKasusID)
+            ->where(
+                'JwbKasusID',
+                $item->piutang?->JwbKasusID
+            )
             ->firstOrFail();
+
         if (is_null($item->FileBukti)) {
             return response()->json([
                 'success' => false,
@@ -64,75 +103,241 @@ class RekapBalasanController extends Controller
             ], 404);
         }
 
-        $filename = basename($item->NamaFile ?: 'rekap-balasan-file');
-        $contentType = $item->TipeFile ?: 'application/octet-stream';
+        $filename = basename(
+            $item->NamaFile ?: 'rekap-balasan-file'
+        );
+
+        $contentType =
+            $item->TipeFile
+            ?: 'application/octet-stream';
 
         return response(
             $item->FileBukti,
             200,
             [
-                'Content-Type' => $contentType,
-                'Content-Disposition' => 'attachment; filename="' . addslashes($filename) . '"',
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Content-Type' =>
+                    $contentType,
+
+                'Content-Disposition' =>
+                    'attachment; filename="' .
+                    addslashes($filename) .
+                    '"',
+
+                'Cache-Control' =>
+                    'no-store, no-cache, must-revalidate, max-age=0',
             ]
         );
     }
 
-    public function store(Request $request): JsonResponse
-    {
+    /*
+    |--------------------------------------------------------------------------
+    | STORE
+    |--------------------------------------------------------------------------
+    */
+
+    public function store(
+        Request $request
+    ): JsonResponse {
         $validated = $request->validate([
-            'PiutangID' => ['required', 'exists:Piutang,PiutangID'],
-            'KonfirmasiPiutangID' => ['nullable', 'exists:KonfirmasiPiutang,KonfirmasiPiutangID'],
-            'SaldoBB' => ['nullable', 'integer'],
-            'TanggalKirim' => ['nullable', 'date'],
-            'MetodeKirim' => ['nullable', 'string', 'max:255'],
-            'TanggalJawab' => ['nullable', 'date'],
-            'SaldoJawab' => ['nullable', 'integer'],
-            'Selisih' => ['nullable', 'integer'],
-            'Status' => ['nullable', 'in:terbalas,tidak terbalas'],
-            'FileBukti' => ['nullable'],
-            'NamaFile' => ['nullable', 'string', 'max:255'],
-            'TipeFile' => ['nullable', 'string', 'max:255'],
+            'PiutangID' => [
+                'required',
+                'exists:Piutang,PiutangID',
+            ],
+
+            'KonfirmasiPiutangID' => [
+                'nullable',
+                'exists:KonfirmasiPiutang,KonfirmasiPiutangID',
+            ],
+
+            'SaldoBB' => [
+                'nullable',
+                'integer',
+            ],
+
+            'TanggalKirim' => [
+                'nullable',
+                'date',
+            ],
+
+            'MetodeKirim' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'TanggalJawab' => [
+                'nullable',
+                'date',
+            ],
+
+            'SaldoJawab' => [
+                'nullable',
+                'integer',
+            ],
+
+            'Selisih' => [
+                'nullable',
+                'integer',
+            ],
+
+            'Status' => [
+                'nullable',
+                'in:terbalas,tidak terbalas',
+            ],
+
+            'FileBukti' => [
+                'nullable',
+            ],
+
+            'NamaFile' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'TipeFile' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ]);
 
-        $piutang = Piutang::findOrFail($validated['PiutangID']);
+        $piutang = Piutang::findOrFail(
+            $validated['PiutangID']
+        );
+
         JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $piutang->JwbKasusID)
+            ->where(
+                'JwbKasusID',
+                $piutang->JwbKasusID
+            )
             ->firstOrFail();
 
-        if (!empty($validated['KonfirmasiPiutangID'])) {
-            $konfirmasiPiutang = $piutang->konfirmasiPiutang()
-                ->whereKey($validated['KonfirmasiPiutangID'])
-                ->whereDoesntHave('rekapBalasan')
-                ->exists();
+        /*
+        |--------------------------------------------------------------------------
+        | Pastikan customer masih tersedia
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !empty(
+                $validated['KonfirmasiPiutangID']
+            )
+        ) {
+            $konfirmasiPiutang =
+                $piutang
+                    ->konfirmasiPiutang()
+                    ->whereKey(
+                        $validated[
+                            'KonfirmasiPiutangID'
+                        ]
+                    )
+                    ->whereDoesntHave(
+                        'rekapBalasan'
+                    )
+                    ->exists();
 
             if (!$konfirmasiPiutang) {
                 return response()->json([
-                    'message' => 'Konfirmasi piutang tidak tersedia untuk Piutang ini atau sudah digunakan.',
+                    'message' =>
+                        'Konfirmasi piutang tidak tersedia untuk Piutang ini atau sudah digunakan.',
                 ], 422);
             }
         }
 
-        $file = $request->file('FileBukti');
+        /*
+        |--------------------------------------------------------------------------
+        | File
+        |--------------------------------------------------------------------------
+        */
+
+        $file = $request->file(
+            'FileBukti'
+        );
+
         if ($file) {
-            $validated['FileBukti'] = file_get_contents($file->getRealPath());
-            $validated['NamaFile'] = $file->getClientOriginalName();
-            $validated['TipeFile'] = $file->getMimeType();
+            $validated['FileBukti'] =
+                file_get_contents(
+                    $file->getRealPath()
+                );
+
+            $validated['NamaFile'] =
+                $file->getClientOriginalName();
+
+            $validated['TipeFile'] =
+                $file->getMimeType();
         }
 
-        $rekap = RekapBalasan::create($validated);
-        $this->rekapCheck($piutang);
+        $rekap = RekapBalasan::create(
+            $validated
+        );
 
-        return response()->json($rekap->load(['piutang', 'konfirmasiPiutang']), 201);
+        $this->rekapCheck(
+            $piutang
+        );
+
+        return response()->json(
+            $rekap->load([
+                'piutang',
+                'konfirmasiPiutang',
+            ]),
+            201
+        );
     }
 
-    public function bulkSave(Request $request): JsonResponse
-    {
+    /*
+    |--------------------------------------------------------------------------
+    | BULK SAVE
+    |--------------------------------------------------------------------------
+    |
+    | Digunakan sebagai final-state save.
+    |
+    | RekapBalasanID ada:
+    | -> UPDATE row yang sama.
+    |
+    | RekapBalasanID tidak ada:
+    | -> CREATE row baru.
+    |
+    | Existing RekapBalasanID tidak dikirim lagi:
+    | -> DELETE.
+    |
+    | SWAP:
+    |
+    | Sebelum:
+    |
+    | ID 10 -> Customer A
+    | ID 11 -> Customer B
+    |
+    | Payload:
+    |
+    | ID 10 -> Customer B
+    | ID 11 -> Customer A
+    |
+    | Backend:
+    |
+    | 1. Validasi FINAL STATE.
+    | 2. Release customer existing menjadi NULL.
+    | 3. Assign customer final.
+    |
+    | RekapBalasanID tetap 10 dan 11.
+    |
+    |--------------------------------------------------------------------------
+    */
+
+    public function bulkSave(
+        Request $request
+    ): JsonResponse {
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATION
+        |--------------------------------------------------------------------------
+        */
+
         $validated = $request->validate([
             'data' => [
                 'required',
                 'array',
-                'min:1'
+                'min:1',
             ],
 
             'data.*.RekapBalasanID' => [
@@ -153,61 +358,202 @@ class RekapBalasanController extends Controller
                 'exists:KonfirmasiPiutang,KonfirmasiPiutangID',
             ],
 
-            'data.*.SaldoBB' => ['nullable', 'integer'],
-            'data.*.TanggalKirim' => ['nullable', 'date'],
-            'data.*.MetodeKirim' => ['nullable', 'string', 'max:255'],
-            'data.*.TanggalJawab' => ['nullable', 'date'],
-            'data.*.SaldoJawab' => ['nullable', 'integer'],
-            'data.*.Selisih' => ['nullable', 'integer'],
-            'data.*.Status' => ['nullable', 'in:terbalas,tidak terbalas'],
-            'data.*.FileBukti' => ['nullable', 'file'],
-            'data.*.NamaFile' => ['nullable', 'string', 'max:255'],
-            'data.*.TipeFile' => ['nullable', 'string', 'max:255'],
+            'data.*.SaldoBB' => [
+                'nullable',
+                'integer',
+            ],
+
+            'data.*.TanggalKirim' => [
+                'nullable',
+                'date',
+            ],
+
+            'data.*.MetodeKirim' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'data.*.TanggalJawab' => [
+                'nullable',
+                'date',
+            ],
+
+            'data.*.SaldoJawab' => [
+                'nullable',
+                'integer',
+            ],
+
+            'data.*.Selisih' => [
+                'nullable',
+                'integer',
+            ],
+
+            'data.*.Status' => [
+                'nullable',
+                'in:terbalas,tidak terbalas',
+            ],
+
+            'data.*.FileBukti' => [
+                'nullable',
+                'file',
+            ],
+
+            'data.*.NamaFile' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'data.*.TipeFile' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ]);
-        $rows = $validated['data'];
+
+        $rows = collect(
+            $validated['data']
+        )->values();
 
         /*
         |--------------------------------------------------------------------------
-        | 1. Authorization + cek Piutang
+        | 1. AUTHORIZATION
         |--------------------------------------------------------------------------
         */
 
-        foreach ($rows as $row) {
-            $piutang = Piutang::findOrFail($row['PiutangID']);
-            JwbKasus::forUser($request->user())
-                ->where('JwbKasusID', $piutang->JwbKasusID)
+        $piutangIds = $rows
+            ->pluck('PiutangID')
+            ->map(
+                fn ($id) => (int) $id
+            )
+            ->unique()
+            ->values();
+
+        foreach ($piutangIds as $piutangId) {
+            $piutang = Piutang::findOrFail(
+                $piutangId
+            );
+
+            JwbKasus::forUser(
+                $request->user()
+            )
+                ->where(
+                    'JwbKasusID',
+                    $piutang->JwbKasusID
+                )
                 ->firstOrFail();
         }
 
         /*
         |--------------------------------------------------------------------------
-        | 2. Cek duplicate KonfirmasiPiutangID
+        | 2. CEK DUPLICATE RekapBalasanID DALAM PAYLOAD
         |--------------------------------------------------------------------------
+        |
+        | ID existing yang sama tidak boleh dikirim dua kali.
+        |
         */
 
-        $konfirmasiIds = collect($rows)
-            ->filter(fn ($row) => !is_null($row['KonfirmasiPiutangID'] ?? null))
-            ->map(fn ($row) => $row['PiutangID'] . ':' . $row['KonfirmasiPiutangID']);
+        $submittedExistingIds = $rows
+            ->pluck('RekapBalasanID')
+            ->filter(
+                fn ($id) =>
+                    !is_null($id)
+                    && $id !== ''
+            )
+            ->map(
+                fn ($id) => (int) $id
+            );
 
-        if ($konfirmasiIds->count() !== $konfirmasiIds->unique()->count()) {
+        if (
+            $submittedExistingIds->count()
+            !==
+            $submittedExistingIds
+                ->unique()
+                ->count()
+        ) {
             throw ValidationException::withMessages([
-                'data' => 'Nama Customer yang sama tidak boleh digunakan pada lebih dari satu baris.',
+                'data' =>
+                    'RekapBalasanID yang sama tidak boleh dikirim lebih dari satu kali.',
             ]);
         }
 
         /*
         |--------------------------------------------------------------------------
-        | 3. Pastikan KonfirmasiPiutang memang milik Piutang tersebut
+        | 3. CEK DUPLICATE CUSTOMER PADA FINAL STATE
+        |--------------------------------------------------------------------------
+        |
+        | Ini pengecekan yang penting.
+        |
+        | Yang dicek adalah FINAL STATE dari payload,
+        | bukan kondisi lama di database.
+        |
+        | Valid:
+        |
+        | ID 10 -> A
+        | ID 11 -> B
+        |
+        | Swap juga valid:
+        |
+        | ID 10 -> B
+        | ID 11 -> A
+        |
+        | Tidak valid:
+        |
+        | ID 10 -> A
+        | ID 11 -> A
+        |
         |--------------------------------------------------------------------------
         */
 
-        $submittedRekapIds = collect($rows)
-            ->pluck('RekapBalasanID')
-            ->filter()
-            ->map(fn ($id) => (int) $id);
+        $konfirmasiKeys = $rows
+            ->filter(
+                fn ($row) =>
+                    !is_null(
+                        $row[
+                            'KonfirmasiPiutangID'
+                        ] ?? null
+                    )
+            )
+            ->map(
+                fn ($row) =>
+                    (int) $row['PiutangID']
+                    . ':'
+                    . (int) $row[
+                        'KonfirmasiPiutangID'
+                    ]
+            );
+
+        if (
+            $konfirmasiKeys->count()
+            !==
+            $konfirmasiKeys
+                ->unique()
+                ->count()
+        ) {
+            throw ValidationException::withMessages([
+                'data' =>
+                    'Nama Customer yang sama tidak boleh digunakan pada lebih dari satu baris.',
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 4. PASTIKAN CUSTOMER MEMANG MILIK PIUTANG TERSEBUT
+        |--------------------------------------------------------------------------
+        */
 
         foreach ($rows as $row) {
-            if (empty($row['KonfirmasiPiutangID'])) {
+            $konfirmasiId =
+                $row[
+                    'KonfirmasiPiutangID'
+                ] ?? null;
+
+            if (
+                is_null(
+                    $konfirmasiId
+                )
+            ) {
                 continue;
             }
 
@@ -215,288 +561,736 @@ class RekapBalasanController extends Controller
                 'PiutangID',
                 $row['PiutangID']
             )
-                ->whereHas('konfirmasiPiutang', function ($query) use ($row) {
-                    $query->where(
-                        'KonfirmasiPiutangID',
-                        $row['KonfirmasiPiutangID']
-                    );
-                })->exists();
+                ->whereHas(
+                    'konfirmasiPiutang',
+                    function (
+                        $query
+                    ) use (
+                        $konfirmasiId
+                    ) {
+                        $query->where(
+                            'KonfirmasiPiutangID',
+                            $konfirmasiId
+                        );
+                    }
+                )
+                ->exists();
 
             if (!$exists) {
                 throw ValidationException::withMessages([
-                    'data' => 'Konfirmasi piutang tidak sesuai dengan Piutang yang dipilih.',
-                ]);
-            }
-        }
-
-        foreach ($rows as $row) {
-            if (empty($row['RekapBalasanID'])) {
-                continue;
-            }
-
-            $belongsToPiutang = RekapBalasan::where(
-                'RekapBalasanID',
-                $row['RekapBalasanID']
-            )
-                ->where('PiutangID', $row['PiutangID'])
-                ->exists();
-
-            if (!$belongsToPiutang) {
-                throw ValidationException::withMessages([
-                    'data' => 'Rekap balasan tidak sesuai dengan Piutang yang dipilih.',
-                ]);
-            }
-        }
-
-        foreach ($rows as $row) {
-            if (empty($row['KonfirmasiPiutangID'])) {
-                continue;
-            }
-
-            $duplicate = RekapBalasan::where(
-                    'PiutangID',
-                    $row['PiutangID']
-                )
-                ->where(
-                    'KonfirmasiPiutangID',
-                    $row['KonfirmasiPiutangID']
-                )
-                ->when(
-                    !empty($row['RekapBalasanID']),
-                    fn ($query) => $query->where(
-                        'RekapBalasanID',
-                        '!=',
-                        $row['RekapBalasanID']
-                    )
-                )
-                ->exists();
-
-            if ($duplicate) {
-                throw ValidationException::withMessages([
-                    'data' => 'Nama Customer sudah digunakan pada Piutang yang dipilih.',
+                    'data' =>
+                        'Konfirmasi piutang tidak sesuai dengan Piutang yang dipilih.',
                 ]);
             }
         }
 
         /*
         |--------------------------------------------------------------------------
-        | 4. DELETE + UPDATE + CREATE
+        | 5. EXISTING REKAP HARUS MILIK PIUTANG YANG DIKIRIM
         |--------------------------------------------------------------------------
         */
 
-        DB::transaction(function () use ($rows) {
-            $piutangIds = collect($rows)
-                ->pluck('PiutangID')
-                ->unique();
+        foreach ($rows as $row) {
+            $rekapId =
+                $row[
+                    'RekapBalasanID'
+                ] ?? null;
 
-            $submittedRekapIds = collect($rows)
-                ->pluck('RekapBalasanID')
-                ->filter()
-                ->map(fn ($id) => (int) $id);
-
-            $existingRekapIds = RekapBalasan::whereIn(
-                'PiutangID',
-                $piutangIds
-            )->pluck('RekapBalasanID');
-
-            /*--------------------------------------------------------------------------
-            | DELETE
-            |
-            | Jika ID ada di database tetapi tidak dikirim oleh frontend,
-            | berarti row tersebut sudah dihapus dari tabel frontend.
-            |--------------------------------------------------------------------------
-            */
-
-            $idsToDelete = $existingRekapIds->diff($submittedRekapIds);
-            if ($idsToDelete->isNotEmpty()) {
-                RekapBalasan::whereIn(
-                    'RekapBalasanID',
-                    $idsToDelete
-                )->delete();
+            if (
+                is_null(
+                    $rekapId
+                )
+            ) {
+                continue;
             }
 
-            /*--------------------------------------------------------------------------
-            | UPDATE / CREATE
-            |--------------------------------------------------------------------------
-            */
+            $belongsToPiutang =
+                RekapBalasan::where(
+                    'RekapBalasanID',
+                    $rekapId
+                )
+                    ->where(
+                        'PiutangID',
+                        $row['PiutangID']
+                    )
+                    ->exists();
 
-            foreach ($rows as $row) {
-                if (!empty($row['RekapBalasanID'])) {
-                    $rekap = RekapBalasan::findOrFail($row['RekapBalasanID']);
-                    $updateData = [
-                        'KonfirmasiPiutangID' => $row['KonfirmasiPiutangID'] ?? null,
-                        'SaldoBB' => $row['SaldoBB'] ?? null,
-                        'TanggalKirim' => $row['TanggalKirim'] ?? null,
-                        'MetodeKirim' => $row['MetodeKirim'] ?? null,
-                        'TanggalJawab' => $row['TanggalJawab'] ?? null,
-                        'SaldoJawab' => $row['SaldoJawab'] ?? null,
-                        'Selisih' => $row['Selisih'] ?? null,
-                        'Status' => $row['Status'] ?? null,
-                    ];
+            if (!$belongsToPiutang) {
+                throw ValidationException::withMessages([
+                    'data' =>
+                        'Rekap balasan tidak sesuai dengan Piutang yang dipilih.',
+                ]);
+            }
+        }
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | File hanya diganti jika frontend mengirim file baru
-                    |--------------------------------------------------------------------------
-                    */
+        /*
+        |--------------------------------------------------------------------------
+        | PENTING
+        |--------------------------------------------------------------------------
+        |
+        | Pengecekan seperti berikut SENGAJA TIDAK DIPAKAI lagi:
+        |
+        | RekapBalasan::where(...)
+        |   ->where('KonfirmasiPiutangID', target)
+        |   ->exists();
+        |
+        | Karena pengecekan terhadap kondisi DATABASE LAMA
+        | tersebut akan membuat SWAP ditolak.
+        |
+        | Final-state duplicate sudah divalidasi di step 3.
+        |
+        |--------------------------------------------------------------------------
+        */
 
-                    if (isset($row['FileBukti'])) {
+        /*
+        |--------------------------------------------------------------------------
+        | 6. TRANSACTION
+        |--------------------------------------------------------------------------
+        */
 
-                        $file = $row['FileBukti'];
-
-                        $updateData['FileBukti'] =
-                            file_get_contents(
-                                $file->getRealPath()
-                            );
-
-                        $updateData['NamaFile'] =
-                            $file->getClientOriginalName();
-
-                        $updateData['TipeFile'] =
-                            $file->getMimeType();
-                    }
-
-                    $rekap->fill($updateData);
-                    $rekap->save();
-                }
-
+        DB::transaction(
+            function () use (
+                $rows,
+                $piutangIds
+            ) {
                 /*
                 |--------------------------------------------------------------------------
-                | CREATE
+                | Diproses PER PIUTANG
                 |--------------------------------------------------------------------------
                 */
 
-                else {
-                    $createData = [
-                        'PiutangID' => $row['PiutangID'],
-                        'KonfirmasiPiutangID' => $row['KonfirmasiPiutangID'] ?? null,
-                        'SaldoBB' => $row['SaldoBB'] ?? null,
-                        'TanggalKirim' => $row['TanggalKirim'] ?? null,
-                        'MetodeKirim' => $row['MetodeKirim'] ?? null,
-                        'TanggalJawab' => $row['TanggalJawab'] ?? null,
-                        'SaldoJawab' => $row['SaldoJawab'] ?? null,
-                        'Selisih' => $row['Selisih'] ?? null,
-                        'Status' => $row['Status'] ?? null,
-                    ];
+                foreach (
+                    $piutangIds
+                    as
+                    $piutangId
+                ) {
+                    $rowsForPiutang =
+                        $rows
+                            ->filter(
+                                fn ($row) =>
+                                    (int)
+                                    $row[
+                                        'PiutangID'
+                                    ]
+                                    ===
+                                    (int)
+                                    $piutangId
+                            )
+                            ->values();
 
                     /*
                     |--------------------------------------------------------------------------
-                    | File untuk data baru
+                    | EXISTING ID YANG DIKIRIM FE
                     |--------------------------------------------------------------------------
                     */
 
-                    if (isset($row['FileBukti'])) {
-                        $file = $row['FileBukti'];
+                    $submittedRekapIds =
+                        $rowsForPiutang
+                            ->pluck(
+                                'RekapBalasanID'
+                            )
+                            ->filter(
+                                fn ($id) =>
+                                    !is_null($id)
+                                    && $id !== ''
+                            )
+                            ->map(
+                                fn ($id) =>
+                                    (int) $id
+                            )
+                            ->values();
 
-                        $createData['FileBukti'] =
-                            file_get_contents(
-                                $file->getRealPath()
+                    /*
+                    |--------------------------------------------------------------------------
+                    | EXISTING ID DI DATABASE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $existingRekapIds =
+                        RekapBalasan::where(
+                            'PiutangID',
+                            $piutangId
+                        )
+                            ->pluck(
+                                'RekapBalasanID'
                             );
 
-                        $createData['NamaFile'] =
-                            $file->getClientOriginalName();
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DELETE ROW YANG SUDAH DIHAPUS DARI FE
+                    |--------------------------------------------------------------------------
+                    |
+                    | Karena bulkSave dianggap sebagai final state,
+                    | existing ID yang tidak lagi dikirim FE
+                    | dianggap telah dihapus.
+                    |
+                    */
 
-                        $createData['TipeFile'] =
-                            $file->getMimeType();
+                    $idsToDelete =
+                        $existingRekapIds
+                            ->diff(
+                                $submittedRekapIds
+                            );
+
+                    if (
+                        $idsToDelete
+                            ->isNotEmpty()
+                    ) {
+                        RekapBalasan::whereIn(
+                            'RekapBalasanID',
+                            $idsToDelete
+                        )->delete();
                     }
-                    RekapBalasan::create($createData);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | RELEASE CUSTOMER EXISTING
+                    |--------------------------------------------------------------------------
+                    |
+                    | Ini bagian utama supaya SWAP aman.
+                    |
+                    | Contoh awal:
+                    |
+                    | ID 10 -> A
+                    | ID 11 -> B
+                    |
+                    | Sementara di transaction:
+                    |
+                    | ID 10 -> NULL
+                    | ID 11 -> NULL
+                    |
+                    | RekapBalasanID TIDAK berubah.
+                    |
+                    */
+
+                    if (
+                        $submittedRekapIds
+                            ->isNotEmpty()
+                    ) {
+                        RekapBalasan::where(
+                            'PiutangID',
+                            $piutangId
+                        )
+                            ->whereIn(
+                                'RekapBalasanID',
+                                $submittedRekapIds
+                            )
+                            ->update([
+                                'KonfirmasiPiutangID'
+                                    => null,
+                            ]);
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | UPDATE / CREATE FINAL STATE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    foreach (
+                        $rowsForPiutang
+                        as
+                        $row
+                    ) {
+                        $rekapId =
+                            $row[
+                                'RekapBalasanID'
+                            ] ?? null;
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | UPDATE EXISTING
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if (
+                            !is_null(
+                                $rekapId
+                            )
+                        ) {
+                            $rekap =
+                                RekapBalasan::where(
+                                    'RekapBalasanID',
+                                    $rekapId
+                                )
+                                    ->where(
+                                        'PiutangID',
+                                        $piutangId
+                                    )
+                                    ->firstOrFail();
+
+                            $updateData = [
+                                'KonfirmasiPiutangID' =>
+                                    $row[
+                                        'KonfirmasiPiutangID'
+                                    ] ?? null,
+
+                                'SaldoBB' =>
+                                    $row[
+                                        'SaldoBB'
+                                    ] ?? null,
+
+                                'TanggalKirim' =>
+                                    $row[
+                                        'TanggalKirim'
+                                    ] ?? null,
+
+                                'MetodeKirim' =>
+                                    $row[
+                                        'MetodeKirim'
+                                    ] ?? null,
+
+                                'TanggalJawab' =>
+                                    $row[
+                                        'TanggalJawab'
+                                    ] ?? null,
+
+                                'SaldoJawab' =>
+                                    $row[
+                                        'SaldoJawab'
+                                    ] ?? null,
+
+                                'Selisih' =>
+                                    $row[
+                                        'Selisih'
+                                    ] ?? null,
+
+                                'Status' =>
+                                    $row[
+                                        'Status'
+                                    ] ?? null,
+                            ];
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | FILE EXISTING
+                            |--------------------------------------------------------------------------
+                            |
+                            | File hanya diganti jika frontend
+                            | benar-benar mengirim FileBukti baru.
+                            |
+                            | Kalau tidak ada file baru:
+                            | FileBukti, NamaFile dan TipeFile lama
+                            | tetap dipertahankan.
+                            |
+                            */
+
+                            if (
+                                isset(
+                                    $row[
+                                        'FileBukti'
+                                    ]
+                                )
+                            ) {
+                                $file =
+                                    $row[
+                                        'FileBukti'
+                                    ];
+
+                                $updateData[
+                                    'FileBukti'
+                                ] =
+                                    file_get_contents(
+                                        $file
+                                            ->getRealPath()
+                                    );
+
+                                $updateData[
+                                    'NamaFile'
+                                ] =
+                                    $file
+                                        ->getClientOriginalName();
+
+                                $updateData[
+                                    'TipeFile'
+                                ] =
+                                    $file
+                                        ->getMimeType();
+                            }
+
+                            $rekap->fill(
+                                $updateData
+                            );
+
+                            $rekap->save();
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | CREATE NEW
+                        |--------------------------------------------------------------------------
+                        */
+
+                        else {
+                            $createData = [
+                                'PiutangID' =>
+                                    $piutangId,
+
+                                'KonfirmasiPiutangID' =>
+                                    $row[
+                                        'KonfirmasiPiutangID'
+                                    ] ?? null,
+
+                                'SaldoBB' =>
+                                    $row[
+                                        'SaldoBB'
+                                    ] ?? null,
+
+                                'TanggalKirim' =>
+                                    $row[
+                                        'TanggalKirim'
+                                    ] ?? null,
+
+                                'MetodeKirim' =>
+                                    $row[
+                                        'MetodeKirim'
+                                    ] ?? null,
+
+                                'TanggalJawab' =>
+                                    $row[
+                                        'TanggalJawab'
+                                    ] ?? null,
+
+                                'SaldoJawab' =>
+                                    $row[
+                                        'SaldoJawab'
+                                    ] ?? null,
+
+                                'Selisih' =>
+                                    $row[
+                                        'Selisih'
+                                    ] ?? null,
+
+                                'Status' =>
+                                    $row[
+                                        'Status'
+                                    ] ?? null,
+                            ];
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | FILE NEW ROW
+                            |--------------------------------------------------------------------------
+                            */
+
+                            if (
+                                isset(
+                                    $row[
+                                        'FileBukti'
+                                    ]
+                                )
+                            ) {
+                                $file =
+                                    $row[
+                                        'FileBukti'
+                                    ];
+
+                                $createData[
+                                    'FileBukti'
+                                ] =
+                                    file_get_contents(
+                                        $file
+                                            ->getRealPath()
+                                    );
+
+                                $createData[
+                                    'NamaFile'
+                                ] =
+                                    $file
+                                        ->getClientOriginalName();
+
+                                $createData[
+                                    'TipeFile'
+                                ] =
+                                    $file
+                                        ->getMimeType();
+                            }
+
+                            RekapBalasan::create(
+                                $createData
+                            );
+                        }
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | UPDATE REKAP CHECK
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $piutang =
+                        Piutang::find(
+                            $piutangId
+                        );
+
+                    if ($piutang) {
+                        $piutang->updateQuietly([
+                            'RekapCheck' =>
+                                $piutang
+                                    ->rekapBalasan()
+                                    ->exists(),
+                        ]);
+                    }
                 }
             }
+        );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Update RekapCheck
-            |--------------------------------------------------------------------------
-            */
-
-            foreach ($piutangIds as $piutangId) {
-                $piutang = Piutang::find($piutangId);
-                if ($piutang) {
-                    $piutang->updateQuietly([
-                        'RekapCheck' =>
-                            $piutang
-                                ->rekapBalasan()
-                                ->exists(),
-                    ]);
-                }
-            }
-        });
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
 
         return response()->json([
             'success' => true,
-            'message' => 'Data rekap balasan berhasil disimpan.',
+            'message' =>
+                'Data rekap balasan berhasil disimpan.',
         ]);
     }
 
-    public function update(Request $request, int $id): JsonResponse
-    {
-        $rekap = RekapBalasan::findOrFail($id);
-        $piutang = $rekap->piutang;
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
 
-        JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $piutang?->JwbKasusID)
+    public function update(
+        Request $request,
+        int $id
+    ): JsonResponse {
+        $rekap =
+            RekapBalasan::findOrFail(
+                $id
+            );
+
+        $piutang =
+            $rekap->piutang;
+
+        JwbKasus::forUser(
+            $request->user()
+        )
+            ->where(
+                'JwbKasusID',
+                $piutang?->JwbKasusID
+            )
             ->firstOrFail();
 
-        $validated = $request->validate([
-            'KonfirmasiPiutangID' => ['nullable', 'exists:KonfirmasiPiutang,KonfirmasiPiutangID'],
-            'SaldoBB' => ['nullable', 'integer'],
-            'TanggalKirim' => ['nullable', 'date'],
-            'MetodeKirim' => ['nullable', 'string', 'max:255'],
-            'TanggalJawab' => ['nullable', 'date'],
-            'SaldoJawab' => ['nullable', 'integer'],
-            'Selisih' => ['nullable', 'integer'],
-            'Status' => ['sometimes', 'in:terbalas,tidak terbalas'],
-            'FileBukti' => ['nullable'],
-            'NamaFile' => ['nullable', 'string', 'max:255'],
-            'TipeFile' => ['nullable', 'string', 'max:255'],
-        ]);
+        $validated =
+            $request->validate([
+                'KonfirmasiPiutangID' => [
+                    'nullable',
+                    'exists:KonfirmasiPiutang,KonfirmasiPiutangID',
+                ],
 
-        if (array_key_exists('KonfirmasiPiutangID', $validated) && $validated['KonfirmasiPiutangID'] !== null) {
-            $konfirmasiPiutang = $piutang->konfirmasiPiutang()
-                ->whereKey($validated['KonfirmasiPiutangID'])
-                ->whereDoesntHave('rekapBalasan', function ($query) use ($rekap) {
-                    $query->where('RekapBalasanID', '!=', $rekap->getKey());
-                })
-                ->exists();
+                'SaldoBB' => [
+                    'nullable',
+                    'integer',
+                ],
+
+                'TanggalKirim' => [
+                    'nullable',
+                    'date',
+                ],
+
+                'MetodeKirim' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'TanggalJawab' => [
+                    'nullable',
+                    'date',
+                ],
+
+                'SaldoJawab' => [
+                    'nullable',
+                    'integer',
+                ],
+
+                'Selisih' => [
+                    'nullable',
+                    'integer',
+                ],
+
+                'Status' => [
+                    'sometimes',
+                    'in:terbalas,tidak terbalas',
+                ],
+
+                'FileBukti' => [
+                    'nullable',
+                ],
+
+                'NamaFile' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'TipeFile' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+            ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validasi customer untuk UPDATE individual
+        |--------------------------------------------------------------------------
+        |
+        | Method ini tetap menggunakan validasi existing seperti sebelumnya.
+        | Swap dilakukan melalui bulkSave(), bukan update() individual.
+        |
+        */
+
+        if (
+            array_key_exists(
+                'KonfirmasiPiutangID',
+                $validated
+            )
+            &&
+            $validated[
+                'KonfirmasiPiutangID'
+            ] !== null
+        ) {
+            $konfirmasiPiutang =
+                $piutang
+                    ->konfirmasiPiutang()
+                    ->whereKey(
+                        $validated[
+                            'KonfirmasiPiutangID'
+                        ]
+                    )
+                    ->whereDoesntHave(
+                        'rekapBalasan',
+                        function (
+                            $query
+                        ) use (
+                            $rekap
+                        ) {
+                            $query->where(
+                                'RekapBalasanID',
+                                '!=',
+                                $rekap->getKey()
+                            );
+                        }
+                    )
+                    ->exists();
 
             if (!$konfirmasiPiutang) {
                 return response()->json([
-                    'message' => 'Konfirmasi piutang tidak tersedia untuk Piutang ini atau sudah digunakan.',
+                    'message' =>
+                        'Konfirmasi piutang tidak tersedia untuk Piutang ini atau sudah digunakan.',
                 ], 422);
             }
         }
 
-        $file = $request->file('FileBukti');
+        /*
+        |--------------------------------------------------------------------------
+        | File
+        |--------------------------------------------------------------------------
+        */
+
+        $file =
+            $request->file(
+                'FileBukti'
+            );
+
         if ($file) {
-            $validated['FileBukti'] = file_get_contents($file->getRealPath());
-            $validated['NamaFile'] = $file->getClientOriginalName();
-            $validated['TipeFile'] = $file->getMimeType();
+            $validated['FileBukti'] =
+                file_get_contents(
+                    $file->getRealPath()
+                );
+
+            $validated['NamaFile'] =
+                $file
+                    ->getClientOriginalName();
+
+            $validated['TipeFile'] =
+                $file
+                    ->getMimeType();
         }
 
-        $rekap->fill($validated);
+        $rekap->fill(
+            $validated
+        );
+
         $rekap->save();
 
-        return response()->json($rekap->fresh()->load(['piutang', 'konfirmasiPiutang']));
+        return response()->json(
+            $rekap
+                ->fresh()
+                ->load([
+                    'piutang',
+                    'konfirmasiPiutang',
+                ])
+        );
     }
 
-    public function destroy(Request $request, int $id): JsonResponse
-    {
-        $rekap = RekapBalasan::findOrFail($id);
-        JwbKasus::forUser($request->user())
-            ->where('JwbKasusID', $rekap->piutang?->JwbKasusID)
+    /*
+    |--------------------------------------------------------------------------
+    | DESTROY
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroy(
+        Request $request,
+        int $id
+    ): JsonResponse {
+        $rekap =
+            RekapBalasan::findOrFail(
+                $id
+            );
+
+        JwbKasus::forUser(
+            $request->user()
+        )
+            ->where(
+                'JwbKasusID',
+                $rekap
+                    ->piutang
+                    ?->JwbKasusID
+            )
             ->firstOrFail();
 
-        $rekap->delete();
-        $this->rekapCheck($rekap->piutang);
+        /*
+        |--------------------------------------------------------------------------
+        | Simpan Piutang sebelum delete
+        |--------------------------------------------------------------------------
+        */
 
-        return response()->json(['message' => 'Rekap balasan deleted successfully']);
+        $piutang =
+            $rekap->piutang;
+
+        $rekap->delete();
+
+        $this->rekapCheck(
+            $piutang
+        );
+
+        return response()->json([
+            'message' =>
+                'Rekap balasan deleted successfully',
+        ]);
     }
 
-    private function rekapCheck(?Piutang $piutang): void
-    {
+    /*
+    |--------------------------------------------------------------------------
+    | REKAP CHECK
+    |--------------------------------------------------------------------------
+    */
+
+    private function rekapCheck(
+        ?Piutang $piutang
+    ): void {
         if ($piutang) {
             $piutang->updateQuietly([
-                'RekapCheck' => $piutang->rekapBalasan()->exists(),
+                'RekapCheck' =>
+                    $piutang
+                        ->rekapBalasan()
+                        ->exists(),
             ]);
         }
     }
