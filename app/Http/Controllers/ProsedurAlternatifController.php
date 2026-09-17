@@ -20,14 +20,11 @@ class ProsedurAlternatifController extends Controller
         $query->whereHas('JwbKasus', function ($query) use ($request) {
             $query->forUser($request->user());
         });
-
         $items = $query->get();
-
         $items->each(function (Piutang $piutang) {
             $usedCustomerNames = $piutang->prosedurAlternatif
                 ->map(fn (ProsedurAlternatif $item) => $item->konfirmasiPiutang?->NamaCustomer)
                 ->filter();
-
             $piutang->setRelation(
                 'konfirmasiPiutangTersedia',
                 $piutang->konfirmasiPiutang
@@ -50,7 +47,6 @@ class ProsedurAlternatifController extends Controller
     public function show(Request $request, int $id): JsonResponse
     {
         $data = ProsedurAlternatif::with(['piutang', 'konfirmasiPiutang'])->findOrFail($id);
-
         $this->authorizePiutang($request, $data->piutang);
 
         return response()->json($this->serializeItem($data));
@@ -60,7 +56,6 @@ class ProsedurAlternatifController extends Controller
     {
         $item = ProsedurAlternatif::with('piutang')->findOrFail($id);
         $this->authorizePiutang($request, $item->piutang);
-
         if (is_null($item->FileBukti)) {
             return response()->json([
                 'success' => false,
@@ -91,7 +86,6 @@ class ProsedurAlternatifController extends Controller
             'NamaFile' => ['nullable', 'string', 'max:255'],
             'TipeFile' => ['nullable', 'string', 'max:255'],
         ]);
-
         $piutang = Piutang::findOrFail($validated['PiutangID']);
         $this->authorizePiutang($request, $piutang);
         $konfirmasi = $this->resolveKonfirmasi($piutang, $validated['KonfirmasiPiutangID']);
@@ -103,7 +97,6 @@ class ProsedurAlternatifController extends Controller
         }
 
         $this->storeFile($request, $validated);
-
         $item = $piutang->prosedurAlternatif()->create($validated);
         $this->prosedurAlternatifCheck($piutang);
 
@@ -139,9 +132,7 @@ class ProsedurAlternatifController extends Controller
                     'message' => 'Konfirmasi piutang ini sudah digunakan untuk Piutang ini.',
                 ], 422);
             }
-
         }
-
         $this->storeFile($request, $validated);
         $item->fill($validated);
         $item->save();

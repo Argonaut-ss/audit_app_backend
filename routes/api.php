@@ -100,6 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/konfirmasi-piutang/{id}/file', [KonfirmasiPiutangController::class, 'file']);
     Route::apiResource('konfirmasi-piutang', KonfirmasiPiutangController::class);
 
+    Route::post('rekap-balasan/bulk-save', [RekapBalasanController::class, 'bulkSave']);
     Route::get('/rekap-balasan/{id}/file', [RekapBalasanController::class, 'file']);
     Route::apiResource('rekap-balasan', RekapBalasanController::class);
 
