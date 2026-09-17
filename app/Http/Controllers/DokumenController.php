@@ -152,6 +152,9 @@ class DokumenController extends Controller
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
                 'NamaFileUpload' => $dokumen->NamaFileUpload,
+                'File' => $dokumen->File
+                    ? base64_encode($dokumen->File)
+                    : null,
                 'created_at' => $dokumen->created_at,
                 'updated_at' => $dokumen->updated_at,
             ],
