@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dokumen;
+use App\Models\Piutang;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -10,6 +11,21 @@ use Illuminate\Validation\Rule;
 
 class DokumenController extends Controller
 {
+    private function dokumenCheck(int $piutangId): void
+    {
+        $piutang = Piutang::find($piutangId);
+
+        if (! $piutang) {
+            return;
+        }
+
+        $hasDokumen = Dokumen::where('PiutangID', $piutangId)->exists();
+
+        $piutang->updateQuietly([
+            'DokumenCheck' => $hasDokumen,
+        ]);
+    }
+
     /**
      * GET /api/piutang/{piutangId}/dokumen
      *
@@ -116,6 +132,8 @@ class DokumenController extends Controller
             'NamaFileUpload' => $data['NamaFileUpload'],
             'File' => $data['File'],
         ]);
+
+        $this->dokumenCheck($piutangId);
 
         return response()->json([
             'message' => 'Dokumen berhasil disimpan.',
@@ -254,6 +272,8 @@ class DokumenController extends Controller
             'File' => $data['File'],
         ]);
 
+        $this->dokumenCheck($dokumen->PiutangID);
+
         return response()->json([
             'message' => 'Dokumen berhasil diperbarui.',
             'data' => [
@@ -281,7 +301,10 @@ class DokumenController extends Controller
             ], 404);
         }
 
+        $piutangId = $dokumen->PiutangID;
         $dokumen->delete();
+
+        $this->dokumenCheck($piutangId);
 
         return response()->json([
             'message' => 'Dokumen berhasil dihapus.',

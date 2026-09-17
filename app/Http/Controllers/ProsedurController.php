@@ -9,6 +9,19 @@ use Illuminate\Http\Request;
 
 class ProsedurController extends Controller
 {
+    private function prosedurCheck(int $piutangId): void
+    {
+        $piutang = Piutang::find($piutangId);
+
+        if (! $piutang) {
+            return;
+        }
+
+        $piutang->updateQuietly([
+            'ProsedurCheck' => $piutang->prosedurs()->exists(),
+        ]);
+    }
+
     /**
      * GET /api/piutangs/{piutang}/prosedur
      *
@@ -49,6 +62,8 @@ class ProsedurController extends Controller
             'checkbox' => $validated['checkbox'],
         ]);
 
+        $this->prosedurCheck((int) $validated['piutang_id']);
+
         return response()->json([
             'message' => 'Prosedur created successfully.',
             'data' => $prosedur,
@@ -86,6 +101,8 @@ class ProsedurController extends Controller
             'checkbox' => $validated['checkbox'],
         ]);
 
+        $this->prosedurCheck($prosedur->piutang_id);
+
         return response()->json([
             'message' => 'Prosedur updated successfully.',
             'data' => $prosedur->fresh(),
@@ -99,7 +116,10 @@ class ProsedurController extends Controller
      */
     public function destroy(Prosedur $prosedur): JsonResponse
     {
+        $piutangId = $prosedur->piutang_id;
         $prosedur->delete();
+
+        $this->prosedurCheck($piutangId);
 
         return response()->json([
             'message' => 'Prosedur deleted successfully.',
