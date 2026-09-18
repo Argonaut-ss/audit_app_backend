@@ -105,6 +105,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('rekap-balasan', RekapBalasanController::class);
 
     Route::get('/prosedur-alternatif/{id}/file', [ProsedurAlternatifController::class, 'file']);
+    Route::post('/prosedur-alternatif/bulk-save', [ProsedurAlternatifController::class, 'bulkSave']);
     Route::apiResource('prosedur-alternatif', ProsedurAlternatifController::class);
 
     // Prosedur Routes
