@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('ProsedurAlternatif', function (Blueprint $table) {
             $table->id('ProsedurAlternatifID');
             $table->unsignedBigInteger('PiutangID');
-            $table->unsignedBigInteger('KonfirmasiPiutangID')->nullable();
+            $table->unsignedBigInteger('KonfirmasiPiutangID');
             $table->bigInteger('SaldoAkhir')->nullable();
             $table->boolean('KonfirmasiBayar')->nullable();
             $table->string('BuktiBayar')->nullable();
