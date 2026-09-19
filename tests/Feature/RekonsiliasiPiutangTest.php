@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\JwbKasus;
-use App\Models\KonfirmasiPiutang;
+use App\Models\Piutang\KonfirmasiPiutang;
 use App\Models\Mahasiswa;
-use App\Models\Piutang;
-use App\Models\RekonsiliasiPiutang;
+use App\Models\Piutang\Piutang;
+use App\Models\Piutang\RekonsiliasiPiutang;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
