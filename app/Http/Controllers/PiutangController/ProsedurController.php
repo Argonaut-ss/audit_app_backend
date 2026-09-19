@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PiutangController;
 
-use App\Models\Piutang;
-use App\Models\Prosedur;
+use App\Http\Controllers\Controller;
+use App\Models\Piutang\Piutang;
+use App\Models\Piutang\Prosedur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

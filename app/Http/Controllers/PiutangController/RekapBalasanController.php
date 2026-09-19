@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PiutangController;
 
+use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
-use App\Models\Piutang;
-use App\Models\RekapBalasan;
+use App\Models\Piutang\Piutang;
+use App\Models\Piutang\RekapBalasan;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;

@@ -16,15 +16,15 @@ use App\Http\Controllers\DetilVerifikasiController;
 use App\Http\Controllers\IdentifikasiController;
 use App\Http\Controllers\PmpjController;
 use App\Http\Controllers\COAController;
-use App\Http\Controllers\PiutangController;
-use App\Http\Controllers\KonfirmasiPiutangController;
-use App\Http\Controllers\RekonsiliasiPiutangController;
-use App\Http\Controllers\RekapBalasanController;
-use App\Http\Controllers\ProsedurAlternatifController;
-use App\Http\Controllers\AnalisisUmurPiutangController;
-use App\Http\Controllers\JurnalKoreksiPiutangController;
-use App\Http\Controllers\ProsedurController;
-use App\Http\Controllers\DokumenController;
+use App\Http\Controllers\PiutangController\PiutangController;
+use App\Http\Controllers\PiutangController\KonfirmasiPiutangController;
+use App\Http\Controllers\PiutangController\RekonsiliasiPiutangController;
+use App\Http\Controllers\PiutangController\RekapBalasanController;
+use App\Http\Controllers\PiutangController\ProsedurAlternatifController;
+use App\Http\Controllers\PiutangController\AnalisisUmurPiutangController;
+use App\Http\Controllers\PiutangController\JurnalKoreksiPiutangController;
+use App\Http\Controllers\PiutangController\ProsedurController;
+use App\Http\Controllers\PiutangController\DokumenController;
 
 use App\Http\Controllers\KelasCardController;
 

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PiutangController;
 
+use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
-use App\Models\Piutang;
-use App\Models\ProsedurAlternatif;
-use App\Models\RekapBalasan;
+use App\Models\Piutang\Piutang;
+use App\Models\Piutang\ProsedurAlternatif;
+use App\Models\Piutang\RekapBalasan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -342,7 +343,7 @@ class ProsedurAlternatifController extends Controller
         $konfirmasiPiutangs = collect();
 
         if ($konfirmasiIds->isNotEmpty()) {
-            $konfirmasiPiutangs = \App\Models\KonfirmasiPiutang::whereIn(
+            $konfirmasiPiutangs = \App\Models\Piutang\KonfirmasiPiutang::whereIn(
                     'KonfirmasiPiutangID',
                     $konfirmasiIds
                 )
