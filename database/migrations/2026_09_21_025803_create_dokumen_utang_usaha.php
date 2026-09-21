@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id('DokumenUtangUsahaID');
 
             $table->foreignId('UtangUsahaID')
-                ->constrained('UtangUsaha', 'UtangUsahaID')
+                ->constrained('utang_usaha', 'UtangUsahaID')
                 ->cascadeOnDelete();
 
             $table->enum('TipeFile', [

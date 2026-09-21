@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->foreign('UtangUsahaID')
                 ->references('UtangUsahaID')
-                ->on('UtangUsaha')
+                ->on('utang_usaha')
                 ->cascadeOnDelete();
         });
         DB::statement('ALTER TABLE KonfirmasiUtangUsaha ADD File MEDIUMBLOB NULL');

@@ -5,6 +5,7 @@ namespace App\Models\UtangUsaha;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
 class DokumenUtangUsaha extends Model
 {
     protected $table = 'DokumenUtangUsaha';

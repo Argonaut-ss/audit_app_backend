@@ -5,7 +5,6 @@ namespace App\Http\Controllers\UtangUsahaController;
 use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
 use App\Models\UtangUsaha\UtangUsaha;
-use App\Models\UtangUsaha\KonfirmasiUtangUsaha;
 use App\Models\UtangUsaha\RekapBalasanUtangUsaha;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
