@@ -121,6 +121,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('dokumen/{dokumenId}',[DokumenController::class, 'update']);
     Route::delete('dokumen/{dokumenId}',[DokumenController::class, 'destroy']);
 
+    // UtangUsaha Routes
+    Route::get('/utang-usaha/{jwbKasusId}', [UtangUsahaController::class, 'show']);
+    Route::put('/utang-usaha/{jwbKasusId}', [UtangUsahaController::class, 'update']);
+
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
 });
