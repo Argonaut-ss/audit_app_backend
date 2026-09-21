@@ -12,8 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('utang_usaha', function (Blueprint $table) {
-            $table->id();
+            $table->id('UtangUsahaID');
+
+            $table->unsignedBigInteger('JwbKasusID')->unique();
+
+            $table->boolean('ProsedurCheck')->default(false);
+            $table->boolean('DokumenCheck')->default(false);
+            $table->boolean('KonfirmasiCheck')->default(false);
+            $table->boolean('RekapCheck')->default(false);
+            $table->boolean('JurnalCheck')->default(false);
+            $table->boolean('RekonsiliasiCheck')->default(false);
+            $table->boolean('ProsedurAltCheck')->default(false);
+
+            $table->text('Kesimpulan')->nullable();
+
             $table->timestamps();
+
+            // FK ke JwbKasus
+            $table->foreign('JwbKasusID')
+                ->references('JwbKasusID')
+                ->on('jwb_kasus')
+                ->cascadeOnDelete();
         });
     }
 

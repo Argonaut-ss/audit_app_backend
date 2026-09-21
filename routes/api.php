@@ -26,6 +26,11 @@ use App\Http\Controllers\PiutangController\JurnalKoreksiPiutangController;
 use App\Http\Controllers\PiutangController\ProsedurController;
 use App\Http\Controllers\PiutangController\DokumenController;
 
+use App\Http\Controllers\UtangUsahaController\UtangUsahaController;
+use App\Http\Controllers\UtangUsahaController\ProsedurUtangUsahaController;
+use App\Http\Controllers\UtangUsahaController\RekonsiliasiUtangUsahaController;
+use App\Http\Controllers\UtangUsahaController\JurnalKoreksiUtangUsahaController;
+
 use App\Http\Controllers\KelasCardController;
 
 // Login & Logout & RBAC
@@ -124,6 +129,22 @@ Route::middleware('auth:sanctum')->group(function () {
     // UtangUsaha Routes
     Route::get('/utang-usaha/{jwbKasusId}', [UtangUsahaController::class, 'show']);
     Route::put('/utang-usaha/{jwbKasusId}', [UtangUsahaController::class, 'update']);
+
+    // Prosedur Utang Usaha Routes
+    Route::get('/utang-usahas/{utangUsaha}/prosedur', [ProsedurUtangUsahaController::class, 'index']);
+    Route::post('/prosedur-utang-usaha', [ProsedurUtangUsahaController::class, 'store']);
+    Route::put('/prosedur-utang-usaha/{prosedurUtangUsaha}', [ProsedurUtangUsahaController::class, 'update']);
+    Route::delete('/prosedur-utang-usaha/{prosedurUtangUsaha}', [ProsedurUtangUsahaController::class, 'destroy']);
+
+    // Rekonsiliasi Utang Usaha Routes
+    Route::apiResource('rekonsiliasi-utang-usaha', RekonsiliasiUtangUsahaController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['rekonsiliasi-utang-usaha' => 'rekonsiliasiUtangUsaha']);
+
+    // Jurnal Koreksi Utang Usaha Routes
+    Route::apiResource('jurnal-koreksi-utang-usaha', JurnalKoreksiUtangUsahaController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['jurnal-koreksi-utang-usaha' => 'jurnalKoreksiUtangUsaha']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

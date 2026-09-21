@@ -9,6 +9,7 @@ use App\Models\DetilVerifikasi;
 use App\Models\Identifikasi;
 use App\Models\Pmpj;
 use App\Models\Piutang;
+use App\Models\UtangUsaha\UtangUsaha;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -172,6 +173,10 @@ class JwbKasusController extends Controller
             ]);
 
             $piutang = Piutang::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
+            $utangUsaha = UtangUsaha::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,
             ]);
 

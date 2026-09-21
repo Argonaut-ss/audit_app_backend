@@ -4,7 +4,7 @@ namespace App\Http\Controllers\UtangUsahaController;
 
 use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
-use App\Models\Piutang\UtangUsaha;
+use App\Models\UtangUsaha\UtangUsaha;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -113,7 +113,6 @@ class UtangUsahaController extends Controller
                 'RekapCheck' => $utangUsaha->RekapCheck,
                 'JurnalCheck' => $utangUsaha->JurnalCheck,
                 'RekonsiliasiCheck' => $utangUsaha->RekonsiliasiCheck,
-                'UmurCheck' => $utangUsaha->UmurCheck,
                 'ProsedurAltCheck' => $utangUsaha->ProsedurAltCheck,
                 'Kesimpulan' => $utangUsaha->Kesimpulan,
             ],

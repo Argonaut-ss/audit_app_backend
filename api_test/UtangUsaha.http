@@ -1,0 +1,288 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+@adminToken = {{adminLogin.response.body.token}}
+@mahasiswaToken = {{mhsLogin.response.body.token}}
+@dosenToken = {{dosenLogin.response.body.token}}
+
+# ==========================================================================
+# CATATAN PEMAKAIAN
+# 1. Jalankan "Login" dulu (adminLogin / mhsLogin) supaya token terisi.
+# 2. Jalankan "Get Utang Usaha" agar UtangUsahaID otomatis terpakai
+#    (variabel @utangUsahaId dan @jwbKasusId mengambil dari response).
+# 3. Ganti @coaId dengan COAID yang valid untuk kasus ini
+#    (ambil dari GET /coa di COA.http). COA harus milik JwbKasus yang sama.
+# 4. Untuk update/delete, jalankan store dulu supaya ID-nya terisi otomatis.
+# ==========================================================================
+
+
+# Health Check (no Auth)
+GET {{baseUrl}}/health
+
+
+### Login - Admin
+# @name adminLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@binus.ac.id",
+  "password": "Admin123"
+}
+
+### Login - Mahasiswa
+# @name mhsLogin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "adrian.ananta@binus.ac.id",
+  "password": "Adrian123"
+}
+
+
+# ==========================================================================
+# UTANG USAHA (PARENT)
+# URL memakai jwbKasusId. Ganti angka 1 jika JwbKasus-mu berbeda.
+# ==========================================================================
+
+### Get Utang Usaha
+# @name getUtangUsaha
+GET {{baseUrl}}/utang-usaha/1
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+# Ambil ID dari response Get Utang Usaha di atas.
+@utangUsahaId = {{getUtangUsaha.response.body.data.UtangUsahaID}}
+@jwbKasusId = {{getUtangUsaha.response.body.data.JwbKasusID}}
+
+# Ganti dengan COAID valid milik JwbKasus yang sama (lihat COA.http).
+@coaId = 1
+
+### Update Utang Usaha (check flags + kesimpulan)
+PUT {{baseUrl}}/utang-usaha/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "ProsedurCheck": true,
+    "DokumenCheck": true,
+    "KonfirmasiCheck": true,
+    "RekapCheck": true,
+    "JurnalCheck": true,
+    "RekonsiliasiCheck": true,
+    "ProsedurAltCheck": true,
+    "Kesimpulan": "Kesimpulan pengujian utang usaha."
+}
+
+
+# ==========================================================================
+# PROSEDUR UTANG USAHA
+# ==========================================================================
+
+### List Prosedur
+GET {{baseUrl}}/utang-usahas/{{utangUsahaId}}/prosedur
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+### Create Prosedur (single)
+# @name createProsedur
+POST {{baseUrl}}/prosedur-utang-usaha
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "utang_usaha_id": {{utangUsahaId}},
+    "nama_prosedur": "Vouching faktur pembelian",
+    "index": "A-1",
+    "tanggal": "2026-09-21",
+    "checkbox": true
+}
+
+@prosedurId = {{createProsedur.response.body.data.id}}
+
+### Bulk Save Prosedur (+ Kesimpulan)
+POST {{baseUrl}}/prosedur-utang-usaha
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "utang_usaha_id": {{utangUsahaId}},
+    "Kesimpulan": "Prosedur utang usaha telah dilaksanakan.",
+    "prosedurs": [
+        {
+            "id": null,
+            "nama_prosedur": "Cek cut-off pembelian",
+            "index": "A-2",
+            "tanggal": "2026-09-21",
+            "checkbox": false
+        },
+        {
+            "id": null,
+            "nama_prosedur": "Konfirmasi saldo pemasok",
+            "index": "A-3",
+            "tanggal": "2026-09-21",
+            "checkbox": true
+        }
+    ]
+}
+
+### Update Prosedur
+PUT {{baseUrl}}/prosedur-utang-usaha/{{prosedurId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "utang_usaha_id": {{utangUsahaId}},
+    "nama_prosedur": "Vouching faktur pembelian (revisi)",
+    "index": "A-1",
+    "tanggal": "2026-09-22",
+    "checkbox": true
+}
+
+### Delete Prosedur
+DELETE {{baseUrl}}/prosedur-utang-usaha/{{prosedurId}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+
+# ==========================================================================
+# REKONSILIASI UTANG USAHA
+# ==========================================================================
+
+### List Rekonsiliasi
+GET {{baseUrl}}/rekonsiliasi-utang-usaha?UtangUsahaID={{utangUsahaId}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+### Create Rekonsiliasi
+# @name createRekonsiliasi
+POST {{baseUrl}}/rekonsiliasi-utang-usaha
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "UtangUsahaID": {{utangUsahaId}},
+    "KonfirmasiUtangUsahaID": null,
+    "NomorFaktur": "INV-001",
+    "TanggalFaktur": "2026-09-21",
+    "SaldoBuku": 5000000,
+    "SaldoCustomer": 4800000,
+    "Selisih": 200000,
+    "Keterangan": "Selisih karena barang dalam perjalanan"
+}
+
+@rekonsiliasiId = {{createRekonsiliasi.response.body.data.RekonsiliasiUtangUsahaID}}
+
+### Update Rekonsiliasi
+PUT {{baseUrl}}/rekonsiliasi-utang-usaha/{{rekonsiliasiId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "SaldoCustomer": 5000000,
+    "Selisih": 0,
+    "Keterangan": "Sudah cocok setelah penyesuaian"
+}
+
+### Delete Rekonsiliasi
+DELETE {{baseUrl}}/rekonsiliasi-utang-usaha/{{rekonsiliasiId}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+
+# ==========================================================================
+# JURNAL KOREKSI UTANG USAHA
+# Butuh COAID valid milik JwbKasus yang sama (@coaId di atas).
+# Tiap pembayaran: hanya salah satu dari Debet/Kredit yang > 0.
+# ==========================================================================
+
+### List Jurnal Koreksi
+GET {{baseUrl}}/jurnal-koreksi-utang-usaha?UtangUsahaID={{utangUsahaId}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+### Create Jurnal Koreksi
+# @name createJurnal
+POST {{baseUrl}}/jurnal-koreksi-utang-usaha
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "UtangUsahaID": {{utangUsahaId}},
+    "Keterangan": "Koreksi pencatatan utang usaha kurang catat",
+    "pembayaran": [
+        {
+            "COAID": {{coaId}},
+            "Debet": 200000,
+            "Kredit": 0
+        },
+        {
+            "COAID": {{coaId}},
+            "Debet": 0,
+            "Kredit": 200000
+        }
+    ]
+}
+
+@jurnalId = {{createJurnal.response.body.data.JurnalKoreksiUtangUsahaID}}
+
+### Update Jurnal Koreksi
+PUT {{baseUrl}}/jurnal-koreksi-utang-usaha/{{jurnalId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "Keterangan": "Koreksi pencatatan utang usaha (revisi)",
+    "pembayaran": [
+        {
+            "COAID": {{coaId}},
+            "Debet": 350000,
+            "Kredit": 0
+        },
+        {
+            "COAID": {{coaId}},
+            "Debet": 0,
+            "Kredit": 350000
+        }
+    ]
+}
+
+### Delete Jurnal Koreksi
+DELETE {{baseUrl}}/jurnal-koreksi-utang-usaha/{{jurnalId}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+
+# ==========================================================================
+# NEGATIVE TEST (opsional)
+# ==========================================================================
+
+### Jurnal Koreksi: Debet & Kredit dua-duanya > 0 -> harus 422
+POST {{baseUrl}}/jurnal-koreksi-utang-usaha
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+{
+    "UtangUsahaID": {{utangUsahaId}},
+    "Keterangan": "Harus gagal validasi",
+    "pembayaran": [
+        {
+            "COAID": {{coaId}},
+            "Debet": 100000,
+            "Kredit": 100000
+        }
+    ]
+}
+
+### Akses tanpa token -> harus 401
+GET {{baseUrl}}/utang-usaha/1
+Accept: application/json
