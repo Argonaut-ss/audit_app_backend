@@ -10,12 +10,12 @@ use App\Models\Kasus;
 use App\Models\JwbKasus;
 use App\Models\DataClient;
 use App\Models\Perikatan;
-use App\Models\Piutang;
+use App\Models\Piutang\Piutang;
 use App\Models\DetilVerifikasi;
 use App\Models\Identifikasi;
 use App\Models\Pmpj;
 use App\Models\COA;
-use App\Models\KonfirmasiPiutang;
+use App\Models\Piutang\KonfirmasiPiutang;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

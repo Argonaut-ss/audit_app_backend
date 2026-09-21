@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PiutangController;
 
-use App\Models\Dokumen;
-use App\Models\Piutang;
+use App\Http\Controllers\Controller;
+use App\Models\Piutang\Dokumen;
+use App\Models\Piutang\Piutang;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;

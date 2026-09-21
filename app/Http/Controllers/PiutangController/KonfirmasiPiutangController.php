@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PiutangController;
 
+use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
-use App\Models\KonfirmasiPiutang;
-use App\Models\Piutang;
+use App\Models\Piutang\KonfirmasiPiutang;
+use App\Models\Piutang\Piutang;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
