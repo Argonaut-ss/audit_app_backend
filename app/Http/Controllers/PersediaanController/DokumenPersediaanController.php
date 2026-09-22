@@ -110,11 +110,11 @@ class DokumenPersediaanController extends Controller
          * Default names for predefined document types.
          */
         if ($data['TipeFile'] === 'Rincian') {
-            $data['NamaFile'] = 'Rincian.pdf';
+            $data['NamaFile'] = 'Rincian';
         }
 
         if ($data['TipeFile'] === 'Buku Besar') {
-            $data['NamaFile'] = 'Buku Besar.pdf';
+            $data['NamaFile'] = 'Buku Besar';
         }
 
         /*
@@ -250,11 +250,11 @@ class DokumenPersediaanController extends Controller
          * Default names for predefined document types.
          */
         if ($data['TipeFile'] === 'Rincian') {
-            $data['NamaFile'] = 'Rincian.pdf';
+            $data['NamaFile'] = 'Rincian';
         }
 
         if ($data['TipeFile'] === 'Buku Besar') {
-            $data['NamaFile'] = 'Buku Besar.pdf';
+            $data['NamaFile'] = 'Buku Besar';
         }
 
         /*
