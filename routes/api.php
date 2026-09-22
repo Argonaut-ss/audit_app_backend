@@ -190,7 +190,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'update']);
     Route::delete('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'destroy']);
 
-    // UtangUsaha Routes
+    // Persediaan Routes
     Route::get('/persediaan/{jwbKasusId}', [PersediaanController::class, 'show']);
     Route::put('/persediaan/{jwbKasusId}', [PersediaanController::class, 'update']);
 
