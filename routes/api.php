@@ -31,6 +31,9 @@ use App\Http\Controllers\UtangUsahaController\ProsedurUtangUsahaController;
 use App\Http\Controllers\UtangUsahaController\RekonsiliasiUtangUsahaController;
 use App\Http\Controllers\UtangUsahaController\JurnalKoreksiUtangUsahaController;
 
+use App\Http\Controllers\PersediaanController\DokumenPersediaanController;
+use App\Http\Controllers\PersediaanController\ProsedurPersediaanController;
+
 use App\Http\Controllers\KelasCardController;
 
 // Login & Logout & RBAC
@@ -113,13 +116,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/prosedur-alternatif/bulk-save', [ProsedurAlternatifController::class, 'bulkSave']);
     Route::apiResource('prosedur-alternatif', ProsedurAlternatifController::class);
 
-    // Prosedur Routes
+    // Prosedur Piutang Routes
     Route::get('/piutangs/{piutang}/prosedur',[ProsedurController::class, 'index']);
     Route::post('/prosedur',[ProsedurController::class, 'store']);
     Route::put('/prosedur/{prosedur}',[ProsedurController::class, 'update']);
     Route::delete('/prosedur/{prosedur}',[ProsedurController::class, 'destroy']);
 
-    // Dokumen Routes
+    // Dokumen Piutang Routes
     Route::get('dokumen/piutang/{piutangId}',[DokumenController::class, 'index']);
     Route::post('dokumen/piutang/{piutangId}',[DokumenController::class, 'store']);
     Route::get('dokumen/{dokumenId}',[DokumenController::class, 'show']);
@@ -146,23 +149,39 @@ Route::middleware('auth:sanctum')->group(function () {
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-utang-usaha' => 'jurnalKoreksiUtangUsaha']);
 
-    // Dokumen Routes
+    // Dokumen Utang Usaha Routes
     Route::get('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'index']);
     Route::post('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'store']);
     Route::get('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'show']);
     Route::put('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'update']);
     Route::delete('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'destroy']);
 
+    // Konfirmasi Utang Usaha Routes
     Route::get('/konfirmasi-utang-usaha/{id}/file', [KonfirmasiUtangUsahaController::class, 'file']);
     Route::apiResource('konfirmasi-utang-usaha', KonfirmasiUtangUsahaController::class);
 
+    // Rekap Utang Usaha Routes
     Route::post('rekap-balasan-utang-usaha/bulk-save', [RekapBalasanUtangUsahaController::class, 'bulkSave']);
     Route::get('/rekap-balasan-utang-usaha/{id}/file', [RekapBalasanUtangUsahaController::class, 'file']);
     Route::apiResource('rekap-balasan-utang-usaha', RekapBalasanUtangUsahaController::class);
 
+    // Prosedur Alternatif Utang Usaha Routes
     Route::get('/prosedur-alternatif-utang-usaha/{id}/file', [ProsedurAlternatifUtangUsahaController::class, 'file']);
     Route::post('/prosedur-alternatif-utang-usaha/bulk-save', [ProsedurAlternatifUtangUsahaController::class, 'bulkSave']);
     Route::apiResource('prosedur-alternatif-utang-usaha', ProsedurAlternatifUtangUsahaController::class);
+
+    // Prosedur Persediaan Routes
+    Route::get('/persediaans/{persediaan}/prosedur', [ProsedurPersediaanController::class, 'index']);
+    Route::post('/prosedur-persediaan', [ProsedurPersediaanController::class, 'store']);
+    Route::put('/prosedur-persediaan/{prosedurPersediaan}', [ProsedurPersediaanController::class, 'update']);
+    Route::delete('/prosedur-persediaan/{prosedurPersediaan}', [ProsedurPersediaanController::class, 'destroy']);
+
+    // Dokumen Persediaan Routes
+    Route::get('/persediaan/{persediaanId}/dokumen', [DokumenPersediaanController::class, 'index']);
+    Route::post('/persediaan/{persediaanId}/dokumen', [DokumenPersediaanController::class, 'store']);
+    Route::get('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'show']);
+    Route::put('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'update']);
+    Route::delete('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'destroy']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
