@@ -23,7 +23,7 @@ class RekapBalasanUtangUsahaController extends Controller
     {
         $query = UtangUsaha::query()->with([
             'konfirmasiUtangUsaha:KonfirmasiUtangUsahaID,UtangUsahaID,NamaCustomer,Jumlah',
-            'rekapBalasan.konfirmasiUtangUsaha:KonfirmasiUtangUsahaID,UtangUsahaID,NamaCustomer,Jumlah',
+            'rekap_balasan_utang_usaha.konfirmasiUtangUsaha:KonfirmasiUtangUsahaID,UtangUsahaID,NamaCustomer,Jumlah',
         ]);
 
         $query->whereHas('JwbKasus', function ($query) use ($request) {
