@@ -53,6 +53,42 @@ class UtangUsaha extends Model
         );
     }
 
+    public function dokumens(): HasMany
+    {
+        return $this->hasMany(
+            DokumenUtangUsaha::class,
+            'utang_usaha_id',
+            'UtangUsahaID'
+        );
+    }
+
+    public function konfirmasiUtangUsaha(): HasMany
+    {
+        return $this->hasMany(
+            KonfirmasiUtangUsaha::class,
+            'UtangUsahaID',
+            'UtangUsahaID'
+        );
+    }
+
+    public function rekapBalasan(): HasMany
+    {
+        return $this->hasMany(
+            RekapBalasanUtangUsaha::class,
+            'UtangUsahaID',
+            'UtangUsahaID'
+        );
+    }
+
+    public function prosedurAlternatif(): HasMany
+    {
+        return $this->hasMany(
+            ProsedurAlternatifUtangUsaha::class,
+            'UtangUsahaID',
+            'UtangUsahaID'
+        );
+    }
+
     public function rekonsiliasiUtangUsaha(): HasMany
     {
         return $this->hasMany(
