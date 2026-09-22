@@ -20,7 +20,10 @@ class DokumenUtangUsahaController extends Controller
             return;
         }
 
-        $hasDokumen = DokumenUtangUsaha::where('UtangUsahaID', $utangUsahaId)->exists();
+        $hasDokumen = DokumenUtangUsaha::where(
+            'UtangUsahaID',
+            $utangUsahaId
+        )->exists();
 
         $utangUsaha->updateQuietly([
             'DokumenCheck' => $hasDokumen,
@@ -78,7 +81,7 @@ class DokumenUtangUsahaController extends Controller
             'File' => [
                 'required',
                 'file',
-                'mimes:pdf',
+                'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png',
                 'max:16384',
             ],
         ]);
@@ -107,19 +110,21 @@ class DokumenUtangUsahaController extends Controller
          * Default names for predefined document types.
          */
         if ($data['TipeFile'] === 'Rincian') {
-            $data['NamaFile'] = 'Rincian.pdf';
+            $data['NamaFile'] = 'Rincian';
         }
 
         if ($data['TipeFile'] === 'Buku Besar') {
-            $data['NamaFile'] = 'Buku Besar.pdf';
+            $data['NamaFile'] = 'Buku Besar';
         }
 
         /*
-         * Store the actual uploaded PDF as MEDIUMBLOB.
+         * Store the uploaded file as MEDIUMBLOB and
+         * store its detected MIME type.
          */
         $uploadedFile = $request->file('File');
 
         $data['File'] = $uploadedFile->get();
+        $data['MimeType'] = $uploadedFile->getMimeType();
 
         /*
          * Store the original uploaded filename separately.
@@ -131,6 +136,7 @@ class DokumenUtangUsahaController extends Controller
             'TipeFile' => $data['TipeFile'],
             'NamaFile' => $data['NamaFile'],
             'NamaFileUpload' => $data['NamaFileUpload'],
+            'MimeType' => $data['MimeType'],
             'File' => $data['File'],
         ]);
 
@@ -149,7 +155,7 @@ class DokumenUtangUsahaController extends Controller
     }
 
     /**
-     * GET /api/dokumen/{dokumenUtangUsahaId}
+     * GET /api/dokumen/{dokumenId}
      *
      * Get one document's associated data.
      */
@@ -171,6 +177,7 @@ class DokumenUtangUsahaController extends Controller
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
                 'NamaFileUpload' => $dokumen->NamaFileUpload,
+                'MimeType' => $dokumen->MimeType,
                 'File' => $dokumen->File
                     ? base64_encode($dokumen->File)
                     : null,
@@ -214,7 +221,7 @@ class DokumenUtangUsahaController extends Controller
             'File' => [
                 'nullable',
                 'file',
-                'mimes:pdf',
+                'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png',
                 'max:16384',
             ],
         ]);
@@ -243,33 +250,38 @@ class DokumenUtangUsahaController extends Controller
          * Default names for predefined document types.
          */
         if ($data['TipeFile'] === 'Rincian') {
-            $data['NamaFile'] = 'Rincian.pdf';
+            $data['NamaFile'] = 'Rincian';
         }
 
         if ($data['TipeFile'] === 'Buku Besar') {
-            $data['NamaFile'] = 'Buku Besar.pdf';
+            $data['NamaFile'] = 'Buku Besar';
         }
 
         /*
-         * Only replace the stored blob and filename if a new file is uploaded.
+         * Only replace the stored file, filename, and MIME type
+         * if a new file is uploaded.
          */
         if ($request->hasFile('File')) {
             $uploadedFile = $request->file('File');
 
             $data['File'] = $uploadedFile->get();
             $data['NamaFileUpload'] = $uploadedFile->getClientOriginalName();
+            $data['MimeType'] = $uploadedFile->getMimeType();
         } else {
             /*
-             * Preserve the existing uploaded file and original filename.
+             * Preserve the existing uploaded file,
+             * original filename, and MIME type.
              */
             $data['File'] = $dokumen->File;
             $data['NamaFileUpload'] = $dokumen->NamaFileUpload;
+            $data['MimeType'] = $dokumen->MimeType;
         }
 
         $dokumen->update([
             'TipeFile' => $data['TipeFile'],
             'NamaFile' => $data['NamaFile'],
             'NamaFileUpload' => $data['NamaFileUpload'],
+            'MimeType' => $data['MimeType'],
             'File' => $data['File'],
         ]);
 

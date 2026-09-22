@@ -16,6 +16,7 @@ class Dokumen extends Model
         'TipeFile',
         'NamaFile',
         'NamaFileUpload',
+        'MimeType',
         'File',
     ];
 

@@ -27,6 +27,7 @@ return new class extends Migration
 
             $table->string('NamaFile');
             $table->string('NamaFileUpload')->nullable();
+            $table->string('MimeType', 100)->nullable();
             $table->binary('File')->nullable();
 
             $table->timestamps();
