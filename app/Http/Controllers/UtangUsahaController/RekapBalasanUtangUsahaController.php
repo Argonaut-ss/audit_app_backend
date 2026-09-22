@@ -344,7 +344,7 @@ class RekapBalasanUtangUsahaController extends Controller
             'data.*.RekapBalasanUtangUsahaID' => [
                 'nullable',
                 'integer',
-                'exists:RekapBalasanUtangUsaha,RekapBalasanUtangUsahaID',
+                'exists:rekap_balasan_utang_usaha,RekapBalasanUtangUsahaID',
             ],
 
             'data.*.UtangUsahaID' => [
@@ -356,7 +356,7 @@ class RekapBalasanUtangUsahaController extends Controller
             'data.*.KonfirmasiUtangUsahaID' => [
                 'nullable',
                 'integer',
-                'exists:KonfirmasiUtangUsaha,KonfirmasiUtangUsahaID',
+                'exists:konfirmasi_utang_usaha,KonfirmasiUtangUsahaID',
             ],
 
             'data.*.SaldoBB' => [
