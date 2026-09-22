@@ -18,6 +18,7 @@ use App\Models\COA;
 use App\Models\Piutang\KonfirmasiPiutang;
 use App\Models\UtangUsaha\UtangUsaha;
 use App\Models\UtangUsaha\KonfirmasiUtangUsaha;
+use App\Models\Persediaan\Persediaan;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -286,6 +287,20 @@ class TestSeeder extends Seeder
                     'JurnalCheck' => false,
                     'RekonsiliasiCheck' => false,
                     'ProsedurAltCheck' => false,
+                ]
+            );
+
+            $persediaan = Persediaan::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'ProsedurCheck' => false,
+                    'DokumenCheck' => false,
+                    'StockCheck' => false,
+                    'MutasiStockCheck' => false,
+                    'UjiMutasiCheck' => false,
+                    'TestPricingCheck' => false,
+                    'JurnalCheck' => false,
+                    'Kesimpulan' => null,
                 ]
             );
 

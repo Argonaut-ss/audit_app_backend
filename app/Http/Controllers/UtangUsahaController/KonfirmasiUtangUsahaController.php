@@ -79,7 +79,7 @@ class KonfirmasiUtangUsahaController extends Controller
             'UtangUsahaID' => [
                 'required',
                 'integer',
-                'exists:UtangUsaha,UtangUsahaID',
+                'exists:utang_usaha,UtangUsahaID',
             ],
             'NamaCustomer' => [
                 'required',

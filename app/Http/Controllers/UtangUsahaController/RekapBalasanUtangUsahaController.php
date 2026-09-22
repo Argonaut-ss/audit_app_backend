@@ -142,7 +142,7 @@ class RekapBalasanUtangUsahaController extends Controller
         $validated = $request->validate([
             'UtangUsahaID' => [
                 'required',
-                'exists:UtangUsaha,UtangUsahaID',
+                'exists:utang_usaha,UtangUsahaID',
             ],
 
             'KonfirmasiUtangUsahaID' => [
@@ -350,7 +350,7 @@ class RekapBalasanUtangUsahaController extends Controller
             'data.*.UtangUsahaID' => [
                 'required',
                 'integer',
-                'exists:UtangUsaha,UtangUsahaID',
+                'exists:utang_usaha,UtangUsahaID',
             ],
 
             'data.*.KonfirmasiUtangUsahaID' => [

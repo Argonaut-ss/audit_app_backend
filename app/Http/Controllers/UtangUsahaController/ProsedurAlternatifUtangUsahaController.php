@@ -79,7 +79,7 @@ class ProsedurAlternatifUtangUsahaController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'UtangUsahaID' => ['required', 'exists:UtangUsaha,UtangUsahaID'],
+            'UtangUsahaID' => ['required', 'exists:utang_usaha,UtangUsahaID'],
             'KonfirmasiUtangUsahaID' => ['nullable', 'exists:KonfirmasiUtangUsaha,KonfirmasiUtangUsahaID'],
             'SaldoAkhir' => ['nullable', 'integer'],
             'KonfirmasiBayar' => ['nullable', 'boolean'],
@@ -173,7 +173,7 @@ class ProsedurAlternatifUtangUsahaController extends Controller
             'data.*.UtangUsahaID' => [
                 'required',
                 'integer',
-                'exists:UtangUsaha,UtangUsahaID',
+                'exists:utang_usaha,UtangUsahaID',
             ],
 
             'data.*.KonfirmasiUtangUsahaID' => [
