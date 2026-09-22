@@ -356,7 +356,7 @@ class RekapBalasanUtangUsahaController extends Controller
             'data.*.KonfirmasiUtangUsahaID' => [
                 'nullable',
                 'integer',
-                'exists:konfirmasi_utang_usaha,KonfirmasiUtangUsahaID',
+                'exists:KonfirmasiUtangUsaha,KonfirmasiUtangUsahaID',
             ],
 
             'data.*.SaldoBB' => [
