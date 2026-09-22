@@ -1007,7 +1007,7 @@ class RekapBalasanUtangUsahaController extends Controller
                                         ->getMimeType();
                             }
 
-                            RekapBalasan::create(
+                            RekapBalasanUtangUsaha::create(
                                 $createData
                             );
                         }
