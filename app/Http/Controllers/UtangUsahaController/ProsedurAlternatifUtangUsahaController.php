@@ -167,7 +167,7 @@ class ProsedurAlternatifUtangUsahaController extends Controller
             'data.*.ProsedurAlternatifUtangUsahaID' => [
                 'nullable',
                 'integer',
-                'exists:ProsedurAlternatifUtangUsaha,ProsedurAlternatifUtangUsahaID',
+                'exists:prosedur_alt_utang,ProsedurAlternatifUtangUsahaID',
             ],
 
             'data.*.UtangUsahaID' => [
