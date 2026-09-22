@@ -106,7 +106,7 @@ class Persediaan extends Model
     public function prosedurs(): HasMany
     {
         return $this->hasMany(
-            Prosedur::class,
+            ProsedurPersediaan::class,
             'persediaan_id',
             'PersediaanID'
         );
