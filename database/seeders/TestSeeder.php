@@ -16,6 +16,8 @@ use App\Models\Identifikasi;
 use App\Models\Pmpj;
 use App\Models\COA;
 use App\Models\Piutang\KonfirmasiPiutang;
+use App\Models\UtangUsaha\UtangUsaha;
+use App\Models\UtangUsaha\KonfirmasiUtangUsaha;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -273,6 +275,33 @@ class TestSeeder extends Seeder
                     'AuditSebelum' => null,
                 ]
             );
+
+            $utangUsaha = UtangUsaha::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'ProsedurCheck' => false,
+                    'DokumenCheck' => false,
+                    'KonfirmasiCheck' => true,
+                    'RekapCheck' => false,
+                    'JurnalCheck' => false,
+                    'RekonsiliasiCheck' => false,
+                    'ProsedurAltCheck' => false,
+                ]
+            );
+
+            foreach ([
+                ['NamaCustomer' => 'Toko Kebak', 'KotaCustomer' => 'Jakarta', 'Jumlah' => 500000000],
+                ['NamaCustomer' => 'Toko Makmur Jaya', 'KotaCustomer' => 'Bandung', 'Jumlah' => 350000000],
+                ['NamaCustomer' => 'Toko Sumber Rezeki', 'KotaCustomer' => 'Surabaya', 'Jumlah' => 250000000],
+            ] as $customer) {
+                KonfirmasiUtangUsaha::updateOrCreate(
+                    [
+                        'UtangUsahaID' => $utangUsaha->UtangUsahaID,
+                        'NamaCustomer' => $customer['NamaCustomer'],
+                    ],
+                    $customer
+                );
+            }
         });
     }
 
