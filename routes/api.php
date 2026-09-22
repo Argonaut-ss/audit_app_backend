@@ -146,6 +146,24 @@ Route::middleware('auth:sanctum')->group(function () {
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-utang-usaha' => 'jurnalKoreksiUtangUsaha']);
 
+    // Dokumen Routes
+    Route::get('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'index']);
+    Route::post('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'store']);
+    Route::get('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'show']);
+    Route::put('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'update']);
+    Route::delete('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'destroy']);
+
+    Route::get('/konfirmasi-utang-usaha/{id}/file', [KonfirmasiUtangUsahaController::class, 'file']);
+    Route::apiResource('konfirmasi-utang-usaha', KonfirmasiUtangUsahaController::class);
+
+    Route::post('rekap-balasan-utang-usaha/bulk-save', [RekapBalasanUtangUsahaController::class, 'bulkSave']);
+    Route::get('/rekap-balasan-utang-usaha/{id}/file', [RekapBalasanUtangUsahaController::class, 'file']);
+    Route::apiResource('rekap-balasan-utang-usaha', RekapBalasanUtangUsahaController::class);
+
+    Route::get('/prosedur-alternatif-utang-usaha/{id}/file', [ProsedurAlternatifUtangUsahaController::class, 'file']);
+    Route::post('/prosedur-alternatif-utang-usaha/bulk-save', [ProsedurAlternatifUtangUsahaController::class, 'bulkSave']);
+    Route::apiResource('prosedur-alternatif-utang-usaha', ProsedurAlternatifUtangUsahaController::class);
+
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
 });
