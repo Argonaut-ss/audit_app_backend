@@ -40,6 +40,7 @@ use App\Http\Controllers\PersediaanController\PersediaanController;
 use App\Http\Controllers\PersediaanController\DokumenPersediaanController;
 use App\Http\Controllers\PersediaanController\ProsedurPersediaanController;
 use App\Http\Controllers\PersediaanController\JurnalKoreksiPersediaanController;
+use App\Http\Controllers\PersediaanController\MutasiStockOpnamePersediaanController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -199,6 +200,13 @@ Route::middleware('auth:sanctum')->group(function () {
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-persediaan' => 'jurnalKoreksiPersediaan']);
 
+    // Mutasi Stock Opname Persediaan Routes
+    Route::get('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'index']);
+    Route::post('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'store']);
+    Route::get('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'show']);
+    Route::put('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'update']);
+    Route::delete('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'destroy']);
+    
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
 });
