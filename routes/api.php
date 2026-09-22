@@ -156,9 +156,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dokumen Utang Usaha Routes
     Route::get('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'index']);
     Route::post('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'store']);
-    Route::get('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'show']);
-    Route::put('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'update']);
-    Route::delete('dokumen/{dokumenId}',[DokumenUtangUsahaController::class, 'destroy']);
+    Route::get('dokumen-utang-usaha/{dokumenId}',[DokumenUtangUsahaController::class, 'show']);
+    Route::put('dokumen-utang-usaha/{dokumenId}',[DokumenUtangUsahaController::class, 'update']);
+    Route::delete('dokumen-utang-usaha/{dokumenId}',[DokumenUtangUsahaController::class, 'destroy']);
 
     // Konfirmasi Utang Usaha Routes
     Route::get('/konfirmasi-utang-usaha/{id}/file', [KonfirmasiUtangUsahaController::class, 'file']);
