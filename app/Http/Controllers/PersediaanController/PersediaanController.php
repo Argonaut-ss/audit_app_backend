@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\PersediaannController;
+namespace App\Http\Controllers\PersediaanController;
 
 use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
