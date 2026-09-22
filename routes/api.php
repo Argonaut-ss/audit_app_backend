@@ -37,6 +37,7 @@ use App\Http\Controllers\UtangUsahaController\ProsedurAlternatifUtangUsahaContro
 
 use App\Http\Controllers\PersediaanController\DokumenPersediaanController;
 use App\Http\Controllers\PersediaanController\ProsedurPersediaanController;
+use App\Http\Controllers\PersediaanController\JurnalKoreksiPersediaanController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -186,6 +187,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'show']);
     Route::put('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'update']);
     Route::delete('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'destroy']);
+
+    // Jurnal Koreksi Persediaan Routes
+        Route::apiResource('jurnal-koreksi-persediaan', JurnalKoreksiPersediaanController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['jurnal-koreksi-persediaan' => 'jurnalKoreksiPersediaan']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

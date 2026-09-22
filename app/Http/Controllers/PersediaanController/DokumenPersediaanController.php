@@ -1,43 +1,43 @@
 <?php
 
-namespace App\Http\Controllers\UtangUsahaController;
+namespace App\Http\Controllers\PersediaanController;
 
 use App\Http\Controllers\Controller;
-use App\Models\UtangUsaha\DokumenUtangUsaha;
-use App\Models\UtangUsaha\UtangUsaha;
+use App\Models\Persediaan\DokumenPersediaan;
+use App\Models\Persediaan\Persediaan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class DokumenUtangUsahaController extends Controller
+class DokumenPersediaanController extends Controller
 {
-    private function dokumenCheck(int $utangUsahaId): void
+    private function dokumenCheck(int $persediaanId): void
     {
-        $utangUsaha = UtangUsaha::find($utangUsahaId);
+        $persediaan = Persediaan::find($persediaanId);
 
-        if (! $utangUsaha) {
+        if (! $persediaan) {
             return;
         }
 
-        $hasDokumen = DokumenUtangUsaha::where('UtangUsahaID', $utangUsahaId)->exists();
+        $hasDokumen = DokumenPersediaan::where('PersediaanID', $persediaanId)->exists();
 
-        $utangUsaha->updateQuietly([
+        $persediaan->updateQuietly([
             'DokumenCheck' => $hasDokumen,
         ]);
     }
 
     /**
-     * GET /api/utang-usaha/{utangUsahaId}/dokumen
+     * GET /api/persediaan/{persediaanId}/dokumen
      *
-     * List all documents belonging to a utang usaha.
+     * List all documents belonging to a persediaan.
      */
-    public function index(int $utangUsahaId): JsonResponse
+    public function index(int $persediaanId): JsonResponse
     {
-        $dokumen = DokumenUtangUsaha::where('UtangUsahaID', $utangUsahaId)
+        $dokumen = DokumenPersediaan::where('PersediaanID', $persediaanId)
             ->select([
-                'DokumenUtangUsahaID',
-                'UtangUsahaID',
+                'DokumenPersediaanID',
+                'PersediaanID',
                 'TipeFile',
                 'NamaFile',
                 'NamaFileUpload',
@@ -53,11 +53,11 @@ class DokumenUtangUsahaController extends Controller
     }
 
     /**
-     * POST /api/utang-usaha/{utangUsahaId}/dokumen
+     * POST /api/persediaan/{persediaanId}/dokumen
      *
      * Store a new document and its associated data.
      */
-    public function store(Request $request, int $utangUsahaId): JsonResponse
+    public function store(Request $request, int $persediaanId): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'TipeFile' => [
@@ -92,9 +92,6 @@ class DokumenUtangUsahaController extends Controller
 
         $data = $validator->validated();
 
-        /*
-         * Lain-lain requires a custom name.
-         */
         if ($data['TipeFile'] === 'Lain-lain') {
             if (empty($data['NamaFile'])) {
                 return response()->json([
@@ -103,9 +100,6 @@ class DokumenUtangUsahaController extends Controller
             }
         }
 
-        /*
-         * Default names for predefined document types.
-         */
         if ($data['TipeFile'] === 'Rincian') {
             $data['NamaFile'] = 'Rincian.pdf';
         }
@@ -114,33 +108,26 @@ class DokumenUtangUsahaController extends Controller
             $data['NamaFile'] = 'Buku Besar.pdf';
         }
 
-        /*
-         * Store the actual uploaded PDF as MEDIUMBLOB.
-         */
         $uploadedFile = $request->file('File');
 
         $data['File'] = $uploadedFile->get();
-
-        /*
-         * Store the original uploaded filename separately.
-         */
         $data['NamaFileUpload'] = $uploadedFile->getClientOriginalName();
 
-        $dokumen = DokumenUtangUsaha::create([
-            'UtangUsahaID' => $utangUsahaId,
+        $dokumen = DokumenPersediaan::create([
+            'PersediaanID' => $persediaanId,
             'TipeFile' => $data['TipeFile'],
             'NamaFile' => $data['NamaFile'],
             'NamaFileUpload' => $data['NamaFileUpload'],
             'File' => $data['File'],
         ]);
 
-        $this->dokumenCheck($utangUsahaId);
+        $this->dokumenCheck($persediaanId);
 
         return response()->json([
             'message' => 'Dokumen berhasil disimpan.',
             'data' => [
-                'DokumenUtangUsahaID' => $dokumen->DokumenUtangUsahaID,
-                'UtangUsahaID' => $dokumen->UtangUsahaID,
+                'DokumenPersediaanID' => $dokumen->DokumenPersediaanID,
+                'PersediaanID' => $dokumen->PersediaanID,
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
                 'NamaFileUpload' => $dokumen->NamaFileUpload,
@@ -149,15 +136,15 @@ class DokumenUtangUsahaController extends Controller
     }
 
     /**
-     * GET /api/dokumen/{dokumenUtangUsahaId}
+     * GET /api/dokumen-persediaan/{dokumenId}
      *
      * Get one document's associated data.
      */
     public function show(int $dokumenId): JsonResponse
     {
-        $dokumen = DokumenUtangUsaha::find($dokumenId);
+        $dokumen = DokumenPersediaan::find($dokumenId);
 
-        if (!$dokumen) {
+        if (! $dokumen) {
             return response()->json([
                 'message' => 'Dokumen tidak ditemukan.',
             ], 404);
@@ -166,8 +153,8 @@ class DokumenUtangUsahaController extends Controller
         return response()->json([
             'message' => 'Data dokumen berhasil diambil.',
             'data' => [
-                'DokumenUtangUsahaID' => $dokumen->DokumenUtangUsahaID,
-                'UtangUsahaID' => $dokumen->UtangUsahaID,
+                'DokumenPersediaanID' => $dokumen->DokumenPersediaanID,
+                'PersediaanID' => $dokumen->PersediaanID,
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
                 'NamaFileUpload' => $dokumen->NamaFileUpload,
@@ -181,15 +168,15 @@ class DokumenUtangUsahaController extends Controller
     }
 
     /**
-     * PUT /api/dokumen/{dokumenId}
+     * PUT /api/dokumen-persediaan/{dokumenId}
      *
      * Update a document and its associated data.
      */
     public function update(Request $request, int $dokumenId): JsonResponse
     {
-        $dokumen = DokumenUtangUsaha::find($dokumenId);
+        $dokumen = DokumenPersediaan::find($dokumenId);
 
-        if (!$dokumen) {
+        if (! $dokumen) {
             return response()->json([
                 'message' => 'Dokumen tidak ditemukan.',
             ], 404);
@@ -228,9 +215,6 @@ class DokumenUtangUsahaController extends Controller
 
         $data = $validator->validated();
 
-        /*
-         * Lain-lain requires a custom name.
-         */
         if ($data['TipeFile'] === 'Lain-lain') {
             if (empty($data['NamaFile'])) {
                 return response()->json([
@@ -239,9 +223,6 @@ class DokumenUtangUsahaController extends Controller
             }
         }
 
-        /*
-         * Default names for predefined document types.
-         */
         if ($data['TipeFile'] === 'Rincian') {
             $data['NamaFile'] = 'Rincian.pdf';
         }
@@ -250,18 +231,12 @@ class DokumenUtangUsahaController extends Controller
             $data['NamaFile'] = 'Buku Besar.pdf';
         }
 
-        /*
-         * Only replace the stored blob and filename if a new file is uploaded.
-         */
         if ($request->hasFile('File')) {
             $uploadedFile = $request->file('File');
 
             $data['File'] = $uploadedFile->get();
             $data['NamaFileUpload'] = $uploadedFile->getClientOriginalName();
         } else {
-            /*
-             * Preserve the existing uploaded file and original filename.
-             */
             $data['File'] = $dokumen->File;
             $data['NamaFileUpload'] = $dokumen->NamaFileUpload;
         }
@@ -273,13 +248,13 @@ class DokumenUtangUsahaController extends Controller
             'File' => $data['File'],
         ]);
 
-        $this->dokumenCheck($dokumen->UtangUsahaID);
+        $this->dokumenCheck($dokumen->PersediaanID);
 
         return response()->json([
             'message' => 'Dokumen berhasil diperbarui.',
             'data' => [
-                'DokumenUtangUsahaID' => $dokumen->DokumenUtangUsahaID,
-                'UtangUsahaID' => $dokumen->UtangUsahaID,
+                'DokumenPersediaanID' => $dokumen->DokumenPersediaanID,
+                'PersediaanID' => $dokumen->PersediaanID,
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
                 'NamaFileUpload' => $dokumen->NamaFileUpload,
@@ -288,24 +263,25 @@ class DokumenUtangUsahaController extends Controller
     }
 
     /**
-     * DELETE /api/dokumen/{dokumenId}
+     * DELETE /api/dokumen-persediaan/{dokumenId}
      *
      * Delete a document by ID.
      */
     public function destroy(int $dokumenId): JsonResponse
     {
-        $dokumen = DokumenUtangUsaha::find($dokumenId);
+        $dokumen = DokumenPersediaan::find($dokumenId);
 
-        if (!$dokumen) {
+        if (! $dokumen) {
             return response()->json([
                 'message' => 'Dokumen tidak ditemukan.',
             ], 404);
         }
 
-        $utangUsahaId = $dokumen->UtangUsahaID;
+        $persediaanId = $dokumen->PersediaanID;
+
         $dokumen->delete();
 
-        $this->dokumenCheck($utangUsahaId);
+        $this->dokumenCheck($persediaanId);
 
         return response()->json([
             'message' => 'Dokumen berhasil dihapus.',
