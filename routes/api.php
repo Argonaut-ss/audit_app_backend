@@ -35,6 +35,8 @@ use App\Http\Controllers\UtangUsahaController\KonfirmasiUtangUsahaController;
 use App\Http\Controllers\UtangUsahaController\RekapBalasanUtangUsahaController;
 use App\Http\Controllers\UtangUsahaController\ProsedurAlternatifUtangUsahaController;
 
+use App\Http\Controllers\PersediaanController\PersediaanController;
+
 use App\Http\Controllers\PersediaanController\DokumenPersediaanController;
 use App\Http\Controllers\PersediaanController\ProsedurPersediaanController;
 use App\Http\Controllers\PersediaanController\JurnalKoreksiPersediaanController;
@@ -187,6 +189,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'show']);
     Route::put('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'update']);
     Route::delete('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'destroy']);
+
+    // UtangUsaha Routes
+    Route::get('/persediaan/{jwbKasusId}', [PersediaanController::class, 'show']);
+    Route::put('/persediaan/{jwbKasusId}', [PersediaanController::class, 'update']);
 
     // Jurnal Koreksi Persediaan Routes
         Route::apiResource('jurnal-koreksi-persediaan', JurnalKoreksiPersediaanController::class)
