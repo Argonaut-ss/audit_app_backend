@@ -30,6 +30,10 @@ use App\Http\Controllers\UtangUsahaController\UtangUsahaController;
 use App\Http\Controllers\UtangUsahaController\ProsedurUtangUsahaController;
 use App\Http\Controllers\UtangUsahaController\RekonsiliasiUtangUsahaController;
 use App\Http\Controllers\UtangUsahaController\JurnalKoreksiUtangUsahaController;
+use App\Http\Controllers\UtangUsahaController\DokumenUtangUsahaController;
+use App\Http\Controllers\UtangUsahaController\KonfirmasiUtangUsahaController;
+use App\Http\Controllers\UtangUsahaController\RekapBalasanUtangUsahaController;
+use App\Http\Controllers\UtangUsahaController\ProsedurAlternatifUtangUsahaController;
 
 use App\Http\Controllers\PersediaanController\DokumenPersediaanController;
 use App\Http\Controllers\PersediaanController\ProsedurPersediaanController;
