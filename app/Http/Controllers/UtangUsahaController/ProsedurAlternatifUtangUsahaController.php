@@ -18,7 +18,7 @@ class ProsedurAlternatifUtangUsahaController extends Controller
     {
         $query = UtangUsaha::query()->with([
             'konfirmasiUtangUsaha:KonfirmasiUtangUsahaID,UtangUsahaID,NamaCustomer',
-            'prosedurAlternatifUtangUsaha.konfirmasiUtangUsaha:KonfirmasiUtangUsahaID,UtangUsahaID,NamaCustomer',
+            'prosedurAlternatif.konfirmasiUtangUsaha:KonfirmasiUtangUsahaID,UtangUsahaID,NamaCustomer',
         ]);
         $query->whereHas('JwbKasus', function ($query) use ($request) {
             $query->forUser($request->user());
