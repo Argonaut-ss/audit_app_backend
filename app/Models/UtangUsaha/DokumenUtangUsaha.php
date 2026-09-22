@@ -17,6 +17,7 @@ class DokumenUtangUsaha extends Model
         'TipeFile',
         'NamaFile',
         'NamaFileUpload',
+        'MimeType',
         'File',
     ];
 

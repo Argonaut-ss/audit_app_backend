@@ -78,7 +78,7 @@ class DokumenController extends Controller
             'File' => [
                 'required',
                 'file',
-                'mimes:pdf',
+                'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png',
                 'max:16384',
             ],
         ]);
@@ -107,19 +107,20 @@ class DokumenController extends Controller
          * Default names for predefined document types.
          */
         if ($data['TipeFile'] === 'Rincian') {
-            $data['NamaFile'] = 'Rincian.pdf';
+            $data['NamaFile'] = 'Rincian';
         }
 
         if ($data['TipeFile'] === 'Buku Besar') {
-            $data['NamaFile'] = 'Buku Besar.pdf';
+            $data['NamaFile'] = 'Buku Besar';
         }
 
         /*
-         * Store the actual uploaded PDF as MEDIUMBLOB.
+         * Store the uploaded file as MEDIUMBLOB & file type as string.
          */
         $uploadedFile = $request->file('File');
 
         $data['File'] = $uploadedFile->get();
+        $data['MimeType'] = $uploadedFile->getMimeType();
 
         /*
          * Store the original uploaded filename separately.
@@ -131,6 +132,7 @@ class DokumenController extends Controller
             'TipeFile' => $data['TipeFile'],
             'NamaFile' => $data['NamaFile'],
             'NamaFileUpload' => $data['NamaFileUpload'],
+            'MimeType' => $data['MimeType'],
             'File' => $data['File'],
         ]);
 
@@ -171,6 +173,7 @@ class DokumenController extends Controller
                 'TipeFile' => $dokumen->TipeFile,
                 'NamaFile' => $dokumen->NamaFile,
                 'NamaFileUpload' => $dokumen->NamaFileUpload,
+                'MimeType' => $dokumen->MimeType,
                 'File' => $dokumen->File
                     ? base64_encode($dokumen->File)
                     : null,
@@ -214,7 +217,7 @@ class DokumenController extends Controller
             'File' => [
                 'nullable',
                 'file',
-                'mimes:pdf',
+                'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png',
                 'max:16384',
             ],
         ]);
@@ -243,11 +246,11 @@ class DokumenController extends Controller
          * Default names for predefined document types.
          */
         if ($data['TipeFile'] === 'Rincian') {
-            $data['NamaFile'] = 'Rincian.pdf';
+            $data['NamaFile'] = 'Rincian';
         }
 
         if ($data['TipeFile'] === 'Buku Besar') {
-            $data['NamaFile'] = 'Buku Besar.pdf';
+            $data['NamaFile'] = 'Buku Besar';
         }
 
         /*
@@ -258,18 +261,21 @@ class DokumenController extends Controller
 
             $data['File'] = $uploadedFile->get();
             $data['NamaFileUpload'] = $uploadedFile->getClientOriginalName();
+            $data['MimeType'] = $uploadedFile->getMimeType();
         } else {
             /*
              * Preserve the existing uploaded file and original filename.
              */
             $data['File'] = $dokumen->File;
             $data['NamaFileUpload'] = $dokumen->NamaFileUpload;
+            $data['MimeType'] = $dokumen->MimeType;
         }
 
         $dokumen->update([
             'TipeFile' => $data['TipeFile'],
             'NamaFile' => $data['NamaFile'],
             'NamaFileUpload' => $data['NamaFileUpload'],
+            'MimeType' => $data['MimeType'],
             'File' => $data['File'],
         ]);
 
