@@ -1028,7 +1028,7 @@ class RekapBalasanUtangUsahaController extends Controller
                         $utangUsaha->updateQuietly([
                             'RekapCheck' =>
                                 $utangUsaha
-                                    ->rekapBalasanUtangUsaha()
+                                    ->rekapBalasan()
                                     ->exists(),
                         ]);
                     }
@@ -1290,7 +1290,7 @@ class RekapBalasanUtangUsahaController extends Controller
             $utangUsaha->updateQuietly([
                 'RekapCheck' =>
                     $utangUsaha
-                        ->rekapBalasanUtangUsaha()
+                        ->rekapBalasan()
                         ->exists(),
             ]);
         }
