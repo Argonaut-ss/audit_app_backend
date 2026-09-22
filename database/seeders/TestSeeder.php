@@ -18,6 +18,12 @@ use App\Models\COA;
 use App\Models\Piutang\KonfirmasiPiutang;
 use App\Models\UtangUsaha\UtangUsaha;
 use App\Models\UtangUsaha\KonfirmasiUtangUsaha;
+use App\Models\UtangUsaha\RekapBalasanUtangUsaha;
+use App\Models\UtangUsaha\RekonsiliasiUtangUsaha;
+use App\Models\UtangUsaha\ProsedurUtangUsaha;
+use App\Models\UtangUsaha\ProsedurAlternatifUtangUsaha;
+use App\Models\UtangUsaha\DokumenUtangUsaha;
+use App\Models\UtangUsaha\JurnalUtangUsaha;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
