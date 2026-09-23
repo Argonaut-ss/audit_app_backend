@@ -97,7 +97,7 @@ class Persediaan extends Model
     public function jurnalKoreksi()
     {
         return $this->hasMany(
-            JurnalKoreksi::class,
+            JurnalKoreksiPersediaan::class,
             'PersediaanID',
             'PersediaanID'
         );

@@ -10,6 +10,7 @@ use App\Models\Identifikasi;
 use App\Models\Pmpj;
 use App\Models\Piutang;
 use App\Models\UtangUsaha\UtangUsaha;
+use App\Models\Persediaan\Persediaan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -177,6 +178,10 @@ class JwbKasusController extends Controller
             ]);
 
             $utangUsaha = UtangUsaha::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
+            $persediaan = Persediaan::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,
             ]);
 
