@@ -41,6 +41,7 @@ use App\Http\Controllers\PersediaanController\DokumenPersediaanController;
 use App\Http\Controllers\PersediaanController\ProsedurPersediaanController;
 use App\Http\Controllers\PersediaanController\JurnalKoreksiPersediaanController;
 use App\Http\Controllers\PersediaanController\MutasiStockOpnamePersediaanController;
+use App\Http\Controllers\PersediaanController\StokOpnamePersediaanController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -199,6 +200,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('jurnal-koreksi-persediaan', JurnalKoreksiPersediaanController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-persediaan' => 'jurnalKoreksiPersediaan']);
+
+    // Stok Opname Persediaan Routes
+    Route::apiResource('stok-opname-persediaan', StokOpnamePersediaanController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['stok-opname-persediaan' => 'stokOpnamePersediaan']);
 
     // Mutasi Stock Opname Persediaan Routes
     Route::get('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'index']);

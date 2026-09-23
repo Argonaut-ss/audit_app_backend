@@ -111,4 +111,13 @@ class Persediaan extends Model
             'PersediaanID'
         );
     }
+
+    public function stokOpname(): HasMany
+    {
+        return $this->hasMany(
+            StokOpnamePersediaan::class,
+            'PersediaanID',
+            'PersediaanID'
+        );
+    }
 }
