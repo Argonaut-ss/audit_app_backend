@@ -4,6 +4,7 @@ namespace App\Models\Persediaan;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class StokOpnamePersediaan extends Model
 {
@@ -38,6 +39,15 @@ class StokOpnamePersediaan extends Model
             Persediaan::class,
             'PersediaanID',
             'PersediaanID'
+        );
+    }
+
+    public function ujiMutasi(): HasOne
+    {
+        return $this->hasOne(
+            UjiMutasiPersediaan::class,
+            'StokOpnameID',
+            'StokOpnameID'
         );
     }
 }

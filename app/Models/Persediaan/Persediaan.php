@@ -120,4 +120,13 @@ class Persediaan extends Model
             'PersediaanID'
         );
     }
+
+    public function ujiMutasi(): HasMany
+    {
+        return $this->hasMany(
+            UjiMutasiPersediaan::class,
+            'PersediaanID',
+            'PersediaanID'
+        );
+    }
 }

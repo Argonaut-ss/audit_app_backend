@@ -30,10 +30,24 @@ return new class extends Migration
 
             $table->index('PersediaanID', 'sopers_persediaan_id_idx');
         });
+
+        Schema::table('uji_mutasi_persediaan', function (Blueprint $table) {
+            $table->foreign('StokOpnameID', 'ujimutasi_stok_opname_id_fk')
+                ->references('StokOpnameID')
+                ->on('stok_opname_persediaan')
+                ->cascadeOnDelete();
+
+            $table->unique('StokOpnameID', 'ujimutasi_stok_opname_id_unique');
+        });
     }
 
     public function down(): void
     {
+        Schema::table('uji_mutasi_persediaan', function (Blueprint $table) {
+            $table->dropUnique('ujimutasi_stok_opname_id_unique');
+            $table->dropForeign('ujimutasi_stok_opname_id_fk');
+        });
+
         Schema::dropIfExists('stok_opname_persediaan');
     }
 };

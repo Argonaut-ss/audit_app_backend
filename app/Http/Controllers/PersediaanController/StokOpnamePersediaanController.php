@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PersediaanController;
 use App\Http\Controllers\Controller;
 use App\Models\Persediaan\Persediaan;
 use App\Models\Persediaan\StokOpnamePersediaan;
+use App\Models\Persediaan\UjiMutasiPersediaan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,9 +66,11 @@ class StokOpnamePersediaanController extends Controller
      */
     private function syncTurunan(StokOpnamePersediaan $stokOpname): void
     {
-        // TODO(UjiMutasi & TestPricing):
-        //   $stokOpname->ujiMutasi()->create([... 'StokOpnameID' => $stokOpname->StokOpnameID ...]);
-        //   $stokOpname->testPricing()->create([... 'StokOpnameID' => $stokOpname->StokOpnameID ...]);
+        UjiMutasiPersediaan::create([
+            'StokOpnameID' => $stokOpname->StokOpnameID,
+            'PersediaanID' => $stokOpname->PersediaanID,
+        ]);
+        //   $stokOpname->testPricing()->create([... 'StokOpnameI   D' => $stokOpname->StokOpnameID ...]);
     }
 
     protected function resolveAuthorizedPersediaan(Request $request, int $persediaanId): Persediaan
