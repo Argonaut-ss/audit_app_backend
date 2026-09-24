@@ -19,6 +19,9 @@ use App\Models\Piutang\KonfirmasiPiutang;
 use App\Models\UtangUsaha\UtangUsaha;
 use App\Models\UtangUsaha\KonfirmasiUtangUsaha;
 use App\Models\Persediaan\Persediaan;
+use App\Models\Persediaan\StokOpnamePersediaan;
+use App\Models\Persediaan\UjiMutasiPersediaan;
+use App\Models\Persediaan\TestPricingPersediaan;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -303,6 +306,64 @@ class TestSeeder extends Seeder
                     'Kesimpulan' => null,
                 ]
             );
+
+            $stokOpnameSeed = [
+                ['NamaPersediaan' => 'BRR18A', 'Satuan' => 'Unit', 'SaldoNeraca' => 960, 'JumlahSistem' => 340, 'JumlahFisik' => 380, 'Keterangan' => 'konsinyasi'],
+                ['NamaPersediaan' => 'DUR18D', 'Satuan' => 'Unit', 'SaldoNeraca' => 1025, 'JumlahSistem' => 105, 'JumlahFisik' => 100, 'Keterangan' => 'hilang'],
+                ['NamaPersediaan' => 'GRR16G', 'Satuan' => 'Unit', 'SaldoNeraca' => 970, 'JumlahSistem' => 300, 'JumlahFisik' => 300, 'Keterangan' => 'sesuai'],
+            ];
+
+            foreach ($stokOpnameSeed as $row) {
+                $stokOpname = StokOpnamePersediaan::updateOrCreate(
+                    [
+                        'PersediaanID' => $persediaan->PersediaanID,
+                        'NamaPersediaan' => $row['NamaPersediaan'],
+                    ],
+                    [
+                        'Satuan' => $row['Satuan'],
+                        'SaldoNeraca' => $row['SaldoNeraca'],
+                        'JumlahSistem' => $row['JumlahSistem'],
+                        'JumlahFisik' => $row['JumlahFisik'],
+                        'SelisihFisik' => $row['JumlahFisik'] - $row['JumlahSistem'],
+                        'SelisihSistem' => $row['JumlahSistem'] - $row['SaldoNeraca'],
+                        'Keterangan' => $row['Keterangan'],
+                    ]
+                );
+
+                // Uji Mutasi 1:1 (nilai awal 0, diisi user belakangan).
+                UjiMutasiPersediaan::updateOrCreate(
+                    ['StokOpnameID' => $stokOpname->StokOpnameID],
+                    [
+                        'SaldoStokOpname' => 0,
+                        'Keluar' => 0,
+                        'Rusak' => 0,
+                        'Masuk' => 0,
+                        'SaldoAuditSblm' => 0,
+                        'SaldoAkhirSblm' => 0,
+                        'SaldoAuditSdh' => 0,
+                        'SaldoAkhirSdh' => 0,
+                    ]
+                );
+
+                // Test Pricing baris awal 1:banyak (nilai awal 0).
+                TestPricingPersediaan::updateOrCreate(
+                    [
+                        'PersediaanID' => $persediaan->PersediaanID,
+                        'StokOpnameID' => $stokOpname->StokOpnameID,
+                    ],
+                    [
+                        'HargaAudit' => 0,
+                        'KuantitasAudit' => 0,
+                        'JumlahAudit' => 0,
+                        'HargaPerusahaan' => 0,
+                        'KuantitasPerusahaan' => 0,
+                        'JumlahPerusahaan' => 0,
+                        'Selisih' => 0,
+                    ]
+                );
+            }
+
+            $persediaan->update(['StockCheck' => true]);
 
             foreach ([
                 ['NamaCustomer' => 'Toko Kebak', 'KotaCustomer' => 'Jakarta', 'Jumlah' => 500000000],

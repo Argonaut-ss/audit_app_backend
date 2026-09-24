@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 class StokOpnamePersediaanController extends Controller
 {
-    /**
-     * Set flag StockCheck di induk Persediaan berdasarkan ada/tidaknya baris stok opname.
-     */
     private function stockCheck(int $persediaanId): void
     {
         $persediaan = Persediaan::find($persediaanId);
@@ -29,12 +26,6 @@ class StokOpnamePersediaanController extends Controller
         ]);
     }
 
-    /**
-     * Hitung selisih di backend (source of truth). Frontend tidak boleh menentukan selisih.
-     *
-     * SelisihFisik  = JumlahFisik  - JumlahSistem
-     * SelisihSistem = JumlahSistem - SaldoNeraca
-     */
     private function computeSelisih(array $row): array
     {
         $saldoNeraca = (int) ($row['SaldoNeraca'] ?? 0);
@@ -50,21 +41,6 @@ class StokOpnamePersediaanController extends Controller
         ];
     }
 
-    /**
-     * HOOK AUTO-CREATE TURUNAN (dikerjakan oleh pemilik modul Uji Mutasi & Test Pricing).
-     *
-     * Tiap baris StokOpname yang BARU dibuat harus otomatis membuat:
-     *   - 1 baris UjiMutasi   (relasi 1:1, referensi StokOpnameID)
-     *   - 1 baris TestPricing (relasi 1:banyak, baris pertama, referensi StokOpnameID)
-     *
-     * Catatan implementasi:
-     *   - Panggil di DALAM transaksi store (sudah disediakan di bawah).
-     *   - Cukup urus CREATE. Penghapusan turunan sudah otomatis lewat cascade FK
-     *     (StokOpnameID di tabel uji_mutasi & test_pricing pakai cascadeOnDelete).
-     *   - Nama persediaan TIDAK perlu disalin; ambil via relasi ke StokOpname (StokOpnameID).
-     *
-     * Sengaja dibiarkan kosong sampai tabel & model UjiMutasi/TestPricing tersedia.
-     */
     private function syncTurunan(StokOpnamePersediaan $stokOpname): void
     {
         UjiMutasiPersediaan::create([
@@ -107,9 +83,6 @@ class StokOpnamePersediaanController extends Controller
         ];
     }
 
-    /**
-     * GET /api/stok-opname-persediaan?PersediaanID=...
-     */
     public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -133,14 +106,6 @@ class StokOpnamePersediaanController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/stok-opname-persediaan
-     *
-     * Bulk save: kirim seluruh baris tabel sekaligus.
-     * - id null   -> CREATE (memicu syncTurunan)
-     * - id exists -> UPDATE
-     * Selisih selalu dihitung ulang backend.
-     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -235,9 +200,6 @@ class StokOpnamePersediaanController extends Controller
         ], 200);
     }
 
-    /**
-     * PUT /api/stok-opname-persediaan/{stokOpnamePersediaan}
-     */
     public function update(
         Request $request,
         StokOpnamePersediaan $stokOpnamePersediaan
@@ -278,9 +240,6 @@ class StokOpnamePersediaanController extends Controller
         ]);
     }
 
-    /**
-     * DELETE /api/stok-opname-persediaan/{stokOpnamePersediaan}
-     */
     public function destroy(
         Request $request,
         StokOpnamePersediaan $stokOpnamePersediaan
