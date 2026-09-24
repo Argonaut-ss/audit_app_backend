@@ -4,7 +4,6 @@ namespace App\Models\Persediaan;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UjiMutasiPersediaan extends Model
 {
@@ -13,6 +12,7 @@ class UjiMutasiPersediaan extends Model
     protected $primaryKey = 'UjiMutasiID';
 
     protected $fillable = [
+        'PersediaanID',
         'StokOpnameID',
         'SaldoStokOpname',
         'Keluar',
@@ -25,6 +25,7 @@ class UjiMutasiPersediaan extends Model
     ];
 
     protected $casts = [
+        'PersediaanID' => 'integer',
         'StokOpnameID' => 'integer',
         'SaldoStokOpname' => 'integer',
         'Keluar' => 'integer',
@@ -36,10 +37,10 @@ class UjiMutasiPersediaan extends Model
         'SaldoAkhirSdh' => 'integer',
     ];
 
-    public function ujiMutasi(): HasMany
+    public function persediaan(): BelongsTo
     {
-        return $this->hasMany(
-            UjiMutasiPersediaan::class,
+        return $this->belongsTo(
+            Persediaan::class,
             'PersediaanID',
             'PersediaanID'
         );

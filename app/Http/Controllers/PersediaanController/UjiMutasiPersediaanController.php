@@ -132,6 +132,7 @@ class UjiMutasiPersediaanController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'PersediaanID' => ['required', 'integer', 'exists:persediaan,PersediaanID'],
             'StokOpnameID' => ['required', 'integer', 'exists:stok_opname_persediaan,StokOpnameID'],
         ]);
 
@@ -139,6 +140,12 @@ class UjiMutasiPersediaanController extends Controller
             $request,
             (int) $validated['StokOpnameID']
         );
+
+        if ((int) $stokOpname->PersediaanID !== (int) $validated['PersediaanID']) {
+            return response()->json([
+                'message' => 'Stok opname bukan milik Persediaan ini.',
+            ], 422);
+        }
 
         if (UjiMutasiPersediaan::where(
             'StokOpnameID',
