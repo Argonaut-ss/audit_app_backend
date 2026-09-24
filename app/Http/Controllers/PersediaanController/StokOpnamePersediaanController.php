@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PersediaanController;
 use App\Http\Controllers\Controller;
 use App\Models\Persediaan\Persediaan;
 use App\Models\Persediaan\StokOpnamePersediaan;
+use App\Models\Persediaan\TestPricingPersediaan;
 use App\Models\Persediaan\UjiMutasiPersediaan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,7 +71,11 @@ class StokOpnamePersediaanController extends Controller
             'StokOpnameID' => $stokOpname->StokOpnameID,
             'PersediaanID' => $stokOpname->PersediaanID,
         ]);
-        //   $stokOpname->testPricing()->create([... 'StokOpnameI   D' => $stokOpname->StokOpnameID ...]);
+
+        TestPricingPersediaan::create([
+            'PersediaanID' => $stokOpname->PersediaanID,
+            'StokOpnameID' => $stokOpname->StokOpnameID,
+        ]);
     }
 
     protected function resolveAuthorizedPersediaan(Request $request, int $persediaanId): Persediaan

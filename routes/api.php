@@ -43,6 +43,7 @@ use App\Http\Controllers\PersediaanController\JurnalKoreksiPersediaanController;
 use App\Http\Controllers\PersediaanController\MutasiStockOpnamePersediaanController;
 use App\Http\Controllers\PersediaanController\StokOpnamePersediaanController;
 use App\Http\Controllers\PersediaanController\UjiMutasiPersediaanController;
+use App\Http\Controllers\PersediaanController\TestPricingPersediaanController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -210,6 +211,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Uji Mutasi Persediaan Routes
     Route::put('/uji-mutasi-persediaan', [UjiMutasiPersediaanController::class, 'update']);
     Route::apiResource('uji-mutasi-persediaan', UjiMutasiPersediaanController::class);
+
+    // Test Pricing Persediaan Routes
+    Route::post('/test-pricing-persediaan/bulk-save', [TestPricingPersediaanController::class, 'bulkSave']);
+    Route::apiResource('test-pricing-persediaan', TestPricingPersediaanController::class);
 
     // Mutasi Stock Opname Persediaan Routes
     Route::get('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'index']);
