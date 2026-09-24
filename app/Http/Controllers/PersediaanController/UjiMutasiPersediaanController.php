@@ -61,6 +61,7 @@ class UjiMutasiPersediaanController extends Controller
             'Keluar' => ['nullable', 'integer'],
             'Rusak' => ['nullable', 'integer'],
             'Masuk' => ['nullable', 'integer'],
+            'Keterangan' => ['nullable', 'string'],
         ];
     }
 
@@ -78,6 +79,8 @@ class UjiMutasiPersediaanController extends Controller
                 ?? $ujiMutasi?->Rusak ?? 0),
             'Masuk' => (int) ($validated['Masuk']
                 ?? $ujiMutasi?->Masuk ?? 0),
+            'Keterangan' => $validated['Keterangan']
+                ?? $ujiMutasi?->Keterangan ?? null,
         ];
     }
 
@@ -100,6 +103,7 @@ class UjiMutasiPersediaanController extends Controller
             'SaldoAkhirSblm' => $ujiMutasi->SaldoAkhirSblm,
             'SaldoAuditSdh' => $ujiMutasi->SaldoAuditSdh,
             'SaldoAkhirSdh' => $ujiMutasi->SaldoAkhirSdh,
+            'Keterangan' => $ujiMutasi->Keterangan,
             'created_at' => $ujiMutasi->created_at,
             'updated_at' => $ujiMutasi->updated_at,
         ];
@@ -171,7 +175,10 @@ class UjiMutasiPersediaanController extends Controller
                     'PersediaanID' => $stokOpname->PersediaanID,
                     'StokOpnameID' => $stokOpname->StokOpnameID,
                 ],
-                $calculated
+                $calculated,
+                [
+                    'Keterangan' => $payload['Keterangan'],
+                ]
             ));
         });
 
@@ -216,12 +223,16 @@ class UjiMutasiPersediaanController extends Controller
         $validated = $request->validate($this->validationRules());
         $payload = $this->payloadFrom($validated, $uji_mutasi_persediaan);
 
-        $uji_mutasi_persediaan->update($this->calculate(
-            $payload['SaldoStokOpname'],
-            $payload['Keluar'],
-            $payload['Rusak'],
-            $payload['Masuk'],
-            (int) $stokOpname->SaldoNeraca
+        $uji_mutasi_persediaan->update(array_merge($this->calculate(
+                $payload['SaldoStokOpname'],
+                $payload['Keluar'],
+                $payload['Rusak'],
+                $payload['Masuk'],
+                (int) $stokOpname->SaldoNeraca
+            ),
+            [
+                'Keterangan' => $payload['Keterangan'],
+            ]
         ));
 
         return response()->json([
@@ -247,6 +258,7 @@ class UjiMutasiPersediaanController extends Controller
             'rows.*.Keluar' => ['nullable', 'integer'],
             'rows.*.Rusak' => ['nullable', 'integer'],
             'rows.*.Masuk' => ['nullable', 'integer'],
+            'rows.*.Keterangan' => ['nullable', 'string'],
         ]);
 
         $persediaan = Persediaan::findOrFail($validated['PersediaanID']);
@@ -282,12 +294,17 @@ class UjiMutasiPersediaanController extends Controller
                 $item = $existing->get((int) $row['id']);
                 $payload = $this->payloadFrom($row, $item);
 
-                $item->update($this->calculate(
-                    $payload['SaldoStokOpname'],
-                    $payload['Keluar'],
-                    $payload['Rusak'],
-                    $payload['Masuk'],
-                    (int) $item->stokOpname->SaldoNeraca
+                $item->update(array_merge(
+                    $this->calculate(
+                        $payload['SaldoStokOpname'],
+                        $payload['Keluar'],
+                        $payload['Rusak'],
+                        $payload['Masuk'],
+                        (int) $item->stokOpname->SaldoNeraca
+                    ),
+                    [
+                        'Keterangan' => $payload['Keterangan'],
+                    ]
                 ));
                 $result[] = $item->fresh()->load('stokOpname');
             }

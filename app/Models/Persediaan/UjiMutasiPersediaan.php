@@ -22,6 +22,7 @@ class UjiMutasiPersediaan extends Model
         'SaldoAkhirSblm',
         'SaldoAuditSdh',
         'SaldoAkhirSdh',
+        'Keterangan',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class UjiMutasiPersediaan extends Model
         'SaldoAkhirSblm' => 'integer',
         'SaldoAuditSdh' => 'integer',
         'SaldoAkhirSdh' => 'integer',
+        'Keterangan' => 'string',
     ];
 
     public function persediaan(): BelongsTo

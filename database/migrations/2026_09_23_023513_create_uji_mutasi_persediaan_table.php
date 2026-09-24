@@ -23,6 +23,7 @@ return new class extends Migration
             $table->bigInteger('SaldoAkhirSblm')->default(0);
             $table->bigInteger('SaldoAuditSdh')->default(0);
             $table->bigInteger('SaldoAkhirSdh')->default(0);
+            $table->string('Keterangan')->nullable();
             $table->timestamps();
 
             $table->foreign('PersediaanID', 'ujimutasi_persediaan_id_fk')
