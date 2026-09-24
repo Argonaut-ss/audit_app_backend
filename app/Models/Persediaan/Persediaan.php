@@ -129,4 +129,13 @@ class Persediaan extends Model
             'PersediaanID'
         );
     }
+
+    public function testPricing(): HasMany
+    {
+        return $this->hasMany(
+            TestPricingPersediaan::class,
+            'PersediaanID',
+            'PersediaanID'
+        );
+    }
 }
