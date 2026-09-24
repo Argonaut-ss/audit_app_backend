@@ -332,7 +332,10 @@ class TestSeeder extends Seeder
 
                 // Uji Mutasi 1:1 (nilai awal 0, diisi user belakangan).
                 UjiMutasiPersediaan::updateOrCreate(
-                    ['StokOpnameID' => $stokOpname->StokOpnameID],
+                    [
+                        'PersediaanID' => $persediaan->PersediaanID,
+                        'StokOpnameID' => $stokOpname->StokOpnameID,
+                    ],
                     [
                         'SaldoStokOpname' => 0,
                         'Keluar' => 0,
