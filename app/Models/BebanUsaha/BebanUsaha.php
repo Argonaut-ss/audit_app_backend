@@ -67,4 +67,13 @@ class BebanUsaha extends Model
             'BebanUsahaID'
         );
     }
+
+    public function cutOff(): HasMany
+    {
+        return $this->hasMany(
+            CutOffBebanUsaha::class,
+            'BebanUsahaID',
+            'BebanUsahaID'
+        );
+    }
 }

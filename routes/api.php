@@ -48,10 +48,12 @@ use App\Http\Controllers\PersediaanController\TestPricingPersediaanController;
 use App\Http\Controllers\PendapatanUsahaController\DokumenPendapatanUsahaController;
 use App\Http\Controllers\PendapatanUsahaController\ProsedurPendapatanUsahaController;
 use App\Http\Controllers\PendapatanUsahaController\JurnalKoreksiPendapatanUsahaController;
+use App\Http\Controllers\PendapatanUsahaController\CutOffPendapatanUsahaController;
 
 use App\Http\Controllers\BebanUsahaController\DokumenBebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\ProsedurBebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\JurnalKoreksiBebanUsahaController;
+use App\Http\Controllers\BebanUsahaController\CutOffBebanUsahaController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -250,6 +252,11 @@ Route::middleware('auth:sanctum')->group(function () {
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-pendapatan-usaha' => 'jurnalKoreksiPendapatanUsaha']);
 
+    // Cut Off Pendapatan Usaha Routes
+    Route::apiResource('cut-off-pendapatan-usaha', CutOffPendapatanUsahaController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['cut-off-pendapatan-usaha' => 'cutOffPendapatanUsaha']);
+
     // Dokumen Beban Usaha Routes
     Route::get('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'index']);
     Route::post('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'store']);
@@ -268,6 +275,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('jurnal-koreksi-beban-usaha', JurnalKoreksiBebanUsahaController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-beban-usaha' => 'jurnalKoreksiBebanUsaha']);
+
+    // Cut Off Beban Usaha Routes
+    Route::apiResource('cut-off-beban-usaha', CutOffBebanUsahaController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['cut-off-beban-usaha' => 'cutOffBebanUsaha']);
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

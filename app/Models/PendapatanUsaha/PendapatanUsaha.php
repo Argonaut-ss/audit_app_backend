@@ -67,4 +67,13 @@ class PendapatanUsaha extends Model
             'PendapatanUsahaID'
         );
     }
+
+    public function cutOff(): HasMany
+    {
+        return $this->hasMany(
+            CutOffPendapatanUsaha::class,
+            'PendapatanUsahaID',
+            'PendapatanUsahaID'
+        );
+    }
 }
