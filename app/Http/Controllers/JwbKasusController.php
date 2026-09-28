@@ -11,6 +11,8 @@ use App\Models\Pmpj;
 use App\Models\Piutang;
 use App\Models\UtangUsaha\UtangUsaha;
 use App\Models\Persediaan\Persediaan;
+use App\Models\PendapatanUsaha\PendapatanUsaha;
+use App\Models\BebanUsaha\BebanUsaha;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -182,6 +184,14 @@ class JwbKasusController extends Controller
             ]);
 
             $persediaan = Persediaan::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
+            $pendapatanUsaha = PendapatanUsaha::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
+            $bebanUsaha = BebanUsaha::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,
             ]);
 
