@@ -19,6 +19,8 @@ use App\Models\Piutang\KonfirmasiPiutang;
 use App\Models\UtangUsaha\UtangUsaha;
 use App\Models\UtangUsaha\KonfirmasiUtangUsaha;
 use App\Models\Persediaan\Persediaan;
+use App\Models\PendapatanUsaha\PendapatanUsaha;
+use App\Models\BebanUsaha\BebanUsaha;
 use App\Models\Persediaan\StokOpnamePersediaan;
 use App\Models\Persediaan\UjiMutasiPersediaan;
 use App\Models\Persediaan\TestPricingPersediaan;
@@ -381,6 +383,30 @@ class TestSeeder extends Seeder
                     $customer
                 );
             }
+
+            PendapatanUsaha::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'ProsedurCheck' => false,
+                    'DokumenCheck' => false,
+                    'CutOffCheck' => false,
+                    'VouchingCheck' => false,
+                    'JurnalCheck' => false,
+                    'Kesimpulan' => null,
+                ]
+            );
+
+            BebanUsaha::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'ProsedurCheck' => false,
+                    'DokumenCheck' => false,
+                    'CutOffCheck' => false,
+                    'VouchingCheck' => false,
+                    'JurnalCheck' => false,
+                    'Kesimpulan' => null,
+                ]
+            );
         });
     }
 
