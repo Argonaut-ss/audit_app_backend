@@ -58,4 +58,13 @@ class BebanUsaha extends Model
             'BebanUsahaID'
         );
     }
+
+    public function jurnalKoreksi(): HasMany
+    {
+        return $this->hasMany(
+            JurnalKoreksiBebanUsaha::class,
+            'BebanUsahaID',
+            'BebanUsahaID'
+        );
+    }
 }

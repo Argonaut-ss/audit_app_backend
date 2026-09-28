@@ -58,4 +58,13 @@ class PendapatanUsaha extends Model
             'PendapatanUsahaID'
         );
     }
+
+    public function jurnalKoreksi(): HasMany
+    {
+        return $this->hasMany(
+            JurnalKoreksiPendapatanUsaha::class,
+            'PendapatanUsahaID',
+            'PendapatanUsahaID'
+        );
+    }
 }

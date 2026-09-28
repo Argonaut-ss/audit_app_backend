@@ -47,9 +47,11 @@ use App\Http\Controllers\PersediaanController\TestPricingPersediaanController;
 
 use App\Http\Controllers\PendapatanUsahaController\DokumenPendapatanUsahaController;
 use App\Http\Controllers\PendapatanUsahaController\ProsedurPendapatanUsahaController;
+use App\Http\Controllers\PendapatanUsahaController\JurnalKoreksiPendapatanUsahaController;
 
 use App\Http\Controllers\BebanUsahaController\DokumenBebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\ProsedurBebanUsahaController;
+use App\Http\Controllers\BebanUsahaController\JurnalKoreksiBebanUsahaController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -243,6 +245,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/prosedur-pendapatan-usaha/{prosedurPendapatanUsaha}', [ProsedurPendapatanUsahaController::class, 'update']);
     Route::delete('/prosedur-pendapatan-usaha/{prosedurPendapatanUsaha}', [ProsedurPendapatanUsahaController::class, 'destroy']);
 
+    // Jurnal Koreksi Pendapatan Usaha Routes
+    Route::apiResource('jurnal-koreksi-pendapatan-usaha', JurnalKoreksiPendapatanUsahaController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['jurnal-koreksi-pendapatan-usaha' => 'jurnalKoreksiPendapatanUsaha']);
+
     // Dokumen Beban Usaha Routes
     Route::get('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'index']);
     Route::post('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'store']);
@@ -256,6 +263,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/prosedur-beban-usaha/{prosedurBebanUsaha}', [ProsedurBebanUsahaController::class, 'update']);
     Route::patch('/prosedur-beban-usaha/{prosedurBebanUsaha}', [ProsedurBebanUsahaController::class, 'update']);
     Route::delete('/prosedur-beban-usaha/{prosedurBebanUsaha}', [ProsedurBebanUsahaController::class, 'destroy']);
+
+    // Jurnal Koreksi Beban Usaha Routes
+    Route::apiResource('jurnal-koreksi-beban-usaha', JurnalKoreksiBebanUsahaController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['jurnal-koreksi-beban-usaha' => 'jurnalKoreksiBebanUsaha']);
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
