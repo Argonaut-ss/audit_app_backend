@@ -45,6 +45,12 @@ use App\Http\Controllers\PersediaanController\StokOpnamePersediaanController;
 use App\Http\Controllers\PersediaanController\UjiMutasiPersediaanController;
 use App\Http\Controllers\PersediaanController\TestPricingPersediaanController;
 
+use App\Http\Controllers\PendapatanUsahaController\DokumenPendapatanUsahaController;
+use App\Http\Controllers\PendapatanUsahaController\ProsedurPendapatanUsahaController;
+
+use App\Http\Controllers\BebanUsahaController\DokumenBebanUsahaController;
+use App\Http\Controllers\BebanUsahaController\ProsedurBebanUsahaController;
+
 use App\Http\Controllers\KelasCardController;
 
 // Login & Logout & RBAC
@@ -222,6 +228,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'show']);
     Route::put('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'update']);
     Route::delete('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'destroy']);
+
+    // Dokumen Pendapatan Usaha Routes
+    Route::get('/pendapatan-usaha/{pendapatanUsahaId}/dokumen',[DokumenPendapatanUsahaController::class, 'index']);
+    Route::post('/pendapatan-usaha/{pendapatanUsahaId}/dokumen',[DokumenPendapatanUsahaController::class, 'store']);
+    Route::get('/dokumen-pendapatan-usaha/{dokumenId}',[DokumenPendapatanUsahaController::class, 'show']);
+    Route::put('/dokumen-pendapatan-usaha/{dokumenId}',[DokumenPendapatanUsahaController::class, 'update']);
+    Route::delete('/dokumen-pendapatan-usaha/{dokumenId}',[DokumenPendapatanUsahaController::class, 'destroy']);
+
+    // Prosedur Pendapatan Usaha Routes
+    Route::get('/pendapatan-usahas/{pendapatanUsaha}/prosedur', [ProsedurPendapatanUsahaController::class, 'index']);
+    Route::post('/prosedur-pendapatan-usaha', [ProsedurPendapatanUsahaController::class, 'store']);
+    Route::put('/prosedur-pendapatan-usaha/{prosedurPendapatanUsaha}', [ProsedurPendapatanUsahaController::class, 'update']);
+    Route::patch('/prosedur-pendapatan-usaha/{prosedurPendapatanUsaha}', [ProsedurPendapatanUsahaController::class, 'update']);
+    Route::delete('/prosedur-pendapatan-usaha/{prosedurPendapatanUsaha}', [ProsedurPendapatanUsahaController::class, 'destroy']);
+
+    // Dokumen Beban Usaha Routes
+    Route::get('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'index']);
+    Route::post('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'store']);
+    Route::get('/dokumen-beban-usaha/{dokumenId}',[DokumenBebanUsahaController::class, 'show']);
+    Route::put('/dokumen-beban-usaha/{dokumenId}',[DokumenBebanUsahaController::class, 'update']);
+    Route::delete('/dokumen-beban-usaha/{dokumenId}',[DokumenBebanUsahaController::class, 'destroy']);
+
+    // Prosedur Beban Usaha Routes
+    Route::get('/beban-usahas/{bebanUsaha}/prosedur', [ProsedurBebanUsahaController::class, 'index']);
+    Route::post('/prosedur-beban-usaha', [ProsedurBebanUsahaController::class, 'store']);
+    Route::put('/prosedur-beban-usaha/{prosedurBebanUsaha}', [ProsedurBebanUsahaController::class, 'update']);
+    Route::patch('/prosedur-beban-usaha/{prosedurBebanUsaha}', [ProsedurBebanUsahaController::class, 'update']);
+    Route::delete('/prosedur-beban-usaha/{prosedurBebanUsaha}', [ProsedurBebanUsahaController::class, 'destroy']);
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
