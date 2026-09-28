@@ -40,4 +40,22 @@ class BebanUsaha extends Model
             'JwbKasusID'
         );
     }
+
+    public function dokumen()
+    {
+        return $this->hasMany(
+            DokumenBebanUsaha::class,
+            'BebanUsahaID',
+            'BebanUsahaID'
+        );
+    }
+
+    public function prosedurs()
+    {
+        return $this->hasMany(
+            ProsedurBebanUsaha::class,
+            'beban_usaha_id',
+            'BebanUsahaID'
+        );
+    }
 }

@@ -40,4 +40,22 @@ class PendapatanUsaha extends Model
             'JwbKasusID'
         );
     }
+
+    public function dokumen()
+    {
+        return $this->hasMany(
+            DokumenPendapatanUsaha::class,
+            'PendapatanUsahaID',
+            'PendapatanUsahaID'
+        );
+    }
+
+    public function prosedurs()
+    {
+        return $this->hasMany(
+            ProsedurPendapatanUsaha::class,
+            'pendapatan_usaha_id',
+            'PendapatanUsahaID'
+        );
+    }
 }
