@@ -45,11 +45,13 @@ use App\Http\Controllers\PersediaanController\StokOpnamePersediaanController;
 use App\Http\Controllers\PersediaanController\UjiMutasiPersediaanController;
 use App\Http\Controllers\PersediaanController\TestPricingPersediaanController;
 
+use App\Http\Controllers\PendapatanUsahaController\PendapatanUsahaController;
 use App\Http\Controllers\PendapatanUsahaController\DokumenPendapatanUsahaController;
 use App\Http\Controllers\PendapatanUsahaController\ProsedurPendapatanUsahaController;
 use App\Http\Controllers\PendapatanUsahaController\JurnalKoreksiPendapatanUsahaController;
 use App\Http\Controllers\PendapatanUsahaController\CutOffPendapatanUsahaController;
 
+use App\Http\Controllers\BebanUsahaController\BebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\DokumenBebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\ProsedurBebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\JurnalKoreksiBebanUsahaController;
@@ -233,6 +235,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'update']);
     Route::delete('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'destroy']);
 
+    // Pendapatan Usaha Routes
+    Route::get('/pendapatan-usaha/{jwbKasusId}', [PendapatanUsahaController::class, 'show']);
+    Route::put('/pendapatan-usaha/{jwbKasusId}', [PendapatanUsahaController::class, 'update']);
+
     // Dokumen Pendapatan Usaha Routes
     Route::get('/pendapatan-usaha/{pendapatanUsahaId}/dokumen',[DokumenPendapatanUsahaController::class, 'index']);
     Route::post('/pendapatan-usaha/{pendapatanUsahaId}/dokumen',[DokumenPendapatanUsahaController::class, 'store']);
@@ -256,6 +262,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cut-off-pendapatan-usaha', CutOffPendapatanUsahaController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['cut-off-pendapatan-usaha' => 'cutOffPendapatanUsaha']);
+
+    // Beban Usaha Routes
+    Route::get('/beban-usaha/{jwbKasusId}', [BebanUsahaController::class, 'show']);
+    Route::put('/beban-usaha/{jwbKasusId}', [BebanUsahaController::class, 'update']);
 
     // Dokumen Beban Usaha Routes
     Route::get('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'index']);
