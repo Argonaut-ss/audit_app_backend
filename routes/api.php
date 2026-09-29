@@ -44,6 +44,8 @@ use App\Http\Controllers\PersediaanController\MutasiStockOpnamePersediaanControl
 use App\Http\Controllers\PersediaanController\StokOpnamePersediaanController;
 use App\Http\Controllers\PersediaanController\UjiMutasiPersediaanController;
 use App\Http\Controllers\PersediaanController\TestPricingPersediaanController;
+use App\Http\Controllers\PendapatanUsahaController\VouchingPUController;
+use App\Http\Controllers\BebanUsahaController\VouchingBUController;
 
 use App\Http\Controllers\PendapatanUsahaController\PendapatanUsahaController;
 use App\Http\Controllers\PendapatanUsahaController\DokumenPendapatanUsahaController;
@@ -227,6 +229,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Test Pricing Persediaan Routes
     Route::post('/test-pricing-persediaan/bulk-save', [TestPricingPersediaanController::class, 'bulkSave']);
     Route::apiResource('test-pricing-persediaan', TestPricingPersediaanController::class);
+
+    // Vouching Pendapatan Usaha Routes
+    Route::get('/vouching-pu/{id}/file/{field}', [VouchingPUController::class, 'file']);
+    Route::apiResource('vouching-pu', VouchingPUController::class);
+
+    // Vouching Beban Usaha Routes
+    Route::get('/vouching-bu/{id}/file/{field}', [VouchingBUController::class, 'file']);
+    Route::apiResource('vouching-bu', VouchingBUController::class);
 
     // Mutasi Stock Opname Persediaan Routes
     Route::get('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'index']);

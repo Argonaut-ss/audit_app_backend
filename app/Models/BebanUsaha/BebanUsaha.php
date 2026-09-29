@@ -76,4 +76,13 @@ class BebanUsaha extends Model
             'BebanUsahaID'
         );
     }
+
+    public function vouching(): HasMany
+    {
+        return $this->hasMany(
+            VouchingBU::class,
+            'BebanUsahaID',
+            'BebanUsahaID'
+        );
+    }
 }

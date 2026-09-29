@@ -76,4 +76,13 @@ class PendapatanUsaha extends Model
             'PendapatanUsahaID'
         );
     }
+
+    public function vouching(): HasMany
+    {
+        return $this->hasMany(
+            VouchingPU::class,
+            'PendapatanUsahaID',
+            'PendapatanUsahaID'
+        );
+    }
 }
