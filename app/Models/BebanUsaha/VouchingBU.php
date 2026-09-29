@@ -38,7 +38,7 @@ class VouchingBU extends Model
     ];
 
     protected $casts = [
-        'PendapatanUsahaID' => 'integer',
+        'BebanUsahaID' => 'integer',
         'Tanggal' => 'date:Y-m-d',
         'NominalInternal' => 'integer',
         'NominalEksternal' => 'integer',
