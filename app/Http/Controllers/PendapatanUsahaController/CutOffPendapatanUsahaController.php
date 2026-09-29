@@ -57,11 +57,11 @@ class CutOffPendapatanUsahaController extends Controller
     {
         return [
             "{$prefix}Periode" => ['required', 'in:sebelum,sesudah'],
-            "{$prefix}NamaPelanggan" => ['nullable', 'string', 'max:255'],
-            "{$prefix}NomorFaktur" => ['nullable', 'string', 'max:255'],
-            "{$prefix}TanggalFaktur" => ['nullable', 'date'],
-            "{$prefix}Jumlah" => ['nullable', 'integer'],
-            "{$prefix}TanggalDelivery" => ['nullable', 'date'],
+            "{$prefix}NamaPelanggan" => ['required', 'string', 'max:255'],
+            "{$prefix}NomorFaktur" => ['required', 'string', 'max:255'],
+            "{$prefix}TanggalFaktur" => ['required', 'date'],
+            "{$prefix}Jumlah" => ['required', 'integer', 'min:1'],
+            "{$prefix}TanggalDelivery" => ['required', 'date'],
             "{$prefix}SesuaiPeriode" => ['required', 'boolean'],
         ];
     }
