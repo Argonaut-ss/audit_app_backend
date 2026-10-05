@@ -103,7 +103,9 @@ class CashCountController extends Controller
             'success' => true,
             'data' => $cashCount
                 ? $this->serialize($cashCount, $this->namaPerusahaan($kas))
-                : null,
+                : [
+                    'NamaPerusahaan' => $this->namaPerusahaan($kas),
+                ],
         ]);
     }
 
