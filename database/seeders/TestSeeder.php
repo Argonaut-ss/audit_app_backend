@@ -21,6 +21,7 @@ use App\Models\UtangUsaha\KonfirmasiUtangUsaha;
 use App\Models\Persediaan\Persediaan;
 use App\Models\PendapatanUsaha\PendapatanUsaha;
 use App\Models\BebanUsaha\BebanUsaha;
+use App\Models\Kas\Kas;
 use App\Models\Persediaan\StokOpnamePersediaan;
 use App\Models\Persediaan\UjiMutasiPersediaan;
 use App\Models\Persediaan\TestPricingPersediaan;
@@ -403,6 +404,19 @@ class TestSeeder extends Seeder
                     'DokumenCheck' => false,
                     'CutOffCheck' => false,
                     'VouchingCheck' => false,
+                    'JurnalCheck' => false,
+                    'Kesimpulan' => null,
+                ]
+            );
+
+            Kas::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'ProsedurCheck' => false,
+                    'DokumenCheck' => false,
+                    'CashCountCheck' => false,
+                    'RekapMutasiCheck' => false,
+                    'UjiMutasiCheck' => false,
                     'JurnalCheck' => false,
                     'Kesimpulan' => null,
                 ]
