@@ -4,7 +4,7 @@ namespace App\Http\Controllers\AsetTetapController;
 
 use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
-use App\Models\BebanUsaha\BebanUsaha;
+use App\Models\AsetTetap\AsetTetap;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

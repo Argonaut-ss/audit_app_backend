@@ -195,6 +195,14 @@ class JwbKasusController extends Controller
                 'JwbKasusID' => $jawaban->JwbKasusID,
             ]);
 
+            $asetTetap = AsetTetap::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
+            $kas = \App\Models\Kas\Kas::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
             return [
                 'jawaban' => $jawaban,
                 'perikatan' => $perikatan,
