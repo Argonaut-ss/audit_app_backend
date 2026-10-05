@@ -36,7 +36,6 @@ use App\Http\Controllers\UtangUsahaController\RekapBalasanUtangUsahaController;
 use App\Http\Controllers\UtangUsahaController\ProsedurAlternatifUtangUsahaController;
 
 use App\Http\Controllers\PersediaanController\PersediaanController;
-
 use App\Http\Controllers\PersediaanController\DokumenPersediaanController;
 use App\Http\Controllers\PersediaanController\ProsedurPersediaanController;
 use App\Http\Controllers\PersediaanController\JurnalKoreksiPersediaanController;
@@ -61,8 +60,13 @@ use App\Http\Controllers\BebanUsahaController\CutOffBebanUsahaController;
 
 use App\Http\Controllers\asetTetapController\AsetTetapController;
 use App\Http\Controllers\AsetTetapController\AsetBaruAsetTetapController;
+use App\Http\Controllers\AsetTetapController\ProsedurAsetTetapController;
+use App\Http\Controllers\AsetTetapController\DokumenAsetTetapController;
+use App\Http\Controllers\AsetTetapController\UjiPenyusutanAsetTetapController;
 
 use App\Http\Controllers\kasController\KasController;
+use App\Http\Controllers\KasController\ProsedurKasController;
+use App\Http\Controllers\KasController\DokumenKasController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -318,6 +322,41 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/aset-baru-aset-tetap/bulk-save', [AsetBaruAsetTetapController::class, 'bulkSave']);
     Route::get('/aset-baru-aset-tetap/{id}/file/{field}', [AsetBaruAsetTetapController::class, 'file']);
     Route::apiResource('aset-baru-aset-tetap', AsetBaruAsetTetapController::class);
+
+    // Prosedur Aset Tetap Routes
+    Route::get('/aset-tetaps/{asetTetap}/prosedur',[ProsedurAsetTetapController::class, 'index']);
+    Route::post('/prosedur-aset-tetap',[ProsedurAsetTetapController::class, 'store']);
+    Route::put('/prosedur-aset-tetap/{prosedurAsetTetap}',[ProsedurAsetTetapController::class, 'update']);
+    Route::patch('/prosedur-aset-tetap/{prosedurAsetTetap}',[ProsedurAsetTetapController::class, 'update']);
+    Route::delete('/prosedur-aset-tetap/{prosedurAsetTetap}',[ProsedurAsetTetapController::class, 'destroy']);
+
+    // Dokumen Aset Tetap Routes
+    Route::get('/aset-tetap/{asetTetapId}/dokumen', [DokumenAsetTetapController::class, 'index']);
+    Route::post('/aset-tetap/{asetTetapId}/dokumen', [DokumenAsetTetapController::class, 'store']);
+    Route::get('/dokumen-aset-tetap/{dokumenId}', [DokumenAsetTetapController::class, 'show']);
+    Route::put('/dokumen-aset-tetap/{dokumenId}', [DokumenAsetTetapController::class, 'update']);
+    Route::delete('/dokumen-aset-tetap/{dokumenId}', [DokumenAsetTetapController::class, 'destroy']);
+
+    // Uji Penyusutan Aset Tetap Routes
+    Route::get('/aset-tetap/{asetTetapId}/uji-penyusutan', [UjiPenyusutanAsetTetapController::class, 'index']);
+    Route::post('/aset-tetap/{asetTetapId}/uji-penyusutan', [UjiPenyusutanAsetTetapController::class, 'store']);
+    Route::get('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'show']);
+    Route::put('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'update']);
+    Route::delete('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'destroy']);
+
+    // Prosedur Kas Routes
+    Route::get('/kas/{kas}/prosedur', [ProsedurKasController::class, 'index']);
+    Route::post('/prosedur-kas', [ProsedurKasController::class, 'store']);
+    Route::put('/prosedur-kas/{prosedurKas}', [ProsedurKasController::class, 'update']);
+    Route::patch('/prosedur-kas/{prosedurKas}', [ProsedurKasController::class, 'update']);
+    Route::delete('/prosedur-kas/{prosedurKas}', [ProsedurKasController::class, 'destroy']);
+
+    // Dokumen Kas Routes
+    Route::get('/kas/{kasId}/dokumen', [DokumenKasController::class, 'index']);
+    Route::post('/kas/{kasId}/dokumen', [DokumenKasController::class, 'store']);
+    Route::get('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'show']);
+    Route::put('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'update']);
+    Route::delete('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'destroy']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

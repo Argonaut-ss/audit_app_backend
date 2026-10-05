@@ -43,21 +43,21 @@ class Kas extends Model
         );
     }
 
-    public function dokumen()
+    public function dokumen(): HasMany
     {
         return $this->hasMany(
-            DokumenBebanUsaha::class,
-            'BebanUsahaID',
-            'BebanUsahaID'
+            DokumenKas::class,
+            'KasID',
+            'KasID'
         );
     }
 
     public function prosedurs()
     {
         return $this->hasMany(
-            ProsedurBebanUsaha::class,
-            'beban_usaha_id',
-            'BebanUsahaID'
+            ProsedurKas::class,
+            'kas_id',
+            'KasID'
         );
     }
 
