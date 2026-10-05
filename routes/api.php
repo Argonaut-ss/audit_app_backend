@@ -59,6 +59,10 @@ use App\Http\Controllers\BebanUsahaController\ProsedurBebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\JurnalKoreksiBebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\CutOffBebanUsahaController;
 
+use App\Http\Controllers\asetTetapController\AsetTetapController;
+
+use App\Http\Controllers\kasController\KasController;
+
 use App\Http\Controllers\KelasCardController;
 
 // Login & Logout & RBAC
@@ -300,7 +304,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cut-off-beban-usaha', CutOffBebanUsahaController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['cut-off-beban-usaha' => 'cutOffBebanUsaha']);
-    
+
+    // Kas Routes
+    Route::get('/kas/{jwbKasusId}', [KasController::class, 'show']);
+    Route::put('/kas/{jwbKasusId}', [KasController::class, 'update']);
+
+    // Aset Tetap Routes
+    Route::get('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'show']);
+    Route::put('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'update']);
+
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
 });
