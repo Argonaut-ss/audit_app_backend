@@ -211,7 +211,7 @@ class DataClientController extends Controller
         /*
          * NamaClient adalah wewenang Admin saja.
          */
-        if (! $isAdmin) {
+        if (! $isAdmin && ! $isMahasiswaSahih) {
             unset($validated['NamaClient']);
         }
 
