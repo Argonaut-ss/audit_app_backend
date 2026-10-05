@@ -60,6 +60,7 @@ use App\Http\Controllers\BebanUsahaController\JurnalKoreksiBebanUsahaController;
 use App\Http\Controllers\BebanUsahaController\CutOffBebanUsahaController;
 
 use App\Http\Controllers\asetTetapController\AsetTetapController;
+use App\Http\Controllers\AsetTetapController\AsetBaruAsetTetapController;
 
 use App\Http\Controllers\kasController\KasController;
 
@@ -252,7 +253,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pendapatan Usaha Routes
     Route::get('/pendapatan-usaha/{jwbKasusId}', [PendapatanUsahaController::class, 'show']);
     Route::put('/pendapatan-usaha/{jwbKasusId}', [PendapatanUsahaController::class, 'update']);
-
+    
     // Dokumen Pendapatan Usaha Routes
     Route::get('/pendapatan-usaha/{pendapatanUsahaId}/dokumen',[DokumenPendapatanUsahaController::class, 'index']);
     Route::post('/pendapatan-usaha/{pendapatanUsahaId}/dokumen',[DokumenPendapatanUsahaController::class, 'store']);
@@ -312,6 +313,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Aset Tetap Routes
     Route::get('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'show']);
     Route::put('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'update']);
+
+    // Aset Tetap Routes
+    Route::post('/aset-baru-aset-tetap/bulk-save', [AsetBaruAsetTetapController::class, 'bulkSave']);
+    Route::get('/aset-baru-aset-tetap/{id}/file/{field}', [AsetBaruAsetTetapController::class, 'file']);
+    Route::apiResource('aset-baru-aset-tetap', AsetBaruAsetTetapController::class);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
