@@ -62,6 +62,7 @@ use App\Http\Controllers\BebanUsahaController\CutOffBebanUsahaController;
 use App\Http\Controllers\asetTetapController\AsetTetapController;
 
 use App\Http\Controllers\kasController\KasController;
+use App\Http\Controllers\KasController\CashCountController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -308,6 +309,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Kas Routes
     Route::get('/kas/{jwbKasusId}', [KasController::class, 'show']);
     Route::put('/kas/{jwbKasusId}', [KasController::class, 'update']);
+
+    // Cash Count Routes
+    Route::get('/kas/{kasId}/cash-count', [CashCountController::class, 'show']);
+    Route::post('/kas/{kasId}/cash-count', [CashCountController::class, 'store']);
 
     // Aset Tetap Routes
     Route::get('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'show']);
