@@ -4,7 +4,7 @@ namespace App\Http\Controllers\KasController;
 
 use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
-use App\Models\Kas\CashCount;
+use App\Models\Kas\CashCountKas;
 use App\Models\Kas\Kas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,7 +56,7 @@ class CashCountController extends Controller
         ]);
     }
 
-    protected function serialize(CashCount $cashCount, ?string $namaPerusahaan = null): array
+    protected function serialize(CashCountKas $cashCount, ?string $namaPerusahaan = null): array
     {
         $cashCount->loadMissing('danaLain');
 
@@ -186,7 +186,7 @@ class CashCountController extends Controller
                 $attributes[$column] = (int) ($validated[$column] ?? 0);
             }
 
-            $cashCount = CashCount::updateOrCreate(
+            $cashCount = CashCountKas::updateOrCreate(
                 ['KasID' => $kas->KasID],
                 $attributes
             );
