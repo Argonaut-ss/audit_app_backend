@@ -17,7 +17,6 @@ class RekapMutasiKasController extends Controller
     private function resolveAuthorizedKas(Request $request, int $kasId): Kas
     {
         $kas = Kas::findOrFail($kasId);
-
         JwbKasus::forUser($request->user())
             ->where('JwbKasusID', $kas->JwbKasusID)
             ->firstOrFail();
@@ -25,10 +24,7 @@ class RekapMutasiKasController extends Controller
         return $kas;
     }
 
-    private function resolveAuthorizedRekap(
-        Request $request,
-        int $rekapMutasiId
-    ): RekapMutasiKas {
+    private function resolveAuthorizedRekap(Request $request,int $rekapMutasiId): RekapMutasiKas {
         $rekap = RekapMutasiKas::with('kas')->findOrFail($rekapMutasiId);
         $this->resolveAuthorizedKas($request, (int) $rekap->KasID);
 
@@ -135,7 +131,6 @@ class RekapMutasiKasController extends Controller
             'SaldoAwal' => ['sometimes', 'integer'],
         ]);
         $kas = $this->resolveAuthorizedKas($request, (int) $validated['KasID']);
-
         $rekap = $kas->rekapMutasi()->create([
             'SaldoAwal' => (int) ($validated['SaldoAwal'] ?? 0),
             'DebitTotal' => 0,
@@ -269,6 +264,20 @@ class RekapMutasiKasController extends Controller
             'success' => true,
             'message' => 'Rekap mutasi kas berhasil disimpan.',
             'data' => $this->serializeRekap($saved),
+        ]);
+    }
+
+    public function destroyRow(Request $request, int $id): JsonResponse
+    {
+        $row = IsiRekapMutasiKas::with('rekapMutasi.kas')->findOrFail($id);
+        $this->resolveAuthorizedRekap($request, (int) $row->RekapMutasiID);
+        $rekap = $row->rekapMutasi;
+        $row->delete();
+        $this->recalculate($rekap);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Baris mutasi kas berhasil dihapus.',
         ]);
     }
 
