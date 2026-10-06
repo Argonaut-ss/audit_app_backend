@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class CashCountKas extends Model
+class CashCount extends Model
 {
     protected $table = 'cash_count';
 
@@ -68,7 +68,7 @@ class CashCountKas extends Model
     public function danaLain(): HasMany
     {
         return $this->hasMany(
-            CashCountDanaLainKas::class,
+            CashCountDanaLain::class,
             'CashCountID',
             'CashCountID'
         );
