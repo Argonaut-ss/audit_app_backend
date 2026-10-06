@@ -65,6 +65,7 @@ use App\Http\Controllers\AsetTetapController\DokumenAsetTetapController;
 use App\Http\Controllers\AsetTetapController\UjiPenyusutanAsetTetapController;
 
 use App\Http\Controllers\kasController\KasController;
+use App\Http\Controllers\KasController\RekapMutasiKasController;
 use App\Http\Controllers\KasController\ProsedurKasController;
 use App\Http\Controllers\KasController\DokumenKasController;
 use App\Http\Controllers\KasController\CashCountController;
@@ -314,6 +315,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Kas Routes
     Route::get('/kas/{jwbKasusId}', [KasController::class, 'show']);
     Route::put('/kas/{jwbKasusId}', [KasController::class, 'update']);
+    
+    // Rekap Mutasi Kas Routes
+    Route::post('/rekap-mutasi-kas/bulk-save', [RekapMutasiKasController::class, 'bulkSave']);
+    Route::apiResource('rekap-mutasi-kas', RekapMutasiKasController::class);
 
     // Cash Count Routes
     Route::get('/kas/{kasId}/cash-count', [CashCountController::class, 'show']);

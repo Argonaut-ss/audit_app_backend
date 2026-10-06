@@ -42,12 +42,16 @@ class Kas extends Model
         );
     }
 
-    public function cashCount(): HasOne
+    public function rekapMutasi(): HasMany
     {
-        return $this->hasOne(
-            CashCount::class,
-          
-    public function dokumen(): HasMany
+        return $this->hasMany(
+            RekapMutasiKas::class,
+            'KasID',
+            'KasID'
+        );
+    }
+
+    public function dokumen()
     {
         return $this->hasMany(
             DokumenKas::class,
