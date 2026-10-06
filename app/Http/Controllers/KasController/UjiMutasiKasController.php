@@ -34,8 +34,6 @@ class UjiMutasiKasController extends Controller
         return [
             'UjiMutasiID' => $ujiMutasi->UjiMutasiID,
             'KasID' => $ujiMutasi->KasID,
-            'CashCountID' => $ujiMutasi->CashCountID,
-            'RekapMutasiID' => $ujiMutasi->RekapMutasiID,
             'Penjelasan' => $ujiMutasi->Penjelasan,
             'created_at' => $ujiMutasi->created_at,
             'updated_at' => $ujiMutasi->updated_at,
@@ -55,9 +53,7 @@ class UjiMutasiKasController extends Controller
 
         $data = array_merge($data, [
             'KasID' => $kas->KasID,
-            'CashCountID' => $cashCount->CashCountID,
             'TotalKeseluruhan' => (int) $cashCount->TotalKeseluruhan,
-            'RekapMutasiID' => $rekapMutasi->RekapMutasiID,
             'KreditTotal' => (int) $rekapMutasi->KreditTotal,
             'DebitTotal' => (int) $rekapMutasi->DebitTotal,
             'SaldoAwal' => (int) $rekapMutasi->SaldoAwal,
@@ -85,8 +81,6 @@ class UjiMutasiKasController extends Controller
             return UjiMutasiKas::updateOrCreate(
                 ['KasID' => $kas->KasID],
                 [
-                    'CashCountID' => $cashCount->CashCountID,
-                    'RekapMutasiID' => $rekapMutasi->RekapMutasiID,
                     'Penjelasan' => $validated['Penjelasan'] ?? null,
                 ]
             );

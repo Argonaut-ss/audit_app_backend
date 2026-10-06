@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::create('uji_mutasi_kas', function (Blueprint $table) {
             $table->id('UjiMutasiID');
             $table->unsignedBigInteger('KasID')->unique();
-            $table->unsignedBigInteger('CashCountID')->unique();
-            $table->unsignedBigInteger('RekapMutasiID')->unique();
             $table->text('Penjelasan')->nullable();
             $table->timestamps();
 
@@ -24,15 +22,6 @@ return new class extends Migration
                 ->on('kas')
                 ->cascadeOnDelete();
 
-            $table->foreign('CashCountID', 'uji_mutasi_kas_cash_count_id_fk')
-                ->references('CashCountID')
-                ->on('cash_count')
-                ->cascadeOnDelete();
-
-            $table->foreign('RekapMutasiID', 'uji_mutasi_kas_rekap_mutasi_id_fk')
-                ->references('RekapMutasiID')
-                ->on('rekap_mutasi_kas')
-                ->cascadeOnDelete();
         });
     }
 
