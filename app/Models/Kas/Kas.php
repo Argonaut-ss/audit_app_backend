@@ -46,8 +46,33 @@ class Kas extends Model
     {
         return $this->hasOne(
             CashCount::class,
+          
+    public function dokumen(): HasMany
+    {
+        return $this->hasMany(
+            DokumenKas::class,
             'KasID',
             'KasID'
         );
     }
+}
+
+    public function prosedurs()
+    {
+        return $this->hasMany(
+            ProsedurKas::class,
+            'kas_id',
+            'KasID'
+        );
+    }
+
+    public function jurnalKoreksi(): HasMany
+    {
+        return $this->hasMany(
+            JurnalKoreksiBebanUsaha::class,
+            'BebanUsahaID',
+            'BebanUsahaID'
+        );
+    }
+
 }

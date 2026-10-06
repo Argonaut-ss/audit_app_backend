@@ -43,23 +43,32 @@ class AsetTetap extends Model
         );
     }
 
-    public function dokumen()
+    public function asetBaru(): HasMany
     {
         return $this->hasMany(
-            DokumenBebanUsaha::class,
-            'BebanUsahaID',
-            'BebanUsahaID'
+            AsetBaruAsetTetap::class,
+            'AsetTetapID',
+            'AsetTetapID'
+        );
+    }
+
+    public function dokumen(): HasMany
+    {
+        return $this->hasMany(
+            DokumenAsetTetap::class,
+            'AsetTetapID',
+            'AsetTetapID'
         );
     }
 
     public function prosedurs()
     {
         return $this->hasMany(
-            ProsedurBebanUsaha::class,
-            'beban_usaha_id',
-            'BebanUsahaID'
+            ProsedurAsetTetap::class,
+            'aset_tetap_id',
+            'AsetTetapID'
         );
-    }
+    }   
 
     public function jurnalKoreksi(): HasMany
     {
@@ -70,5 +79,12 @@ class AsetTetap extends Model
         );
     }
 
-    
+    public function ujiPenyusutan(): HasMany
+    {
+        return $this->hasMany(
+            UjiPenyusutanAsetTetap::class,
+            'AsetTetapID',
+            'AsetTetapID'
+        );
+    }
 }
