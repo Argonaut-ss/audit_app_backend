@@ -6,7 +6,6 @@ use App\Models\JwbKasus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Kas extends Model
 {
@@ -18,9 +17,9 @@ class Kas extends Model
         'JwbKasusID',
         'ProsedurCheck',
         'DokumenCheck',
-        'AsetLamaCheck',
-        'AsetBaruCheck',
-        'UjiPenyusutanCheck',
+        'CashCountCheck',
+        'RekapMutasiCheck',
+        'UjiMutasiCheck',
         'JurnalCheck',
         'Kesimpulan',
     ];
@@ -28,13 +27,13 @@ class Kas extends Model
     protected $casts = [
         'ProsedurCheck' => 'boolean',
         'DokumenCheck' => 'boolean',
-        'AsetLamaCheck' => 'boolean',
-        'AsetBaruCheck' => 'boolean',
-        'UjiPenyusutanCheck' => 'boolean',
+        'CashCountCheck' => 'boolean',
+        'RekapMutasiCheck' => 'boolean',
+        'UjiMutasiCheck' => 'boolean',
         'JurnalCheck' => 'boolean',
     ];
 
-    public function JwbKasus(): BelongsTo
+    public function jwbKasus(): BelongsTo
     {
         return $this->belongsTo(
             JwbKasus::class,
@@ -55,18 +54,19 @@ class Kas extends Model
     public function dokumen()
     {
         return $this->hasMany(
-            DokumenBebanUsaha::class,
-            'BebanUsahaID',
-            'BebanUsahaID'
+            DokumenKas::class,
+            'KasID',
+            'KasID'
         );
     }
+}
 
     public function prosedurs()
     {
         return $this->hasMany(
-            ProsedurBebanUsaha::class,
-            'beban_usaha_id',
-            'BebanUsahaID'
+            ProsedurKas::class,
+            'kas_id',
+            'KasID'
         );
     }
 
@@ -79,5 +79,4 @@ class Kas extends Model
         );
     }
 
-    
 }
