@@ -46,18 +46,26 @@ class UjiMutasiKasController extends Controller
     {
         [$kas, $cashCount, $rekapMutasi] = $this->authorizedSources($request, $kasId);
         $ujiMutasi = UjiMutasiKas::where('KasID', $kas->KasID)->first();
+        $data = $ujiMutasi
+            ? $this->serialize($ujiMutasi)
+            : [
+                'UjiMutasiID' => null,
+                'Penjelasan' => null,
+            ];
+
+        $data = array_merge($data, [
+            'KasID' => $kas->KasID,
+            'CashCountID' => $cashCount->CashCountID,
+            'TotalKeseluruhan' => (int) $cashCount->TotalKeseluruhan,
+            'RekapMutasiID' => $rekapMutasi->RekapMutasiID,
+            'KreditTotal' => (int) $rekapMutasi->KreditTotal,
+            'DebitTotal' => (int) $rekapMutasi->DebitTotal,
+            'SaldoAwal' => (int) $rekapMutasi->SaldoAwal,
+        ]);
 
         return response()->json([
             'success' => true,
-            'data' => $ujiMutasi
-                ? $this->serialize($ujiMutasi)
-                : [
-                    'UjiMutasiID' => null,
-                    'KasID' => $kas->KasID,
-                    'CashCountID' => $cashCount->CashCountID,
-                    'RekapMutasiID' => $rekapMutasi->RekapMutasiID,
-                    'Penjelasan' => null,
-                ],
+            'data' => $data,
         ]);
     }
 
