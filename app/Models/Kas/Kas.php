@@ -79,13 +79,4 @@ class Kas extends Model
         );
     }
 
-    public function jurnalKoreksi(): HasMany
-    {
-        return $this->hasMany(
-            JurnalKoreksiBebanUsaha::class,
-            'BebanUsahaID',
-            'BebanUsahaID'
-        );
-    }
-
 }
