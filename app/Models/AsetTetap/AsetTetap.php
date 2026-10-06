@@ -73,9 +73,9 @@ class AsetTetap extends Model
     public function jurnalKoreksi(): HasMany
     {
         return $this->hasMany(
-            JurnalKoreksiBebanUsaha::class,
-            'BebanUsahaID',
-            'BebanUsahaID'
+            JurnalKoreksiAsetTetap::class,
+            'AsetTetapID',
+            'AsetTetapID'
         );
     }
 

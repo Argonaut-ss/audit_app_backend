@@ -63,6 +63,7 @@ use App\Http\Controllers\AsetTetapController\AsetBaruAsetTetapController;
 use App\Http\Controllers\AsetTetapController\ProsedurAsetTetapController;
 use App\Http\Controllers\AsetTetapController\DokumenAsetTetapController;
 use App\Http\Controllers\AsetTetapController\UjiPenyusutanAsetTetapController;
+use App\Http\Controllers\AsetTetapController\JurnalKoreksiAsetTetapController;
 
 use App\Http\Controllers\kasController\KasController;
 use App\Http\Controllers\KasController\RekapMutasiKasController;
@@ -360,6 +361,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'show']);
     Route::put('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'update']);
     Route::delete('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'destroy']);
+
+    // Jurnal Koreksi Aset Tetap Routes
+    Route::apiResource('jurnal-koreksi-aset-tetap', JurnalKoreksiAsetTetapController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['jurnal-koreksi-aset-tetap' => 'jurnalKoreksiAsetTetap']);
 
     // Prosedur Kas Routes
     Route::get('/kas/{kas}/prosedur', [ProsedurKasController::class, 'index']);
