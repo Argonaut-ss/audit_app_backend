@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
 use App\Models\Kas\IsiRekapMutasiKas;
 use App\Models\Kas\Kas;
-use App\Models\RekapMutasiKas;
+use App\Models\Kas\RekapMutasiKas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
