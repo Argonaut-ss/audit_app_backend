@@ -3,7 +3,6 @@
 namespace App\Models\Kas;
 
 use App\Models\JwbKasus;
-use App\Models\RekapMutasiKas;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
