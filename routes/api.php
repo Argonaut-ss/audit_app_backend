@@ -67,6 +67,7 @@ use App\Http\Controllers\AsetTetapController\JurnalKoreksiAsetTetapController;
 
 use App\Http\Controllers\kasController\KasController;
 use App\Http\Controllers\KasController\RekapMutasiKasController;
+use App\Http\Controllers\KasController\UjiMutasiKasController;
 use App\Http\Controllers\KasController\ProsedurKasController;
 use App\Http\Controllers\KasController\DokumenKasController;
 use App\Http\Controllers\KasController\CashCountController;
@@ -326,6 +327,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Cash Count Routes
     Route::get('/kas/{kasId}/cash-count', [CashCountController::class, 'show']);
     Route::post('/kas/{kasId}/cash-count', [CashCountController::class, 'store']);
+
+    // Uji Mutasi Kas Routes
+    Route::get('/kas/{kasId}/uji-mutasi', [UjiMutasiKasController::class, 'show']);
+    Route::post('/kas/{kasId}/uji-mutasi', [UjiMutasiKasController::class, 'store']);
 
     // Jurnal Koreksi Kas Routes
     Route::apiResource('jurnal-koreksi-kas', JurnalKoreksiKasController::class)

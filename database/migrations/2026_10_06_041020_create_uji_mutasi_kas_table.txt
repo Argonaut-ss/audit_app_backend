@@ -1,0 +1,50 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('uji_mutasi_kas', function (Blueprint $table) {
+            $table->id('UjiMutasiID');
+            $table->unsignedBigInteger('KasID')->unique();
+            $table->unsignedBigInteger('CashCountID')->unique();
+            $table->unsignedBigInteger('RekapMutasiID')->unique();
+            $table->bigInteger('SaldoAuditSblm')->default(0);
+            $table->bigInteger('SaldoAuditStlh')->default(0);
+            $table->bigInteger('SelisihSblm')->default(0);
+            $table->bigInteger('SelisihStlh')->default(0);
+            $table->string('Penjelasan')->nullable();
+            $table->timestamps();
+
+            $table->foreign('KasID', 'uji_mutasi_kas_kas_id_fk')
+                ->references('KasID')
+                ->on('kas')
+                ->cascadeOnDelete();
+
+            $table->foreign('CashCountID', 'uji_mutasi_kas_cash_count_id_fk')
+                ->references('CashCountID')
+                ->on('cash_count')
+                ->cascadeOnDelete();
+
+            $table->foreign('RekapMutasiID', 'uji_mutasi_kas_rekap_mutasi_id_fk')
+                ->references('RekapMutasiID')
+                ->on('rekap_mutasi_kas')
+                ->cascadeOnDelete();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('uji_mutasi_kas');
+    }
+};
