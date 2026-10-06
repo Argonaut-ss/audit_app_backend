@@ -5,7 +5,7 @@ namespace App\Models\Kas;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CashCountDanaLain extends Model
+class CashCountDanaLainKas extends Model
 {
     protected $table = 'cash_count_dana_lain';
 
@@ -24,6 +24,6 @@ class CashCountDanaLain extends Model
 
     public function cashCount(): BelongsTo
     {
-        return $this->belongsTo(CashCount::class, 'CashCountID', 'CashCountID');
+        return $this->belongsTo(CashCountKas::class, 'CashCountID', 'CashCountID');
     }
 }
