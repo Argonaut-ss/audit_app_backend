@@ -51,6 +51,15 @@ class Kas extends Model
         );
     }
 
+    public function cashCount(): HasOne
+    {
+        return $this->hasOne(
+            CashCountKas::class,
+            'KasID',
+            'KasID'
+        );
+    }
+
     public function dokumen()
     {
         return $this->hasMany(
@@ -59,7 +68,7 @@ class Kas extends Model
             'KasID'
         );
     }
-}
+
 
     public function prosedurs()
     {
