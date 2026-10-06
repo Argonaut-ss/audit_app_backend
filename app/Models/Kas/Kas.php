@@ -80,4 +80,13 @@ class Kas extends Model
         );
     }
 
+    public function jurnalKoreksi(): HasMany
+    {
+        return $this->hasMany(
+            JurnalKoreksiKas::class,
+            'KasID',
+            'KasID'
+        );
+    }
+
 }

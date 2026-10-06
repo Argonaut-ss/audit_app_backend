@@ -69,6 +69,7 @@ use App\Http\Controllers\KasController\RekapMutasiKasController;
 use App\Http\Controllers\KasController\ProsedurKasController;
 use App\Http\Controllers\KasController\DokumenKasController;
 use App\Http\Controllers\KasController\CashCountController;
+use App\Http\Controllers\KasController\JurnalKoreksiKasController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -324,6 +325,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Cash Count Routes
     Route::get('/kas/{kasId}/cash-count', [CashCountController::class, 'show']);
     Route::post('/kas/{kasId}/cash-count', [CashCountController::class, 'store']);
+
+    // Jurnal Koreksi Kas Routes
+    Route::apiResource('jurnal-koreksi-kas', JurnalKoreksiKasController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['jurnal-koreksi-kas' => 'jurnalKoreksiKas']);
 
     // Aset Tetap Routes
     Route::get('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'show']);
