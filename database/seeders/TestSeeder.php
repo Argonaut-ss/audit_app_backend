@@ -26,7 +26,6 @@ use App\Models\Persediaan\StokOpnamePersediaan;
 use App\Models\Persediaan\UjiMutasiPersediaan;
 use App\Models\Persediaan\TestPricingPersediaan;
 use App\Models\AsetTetap\AsetTetap;
-use App\Models\kas\Kas;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

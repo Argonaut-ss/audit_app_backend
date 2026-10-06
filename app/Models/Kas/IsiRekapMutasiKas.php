@@ -31,7 +31,7 @@ class IsiRekapMutasiKas extends Model
     public function rekapMutasi(): BelongsTo
     {
         return $this->belongsTo(
-            \App\Models\RekapMutasiKas::class,
+            RekapMutasiKas::class,
             'RekapMutasiID',
             'RekapMutasiID'
         );
