@@ -63,6 +63,7 @@ use App\Http\Controllers\asetTetapController\AsetTetapController;
 use App\Http\Controllers\AsetTetapController\AsetBaruAsetTetapController;
 
 use App\Http\Controllers\kasController\KasController;
+use App\Http\Controllers\KasController\RekapMutasiKasController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -309,6 +310,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Kas Routes
     Route::get('/kas/{jwbKasusId}', [KasController::class, 'show']);
     Route::put('/kas/{jwbKasusId}', [KasController::class, 'update']);
+    
+    // Rekap Mutasi Kas Routes
+    Route::post('/rekap-mutasi-kas/bulk-save', [RekapMutasiKasController::class, 'bulkSave']);
+    Route::apiResource('rekap-mutasi-kas', RekapMutasiKasController::class);
 
     // Aset Tetap Routes
     Route::get('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'show']);
