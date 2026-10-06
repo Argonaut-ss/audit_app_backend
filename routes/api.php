@@ -318,6 +318,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Rekap Mutasi Kas Routes
     Route::post('/rekap-mutasi-kas/bulk-save', [RekapMutasiKasController::class, 'bulkSave']);
+    Route::delete('/rekap-mutasi-kas/row/{id}', [RekapMutasiKasController::class, 'destroyRow']);
     Route::apiResource('rekap-mutasi-kas', RekapMutasiKasController::class);
 
     // Cash Count Routes
