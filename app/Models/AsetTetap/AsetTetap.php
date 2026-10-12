@@ -52,6 +52,15 @@ class AsetTetap extends Model
         );
     }
 
+    public function asetLama(): HasMany
+    {
+        return $this->hasMany(
+            AsetLamaAsetTetap::class,
+            'AsetTetapID',
+            'AsetTetapID'
+        );
+    }
+
     public function dokumen(): HasMany
     {
         return $this->hasMany(

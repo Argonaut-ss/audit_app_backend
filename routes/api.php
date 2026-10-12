@@ -60,6 +60,7 @@ use App\Http\Controllers\BebanUsahaController\CutOffBebanUsahaController;
 
 use App\Http\Controllers\asetTetapController\AsetTetapController;
 use App\Http\Controllers\AsetTetapController\AsetBaruAsetTetapController;
+use App\Http\Controllers\AsetTetapController\AsetLamaAsetTetapController;
 use App\Http\Controllers\AsetTetapController\ProsedurAsetTetapController;
 use App\Http\Controllers\AsetTetapController\DokumenAsetTetapController;
 use App\Http\Controllers\AsetTetapController\UjiPenyusutanAsetTetapController;
@@ -345,6 +346,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/aset-baru-aset-tetap/bulk-save', [AsetBaruAsetTetapController::class, 'bulkSave']);
     Route::get('/aset-baru-aset-tetap/{id}/file/{field}', [AsetBaruAsetTetapController::class, 'file']);
     Route::apiResource('aset-baru-aset-tetap', AsetBaruAsetTetapController::class);
+
+    // Aset Lama Aset Tetap Routes
+    Route::post('/aset-lama-aset-tetap/bulk-save', [AsetLamaAsetTetapController::class, 'bulkSave']);
+    Route::get('/aset-lama-aset-tetap/{id}/file/{field}', [AsetLamaAsetTetapController::class, 'file']);
+    Route::apiResource('aset-lama-aset-tetap', AsetLamaAsetTetapController::class);
 
     // Prosedur Aset Tetap Routes
     Route::get('/aset-tetaps/{asetTetap}/prosedur',[ProsedurAsetTetapController::class, 'index']);
