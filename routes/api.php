@@ -74,6 +74,10 @@ use App\Http\Controllers\KasController\DokumenKasController;
 use App\Http\Controllers\KasController\CashCountController;
 use App\Http\Controllers\KasController\JurnalKoreksiKasController;
 
+use App\Http\Controllers\AsetLainController\ProsedurAsetLainController;
+use App\Http\Controllers\AsetLainController\DokumenAsetLainController;
+use App\Http\Controllers\AsetLainController\BuktiPendukungAsetLainController;
+
 use App\Http\Controllers\KelasCardController;
 
 // Login & Logout & RBAC
@@ -391,6 +395,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'show']);
     Route::put('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'update']);
     Route::delete('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'destroy']);
+
+    // Prosedur Aset Lain Routes
+    Route::get('/aset-lain/{asetLain}/prosedur', [ProsedurAsetLainController::class, 'index']);
+    Route::post('/prosedur-aset-lain', [ProsedurAsetLainController::class, 'store']);
+    Route::put('/prosedur-aset-lain/{prosedurAsetLain}', [ProsedurAsetLainController::class, 'update']);
+    Route::patch('/prosedur-aset-lain/{prosedurAsetLain}', [ProsedurAsetLainController::class, 'update']);
+    Route::delete('/prosedur-aset-lain/{prosedurAsetLain}', [ProsedurAsetLainController::class, 'destroy']);
+
+    // Dokumen Aset Lain Routes
+    Route::get('/aset-lain/{asetLainId}/dokumen', [DokumenAsetLainController::class, 'index']);
+    Route::post('/aset-lain/{asetLainId}/dokumen', [DokumenAsetLainController::class, 'store']);
+    Route::get('/dokumen-aset-lain/{dokumenId}', [DokumenAsetLainController::class, 'show']);
+    Route::put('/dokumen-aset-lain/{dokumenId}', [DokumenAsetLainController::class, 'update']);
+    Route::delete('/dokumen-aset-lain/{dokumenId}', [DokumenAsetLainController::class, 'destroy']);
+
+    // Bukti Pendukung Aset Lain Routes
+    Route::get('/aset-lain/{asetLainId}/bukti-pendukung', [BuktiPendukungAsetLainController::class, 'index']);
+    Route::post('/aset-lain/{asetLainId}/bukti-pendukung', [BuktiPendukungAsetLainController::class, 'store']);
+    Route::get('/bukti-pendukung-aset-lain/{dokumenId}', [BuktiPendukungAsetLainController::class, 'show']);
+    Route::put('/bukti-pendukung-aset-lain/{dokumenId}', [BuktiPendukungAsetLainController::class, 'update']);
+    Route::delete('/bukti-pendukung-aset-lain/{dokumenId}', [BuktiPendukungAsetLainController::class, 'destroy']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

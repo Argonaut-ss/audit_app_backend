@@ -46,4 +46,31 @@ class AsetLain extends Model
             'JwbKasusID'
         );
     }
+
+    public function dokumen(): HasMany
+    {
+        return $this->hasMany(
+            DokumenAsetLain::class,
+            'AsetLainID',
+            'AsetLainID'
+        );
+    }
+
+    public function prosedurs(): HasMany
+    {
+        return $this->hasMany(
+            ProsedurAsetLain::class,
+            'aset_lain_id',
+            'AsetLainID'
+        );
+    }
+
+    public function buktiPendukung(): HasMany
+    {
+        return $this->hasMany(
+            BuktiPendukungAsetLain::class,
+            'AsetLainID',
+            'AsetLainID'
+        );
+    }
 }
