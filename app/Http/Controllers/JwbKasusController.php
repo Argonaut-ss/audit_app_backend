@@ -13,6 +13,9 @@ use App\Models\UtangUsaha\UtangUsaha;
 use App\Models\Persediaan\Persediaan;
 use App\Models\PendapatanUsaha\PendapatanUsaha;
 use App\Models\BebanUsaha\BebanUsaha;
+use App\Models\AsetTetap\AsetTetap;
+use App\Models\AsetLain\AsetLain;
+use App\Models\Kas\Kas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -199,7 +202,11 @@ class JwbKasusController extends Controller
                 'JwbKasusID' => $jawaban->JwbKasusID,
             ]);
 
-            $kas = \App\Models\Kas\Kas::create([
+            $kas = Kas::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
+            $asetLain = AsetLain::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,
             ]);
 
