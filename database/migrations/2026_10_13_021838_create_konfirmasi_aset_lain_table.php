@@ -26,15 +26,15 @@ return new class extends Migration
                 ->on('aset_lain')
                 ->cascadeOnDelete();
         });
-        DB::statement('ALTER TABLE KonfirmasiAsetLain ADD File MEDIUMBLOB NULL');
+        DB::statement('ALTER TABLE konfirmasi_aset_lain ADD File MEDIUMBLOB NULL');
     }
 
     public function down(): void
     {
-        Schema::table('KonfirmasiAsetLain', function (Blueprint $table) {
+        Schema::table('konfirmasi_aset_lain', function (Blueprint $table) {
             $table->dropForeign(['AsetLainID']);
         });
 
-        Schema::dropIfExists('KonfirmasiAsetLain');
+        Schema::dropIfExists('konfirmasi_aset_lain');
     }
 };
