@@ -79,6 +79,7 @@ use App\Http\Controllers\AsetLainController\ProsedurAsetLainController;
 use App\Http\Controllers\AsetLainController\DokumenAsetLainController;
 use App\Http\Controllers\AsetLainController\BuktiPendukungAsetLainController;
 use App\Http\Controllers\AsetLainController\KonfirmasiAsetLainController;
+use App\Http\Controllers\AsetLainController\RekapBalasanAsetLainController;
 use App\Http\Controllers\AsetLainController\JurnalKoreksiAsetLainController;
 
 use App\Http\Controllers\KelasCardController;
