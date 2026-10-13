@@ -201,7 +201,7 @@ class KonfirmasiAsetLainController extends Controller
 
     private function KonfirmasiCheck(AsetLain $asetLain): void
     {
-        $hasKonfirmasi = $asetLain->konfirmasiAsetLain()->exists();
+        $hasKonfirmasi = $asetLain->konfirmasi()->exists();
         $asetLain->updateQuietly([
             'KonfirmasiCheck' => $hasKonfirmasi,
         ]);
