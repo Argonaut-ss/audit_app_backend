@@ -82,4 +82,13 @@ class AsetLain extends Model
             'AsetLainID'
         );
     }
+
+    public function jurnalKoreksi(): HasMany
+    {
+        return $this->hasMany(
+            JurnalKoreksiAsetLain::class,
+            'AsetLainID',
+            'AsetLainID'
+        );
+    }
 }
