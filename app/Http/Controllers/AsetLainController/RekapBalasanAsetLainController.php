@@ -22,8 +22,8 @@ class RekapBalasanAsetLainController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = AsetLain::query()->with([
-            'konfirmasi:KonfirmasiAsetLainID,AsetLainID,NamaCustomer,Jumlah',
-            'rekapBalasan.konfirmasi:KonfirmasiAsetLainID,AsetLainID,NamaCustomer,Jumlah',
+            'konfirmasiAsetLain:KonfirmasiAsetLainID,AsetLainID,NamaCustomer,Jumlah',
+            'rekapBalasan.konfirmasiAsetLain:KonfirmasiAsetLainID,AsetLainID,NamaCustomer,Jumlah',
         ]);
 
         $query->whereHas('JwbKasus', function ($query) use ($request) {
@@ -126,9 +126,7 @@ class RekapBalasanAsetLainController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function store(
-        Request $request
-    ): JsonResponse {
+    public function store(Request $request): JsonResponse {
         $validated = $request->validate([
             'AsetLainID' => [
                 'required',
@@ -193,10 +191,7 @@ class RekapBalasanAsetLainController extends Controller
             ],
         ]);
 
-        $asetLain = AsetLain::findOrFail(
-            $validated['AsetLainID']
-        );
-
+        $asetLain = AsetLain::findOrFail($validated['AsetLainID']);
         JwbKasus::forUser($request->user())
             ->where(
                 'JwbKasusID',
@@ -210,11 +205,7 @@ class RekapBalasanAsetLainController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            !empty(
-                $validated['KonfirmasiAsetLainID']
-            )
-        ) {
+        if (!empty($validated['KonfirmasiAsetLainID'])) {
             $konfirmasiAsetLain =
                 $asetLain
                     ->konfirmasiAsetLain()
@@ -248,9 +239,7 @@ class RekapBalasanAsetLainController extends Controller
 
         if ($file) {
             $validated['FileBukti'] =
-                file_get_contents(
-                    $file->getRealPath()
-                );
+                file_get_contents($file->getRealPath());
 
             $validated['NamaFile'] =
                 $file->getClientOriginalName();
@@ -259,13 +248,8 @@ class RekapBalasanAsetLainController extends Controller
                 $file->getMimeType();
         }
 
-        $rekap = RekapBalasanAsetLain::create(
-            $validated
-        );
-
-        $this->rekapCheck(
-            $asetLain
-        );
+        $rekap = RekapBalasanAsetLain::create($validated);
+        $this->rekapCheck($asetLain);
 
         return response()->json(
             $rekap->load([
@@ -315,9 +299,7 @@ class RekapBalasanAsetLainController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function bulkSave(
-        Request $request
-    ): JsonResponse {
+    public function bulkSave(Request $request): JsonResponse {
         /*
         |--------------------------------------------------------------------------
         | VALIDATION
@@ -415,20 +397,13 @@ class RekapBalasanAsetLainController extends Controller
 
         $asetLainIds = $rows
             ->pluck('AsetLainID')
-            ->map(
-                fn ($id) => (int) $id
-            )
+            ->map(fn ($id) => (int) $id)
             ->unique()
             ->values();
 
         foreach ($asetLainIds as $asetLainId) {
-            $asetLain = AsetLain::findOrFail(
-                $asetLainId
-            );
-
-            JwbKasus::forUser(
-                $request->user()
-            )
+            $asetLain = AsetLain::findOrFail($asetLainId);
+            JwbKasus::forUser($request->user())
                 ->where(
                     'JwbKasusID',
                     $asetLain->JwbKasusID
@@ -452,14 +427,10 @@ class RekapBalasanAsetLainController extends Controller
                     !is_null($id)
                     && $id !== ''
             )
-            ->map(
-                fn ($id) => (int) $id
-            );
+            ->map(fn ($id) => (int) $id);
 
         if (
-            $submittedExistingIds->count()
-            !==
-            $submittedExistingIds
+            $submittedExistingIds->count() !== $submittedExistingIds
                 ->unique()
                 ->count()
         ) {
@@ -516,9 +487,7 @@ class RekapBalasanAsetLainController extends Controller
             );
 
         if (
-            $konfirmasiKeys->count()
-            !==
-            $konfirmasiKeys
+            $konfirmasiKeys->count() !== $konfirmasiKeys
                 ->unique()
                 ->count()
         ) {
@@ -536,15 +505,9 @@ class RekapBalasanAsetLainController extends Controller
 
         foreach ($rows as $row) {
             $konfirmasiId =
-                $row[
-                    'KonfirmasiAsetLainID'
-                ] ?? null;
+                $row['KonfirmasiAsetLainID'] ?? null;
 
-            if (
-                is_null(
-                    $konfirmasiId
-                )
-            ) {
+            if (is_null($konfirmasiId)) {
                 continue;
             }
 
@@ -554,9 +517,7 @@ class RekapBalasanAsetLainController extends Controller
             )
                 ->whereHas(
                     'konfirmasiAsetLain',
-                    function (
-                        $query
-                    ) use (
+                    function ($query) use (
                         $konfirmasiId
                     ) {
                         $query->where(
@@ -650,11 +611,7 @@ class RekapBalasanAsetLainController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                foreach (
-                    $asetLainIds
-                    as
-                    $asetLainId
-                ) {
+                foreach ($asetLainIds as $asetLainId) {
                     $rowsForAsetLain =
                         $rows
                             ->filter(
@@ -723,10 +680,7 @@ class RekapBalasanAsetLainController extends Controller
                                 $submittedRekapIds
                             );
 
-                    if (
-                        $idsToDelete
-                            ->isNotEmpty()
-                    ) {
+                    if ($idsToDelete ->isNotEmpty()) {
                         RekapBalasanAsetLain::whereIn(
                             'RekapBalasanAsetLainID',
                             $idsToDelete
@@ -754,10 +708,7 @@ class RekapBalasanAsetLainController extends Controller
                     |
                     */
 
-                    if (
-                        $submittedRekapIds
-                            ->isNotEmpty()
-                    ) {
+                    if ($submittedRekapIds ->isNotEmpty()) {
                         RekapBalasanAsetLain::where(
                             'AsetLainID',
                             $asetLainId
@@ -778,15 +729,9 @@ class RekapBalasanAsetLainController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    foreach (
-                        $rowsForAsetLain
-                        as
-                        $row
-                    ) {
+                    foreach ($rowsForAsetLain as $row) {
                         $rekapId =
-                            $row[
-                                'RekapBalasanAsetLainID'
-                            ] ?? null;
+                            $row['RekapBalasanAsetLainID'] ?? null;
 
                         /*
                         |--------------------------------------------------------------------------
@@ -794,11 +739,7 @@ class RekapBalasanAsetLainController extends Controller
                         |--------------------------------------------------------------------------
                         */
 
-                        if (
-                            !is_null(
-                                $rekapId
-                            )
-                        ) {
+                        if (!is_null($rekapId)) {
                             $rekap =
                                 RekapBalasanAsetLain::where(
                                     'RekapBalasanAsetLainID',
@@ -866,43 +807,20 @@ class RekapBalasanAsetLainController extends Controller
                             |
                             */
 
-                            if (
-                                isset(
-                                    $row[
-                                        'FileBukti'
-                                    ]
-                                )
-                            ) {
-                                $file =
-                                    $row[
-                                        'FileBukti'
-                                    ];
-
-                                $updateData[
-                                    'FileBukti'
-                                ] =
+                            if (isset($row['FileBukti'])) {
+                                $file = $row['FileBukti'];
+                                $updateData['FileBukti'] =
                                     file_get_contents(
-                                        $file
-                                            ->getRealPath()
+                                        $file ->getRealPath()
                                     );
 
-                                $updateData[
-                                    'NamaFile'
-                                ] =
-                                    $file
-                                        ->getClientOriginalName();
+                                $updateData['NamaFile'] =
+                                    $file ->getClientOriginalName();
 
-                                $updateData[
-                                    'TipeFile'
-                                ] =
-                                    $file
-                                        ->getMimeType();
+                                $updateData['TipeFile'] =
+                                    $file ->getMimeType();
                             }
-
-                            $rekap->fill(
-                                $updateData
-                            );
-
+                            $rekap->fill($updateData);
                             $rekap->save();
                         }
 
@@ -964,13 +882,7 @@ class RekapBalasanAsetLainController extends Controller
                             |--------------------------------------------------------------------------
                             */
 
-                            if (
-                                isset(
-                                    $row[
-                                        'FileBukti'
-                                    ]
-                                )
-                            ) {
+                            if (isset($row['FileBukti'])) {
                                 $file =
                                     $row[
                                         'FileBukti'
@@ -997,9 +909,7 @@ class RekapBalasanAsetLainController extends Controller
                                         ->getMimeType();
                             }
 
-                            RekapBalasanAsetLain::create(
-                                $createData
-                            );
+                            RekapBalasanAsetLain::create($createData);
                         }
                     }
 
@@ -1009,10 +919,7 @@ class RekapBalasanAsetLainController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    $asetLain =
-                        AsetLain::find(
-                            $asetLainId
-                        );
+                    $asetLain = AsetLain::find($asetLainId);
 
                     if ($asetLain) {
                         $asetLain->updateQuietly([
@@ -1034,8 +941,7 @@ class RekapBalasanAsetLainController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' =>
-                'Data rekap balasan berhasil disimpan.',
+            'message' => 'Data rekap balasan berhasil disimpan.',
         ]);
     }
 
@@ -1045,21 +951,11 @@ class RekapBalasanAsetLainController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function update(
-        Request $request,
-        int $id
-    ): JsonResponse {
-        $rekap =
-            RekapBalasanAsetLain::findOrFail(
-                $id
-            );
+    public function update(Request $request, int $id): JsonResponse {
+        $rekap = RekapBalasanAsetLain::findOrFail($id);
+        $asetLain = $rekap->asetLain;
 
-        $asetLain =
-            $rekap->asetLain;
-
-        JwbKasus::forUser(
-            $request->user()
-        )
+        JwbKasus::forUser($request->user())
             ->where(
                 'JwbKasusID',
                 $asetLain?->JwbKasusID
@@ -1136,13 +1032,7 @@ class RekapBalasanAsetLainController extends Controller
         |
         */
 
-        if (
-            array_key_exists(
-                'KonfirmasiAsetLainID',
-                $validated
-            )
-            &&
-            $validated[
+        if (array_key_exists('KonfirmasiAsetLainID', $validated) && $validated[
                 'KonfirmasiAsetLainID'
             ] !== null
         ) {
@@ -1156,11 +1046,7 @@ class RekapBalasanAsetLainController extends Controller
                     )
                     ->whereDoesntHave(
                         'rekapBalasanAsetLain',
-                        function (
-                            $query
-                        ) use (
-                            $rekap
-                        ) {
+                        function ($query) use ($rekap) {
                             $query->where(
                                 'RekapBalasanAsetLainID',
                                 '!=',
@@ -1172,8 +1058,7 @@ class RekapBalasanAsetLainController extends Controller
 
             if (!$konfirmasiAsetLain) {
                 return response()->json([
-                    'message' =>
-                        'Konfirmasi aset lain tidak tersedia untuk Aset Lain ini atau sudah digunakan.',
+                    'message' => 'Konfirmasi aset lain tidak tersedia untuk Aset Lain ini atau sudah digunakan.',
                 ], 422);
             }
         }
@@ -1184,30 +1069,20 @@ class RekapBalasanAsetLainController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $file =
-            $request->file(
-                'FileBukti'
-            );
+        $file = $request->file('FileBukti');
 
         if ($file) {
             $validated['FileBukti'] =
-                file_get_contents(
-                    $file->getRealPath()
-                );
+                file_get_contents($file->getRealPath());
 
             $validated['NamaFile'] =
-                $file
-                    ->getClientOriginalName();
+                $file ->getClientOriginalName();
 
             $validated['TipeFile'] =
-                $file
-                    ->getMimeType();
+                $file ->getMimeType();
         }
 
-        $rekap->fill(
-            $validated
-        );
-
+        $rekap->fill($validated);
         $rekap->save();
 
         return response()->json(
@@ -1226,18 +1101,10 @@ class RekapBalasanAsetLainController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function destroy(
-        Request $request,
-        int $id
-    ): JsonResponse {
-        $rekap =
-            RekapBalasanAsetLain::findOrFail(
-                $id
-            );
+    public function destroy(Request $request, int $id): JsonResponse {
+        $rekap = RekapBalasanAsetLain::findOrFail($id);
 
-        JwbKasus::forUser(
-            $request->user()
-        )
+        JwbKasus::forUser($request->user())
             ->where(
                 'JwbKasusID',
                 $rekap
@@ -1252,18 +1119,13 @@ class RekapBalasanAsetLainController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $asetLain =
-            $rekap->asetLain;
-
+        $asetLain = $rekap->asetLain;
         $rekap->delete();
 
-        $this->rekapCheck(
-            $asetLain
-        );
+        $this->rekapCheck($asetLain);
 
         return response()->json([
-            'message' =>
-                'Rekap balasan deleted successfully',
+            'message' => 'Rekap balasan deleted successfully',
         ]);
     }
 
@@ -1273,9 +1135,7 @@ class RekapBalasanAsetLainController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function rekapCheck(
-        ?AsetLain $asetLain
-    ): void {
+    private function rekapCheck(?AsetLain $asetLain): void {
         if ($asetLain) {
             $asetLain->updateQuietly([
                 'RekapCheck' =>
