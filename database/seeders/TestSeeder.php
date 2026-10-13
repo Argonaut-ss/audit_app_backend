@@ -26,6 +26,7 @@ use App\Models\Persediaan\StokOpnamePersediaan;
 use App\Models\Persediaan\UjiMutasiPersediaan;
 use App\Models\Persediaan\TestPricingPersediaan;
 use App\Models\AsetTetap\AsetTetap;
+use App\Models\AsetLain\AsetLain;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -431,6 +432,21 @@ class TestSeeder extends Seeder
                     'CashCountCheck' => false,
                     'RekapMutasiCheck' => false,
                     'UjiMutasiCheck' => false,
+                    'JurnalCheck' => false,
+                    'Kesimpulan' => null,
+                ]
+            );
+
+            AsetLain::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'ProsedurCheck' => false,
+                    'DokumenCheck' => false,
+                    'KonfirmasiCheck' => false,
+                    'RekapMutasiCheck' => false,
+                    'DokumentasiCheck' => false,
+                    'BuktiPendukungCheck' => false,
+                    'WawancaraCheck' => false,
                     'JurnalCheck' => false,
                     'Kesimpulan' => null,
                 ]
