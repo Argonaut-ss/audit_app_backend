@@ -428,6 +428,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/konfirmasi-aset-lain/{id}/file', [KonfirmasiAsetLainController::class, 'file']);
     Route::apiResource('konfirmasi-aset-lain', KonfirmasiAsetLainController::class);
 
+    //Rekap Balasan Aset Lain Routes
+    Route::post('rekap-balasan-aset-lain/bulk-save', [RekapBalasanAsetLainController::class, 'bulkSave']);
+    Route::get('/rekap-balasan-aset-lain/{id}/file', [RekapBalasanAsetLainController::class, 'file']);
+    Route::apiResource('rekap-balasan-aset-lain', RekapBalasanAsetLainController::class);
+
     // Jurnal Koreksi Aset Lain Routes
     Route::apiResource('jurnal-koreksi-aset-lain', JurnalKoreksiAsetLainController::class)
         ->only(['index', 'store', 'update', 'destroy'])
