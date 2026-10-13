@@ -11,7 +11,7 @@ class KonfirmasiAsetLain extends Model
 {
     use HasFactory;
 
-    protected $table = 'KonfirmasiAsetLain';
+    protected $table = 'konfirmasi_aset_lain';
 
     protected $primaryKey = 'KonfirmasiAsetLainID';
 
