@@ -135,7 +135,7 @@ class RekapBalasanAsetLainController extends Controller
 
             'KonfirmasiAsetLainID' => [
                 'nullable',
-                'exists:KonfirmasiAsetLain,KonfirmasiAsetLainID',
+                'exists:konfirmasi_aset_lain,KonfirmasiAsetLainID',
             ],
 
             'SaldoBB' => [
@@ -328,7 +328,7 @@ class RekapBalasanAsetLainController extends Controller
             'data.*.KonfirmasiAsetLainID' => [
                 'nullable',
                 'integer',
-                'exists:KonfirmasiAsetLain,KonfirmasiAsetLainID',
+                'exists:konfirmasi_aset_lain,KonfirmasiAsetLainID',
             ],
 
             'data.*.SaldoBB' => [
@@ -966,7 +966,7 @@ class RekapBalasanAsetLainController extends Controller
             $request->validate([
                 'KonfirmasiAsetLainID' => [
                     'nullable',
-                    'exists:KonfirmasiAsetLain,KonfirmasiAsetLainID',
+                    'exists:konfirmasi_aset_lain,KonfirmasiAsetLainID',
                 ],
 
                 'SaldoBB' => [
