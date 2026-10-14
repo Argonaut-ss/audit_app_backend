@@ -80,6 +80,7 @@ use App\Http\Controllers\AsetLainController\DokumenAsetLainController;
 use App\Http\Controllers\AsetLainController\BuktiPendukungAsetLainController;
 use App\Http\Controllers\AsetLainController\KonfirmasiAsetLainController;
 use App\Http\Controllers\AsetLainController\JurnalKoreksiAsetLainController;
+use App\Http\Controllers\AsetLainController\DokumentasiAsetLainController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -432,6 +433,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('jurnal-koreksi-aset-lain', JurnalKoreksiAsetLainController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-aset-lain' => 'jurnalKoreksiAsetLain']);
+
+    // Dokumentasi Aset Lain Routes
+    Route::apiResource('dokumentasi-aset-lain', DokumentasiAsetLainController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['dokumentasi-aset-lain' => 'dokumentasiAsetLain']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
