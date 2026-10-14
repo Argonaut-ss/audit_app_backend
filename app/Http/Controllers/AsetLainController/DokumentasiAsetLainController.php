@@ -75,19 +75,24 @@ class DokumentasiAsetLainController extends Controller
             $data['TanggalAkhir'] ?? null
         );
 
-        $amortisasiBulan = $jangkaWaktu > 0
-            ? round($nominal / $jangkaWaktu, 2)
+        $rawAmortisasiBulan = $jangkaWaktu > 0
+            ? ($nominal / $jangkaWaktu)
             : 0.0;
 
-        $amortisasiAkhirTahun = $nominal > 0 && $amortisasiBulan > 0 && $masaPemakaian > 0
-            ? min(round($masaPemakaian * $amortisasiBulan, 2), $nominal)
+        $rawAmortisasiAkhirTahun = $nominal > 0 && $rawAmortisasiBulan > 0 && $masaPemakaian > 0
+            ? min($masaPemakaian * $rawAmortisasiBulan, $nominal)
             : 0.0;
 
-        $audit = $nominal > 0
-            ? round($nominal - $amortisasiAkhirTahun, 2)
+        $rawAudit = $nominal > 0
+            ? ($nominal - $rawAmortisasiAkhirTahun)
             : 0.0;
 
-        $selisih = round($audit - $perusahaan, 2);
+        $rawSelisih = $rawAudit - $perusahaan;
+
+        $amortisasiBulan = round($rawAmortisasiBulan, 2);
+        $amortisasiAkhirTahun = round($rawAmortisasiAkhirTahun, 2);
+        $audit = round($rawAudit, 2);
+        $selisih = round($rawSelisih, 2);
 
         return [
             'NomorPerjanjian' => trim($data['NomorPerjanjian'] ?? ''),
