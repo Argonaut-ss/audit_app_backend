@@ -74,7 +74,7 @@ class AsetLain extends Model
         );
     }
 
-    public function konfirmasi(): HasMany
+    public function konfirmasiAsetLain(): HasMany
     {
         return $this->hasMany(
             KonfirmasiAsetLain::class,
