@@ -109,4 +109,13 @@ class AsetLain extends Model
             'AsetLainID'
         );
     }
+
+    public function wawancara(): HasMany
+    {
+        return $this->hasMany(
+            WawancaraAsetLain::class,
+            'AsetLainID',
+            'AsetLainID'
+        );
+    }
 }

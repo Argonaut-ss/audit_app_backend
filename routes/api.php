@@ -78,6 +78,7 @@ use App\Http\Controllers\AsetLainController\AsetLainController;
 use App\Http\Controllers\AsetLainController\ProsedurAsetLainController;
 use App\Http\Controllers\AsetLainController\DokumenAsetLainController;
 use App\Http\Controllers\AsetLainController\BuktiPendukungAsetLainController;
+use App\Http\Controllers\AsetLainController\WawancaraAsetLainController;
 use App\Http\Controllers\AsetLainController\KonfirmasiAsetLainController;
 use App\Http\Controllers\AsetLainController\RekapBalasanAsetLainController;
 use App\Http\Controllers\AsetLainController\JurnalKoreksiAsetLainController;
@@ -404,6 +405,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Aset Lain Routes
     Route::get('/aset-lain/{jwbKasusId}', [AsetLainController::class, 'show']);
     Route::put('/aset-lain/{jwbKasusId}', [AsetLainController::class, 'update']);
+
+    // Wawancara Aset Lain Routes
+    Route::post('/wawancara-aset-lain/bulk-save', [WawancaraAsetLainController::class, 'bulkSave']);
+    Route::apiResource('wawancara-aset-lain', WawancaraAsetLainController::class);
 
     // Prosedur Aset Lain Routes
     Route::get('/aset-lain/{asetLain}/prosedur', [ProsedurAsetLainController::class, 'index']);
