@@ -74,10 +74,19 @@ class AsetLain extends Model
         );
     }
 
-    public function konfirmasi(): HasMany
+    public function konfirmasiAsetLain(): HasMany
     {
         return $this->hasMany(
             KonfirmasiAsetLain::class,
+            'AsetLainID',
+            'AsetLainID'
+        );
+    }
+
+    public function rekapBalasan(): HasMany
+    {
+        return $this->hasMany(
+            RekapBalasanAsetLain::class,
             'AsetLainID',
             'AsetLainID'
         );

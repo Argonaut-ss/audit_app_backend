@@ -79,6 +79,7 @@ use App\Http\Controllers\AsetLainController\ProsedurAsetLainController;
 use App\Http\Controllers\AsetLainController\DokumenAsetLainController;
 use App\Http\Controllers\AsetLainController\BuktiPendukungAsetLainController;
 use App\Http\Controllers\AsetLainController\KonfirmasiAsetLainController;
+use App\Http\Controllers\AsetLainController\RekapBalasanAsetLainController;
 use App\Http\Controllers\AsetLainController\JurnalKoreksiAsetLainController;
 use App\Http\Controllers\AsetLainController\DokumentasiAsetLainController;
 
@@ -428,6 +429,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Konfirmasi Aset Lain Routes
     Route::get('/konfirmasi-aset-lain/{id}/file', [KonfirmasiAsetLainController::class, 'file']);
     Route::apiResource('konfirmasi-aset-lain', KonfirmasiAsetLainController::class);
+
+    //Rekap Balasan Aset Lain Routes
+    Route::post('rekap-balasan-aset-lain/bulk-save', [RekapBalasanAsetLainController::class, 'bulkSave']);
+    Route::get('/rekap-balasan-aset-lain/{id}/file', [RekapBalasanAsetLainController::class, 'file']);
+    Route::apiResource('rekap-balasan-aset-lain', RekapBalasanAsetLainController::class);
 
     // Jurnal Koreksi Aset Lain Routes
     Route::apiResource('jurnal-koreksi-aset-lain', JurnalKoreksiAsetLainController::class)
