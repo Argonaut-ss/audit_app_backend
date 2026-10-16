@@ -17,7 +17,7 @@ return new class extends Migration
             $table->boolean('ProsedurCheck')->default(false);
             $table->boolean('DokumenCheck')->default(false);
             $table->boolean('KonfirmasiCheck')->default(false);
-            $table->boolean('RekapMutasiCheck')->default(false);
+            $table->boolean('RekapCheck')->default(false);
             $table->boolean('DokumentasiCheck')->default(false);
             $table->boolean('BuktiPendukungCheck')->default(false);
             $table->boolean('WawancaraCheck')->default(false);

@@ -89,4 +89,13 @@ class Kas extends Model
         );
     }
 
+    public function ujiMutasi(): HasOne
+    {
+        return $this->hasOne(
+            UjiMutasiKas::class,
+            'KasID',
+            'KasID'
+        );
+    }
+
 }

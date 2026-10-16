@@ -139,7 +139,7 @@ class AsetLamaAsetTetapController extends Controller
 
     public function update(Request $request, AsetLamaAsetTetap $aset_lama_aset_tetap): JsonResponse
     {
-        $this->resolveAuthorizedAsetTetap(
+        $asetTetap = $this->resolveAuthorizedAsetTetap(
             $request,
             (int) $aset_lama_aset_tetap->AsetTetapID
         );
@@ -147,6 +147,7 @@ class AsetLamaAsetTetapController extends Controller
         $aset_lama_aset_tetap->fill($validated);
         $this->storeUploadedFiles($request, $aset_lama_aset_tetap);
         $aset_lama_aset_tetap->save();
+        $this->asetLamaCheck($asetTetap);
 
         return response()->json([
             'success' => true,

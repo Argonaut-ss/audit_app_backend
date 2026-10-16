@@ -36,8 +36,9 @@ class AsetLainController extends Controller
                 'ProsedurCheck' => $asetLain->ProsedurCheck,
                 'DokumenCheck' => $asetLain->DokumenCheck,
                 'KonfirmasiCheck' => $asetLain->KonfirmasiCheck,
-                'RekapMutasiCheck' => $asetLain->RekapMutasiCheck,
+                'RekapCheck' => $asetLain->RekapCheck,
                 'DokumentasiCheck' => $asetLain->DokumentasiCheck,
+                'DokumentasiAsetLainLainCheck' => $asetLain->DokumentasiCheck,
                 'BuktiPendukungCheck' => $asetLain->BuktiPendukungCheck,
                 'WawancaraCheck' => $asetLain->WawancaraCheck,
                 'JurnalCheck' => $asetLain->JurnalCheck,
@@ -72,11 +73,15 @@ class AsetLainController extends Controller
                 'sometimes',
                 'boolean',
             ],
-            'RekapMutasiCheck' => [
+            'RekapCheck' => [
                 'sometimes',
                 'boolean',
             ],
             'DokumentasiCheck' => [
+                'sometimes',
+                'boolean',
+            ],
+            'DokumentasiAsetLainLainCheck' => [
                 'sometimes',
                 'boolean',
             ],
@@ -99,6 +104,10 @@ class AsetLainController extends Controller
             ],
         ]);
 
+        if (array_key_exists('DokumentasiAsetLainLainCheck', $validated) && !array_key_exists('DokumentasiCheck', $validated)) {
+            $validated['DokumentasiCheck'] = $validated['DokumentasiAsetLainLainCheck'];
+        }
+
         $asetLain = AsetLain::where(
             'JwbKasusID',
             $jwbKasusId
@@ -115,8 +124,9 @@ class AsetLainController extends Controller
                 'ProsedurCheck' => $asetLain->ProsedurCheck,
                 'DokumenCheck' => $asetLain->DokumenCheck,
                 'KonfirmasiCheck' => $asetLain->KonfirmasiCheck,
-                'RekapMutasiCheck' => $asetLain->RekapMutasiCheck,
+                'RekapCheck' => $asetLain->RekapCheck,
                 'DokumentasiCheck' => $asetLain->DokumentasiCheck,
+                'DokumentasiAsetLainLainCheck' => $asetLain->DokumentasiCheck,
                 'BuktiPendukungCheck' => $asetLain->BuktiPendukungCheck,
                 'WawancaraCheck' => $asetLain->WawancaraCheck,
                 'JurnalCheck' => $asetLain->JurnalCheck,

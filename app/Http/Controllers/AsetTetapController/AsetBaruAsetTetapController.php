@@ -29,6 +29,13 @@ class AsetBaruAsetTetapController extends Controller
         return $asetTetap;
     }
 
+    private function asetBaruCheck(AsetTetap $asetTetap): void
+    {
+        $asetTetap->updateQuietly([
+            'AsetBaruCheck' => $asetTetap->asetBaru()->exists(),
+        ]);
+    }
+
     private function validationRules(bool $partial = false): array
     {
         $required = $partial ? 'sometimes' : 'required';
@@ -111,6 +118,7 @@ class AsetBaruAsetTetapController extends Controller
         $item->fill($validated);
         $this->storeUploadedFiles($request, $item);
         $item->save();
+        $this->asetBaruCheck($asetTetap);
 
         return response()->json([
             'success' => true,
@@ -134,7 +142,7 @@ class AsetBaruAsetTetapController extends Controller
 
     public function update(Request $request, AsetBaruAsetTetap $aset_baru_aset_tetap): JsonResponse
     {
-        $this->resolveAuthorizedAsetTetap(
+        $asetTetap = $this->resolveAuthorizedAsetTetap(
             $request,
             (int) $aset_baru_aset_tetap->AsetTetapID
         );
@@ -142,6 +150,7 @@ class AsetBaruAsetTetapController extends Controller
         $aset_baru_aset_tetap->fill($validated);
         $this->storeUploadedFiles($request, $aset_baru_aset_tetap);
         $aset_baru_aset_tetap->save();
+        $this->asetBaruCheck($asetTetap);
 
         return response()->json([
             'success' => true,
@@ -212,6 +221,8 @@ class AsetBaruAsetTetapController extends Controller
             return $result;
         });
 
+        $this->asetBaruCheck($asetTetap);
+
         return response()->json([
             'success' => true,
             'message' => 'Data aset baru berhasil disimpan.',
@@ -254,11 +265,12 @@ class AsetBaruAsetTetapController extends Controller
 
     public function destroy(Request $request, AsetBaruAsetTetap $aset_baru_aset_tetap): JsonResponse
     {
-        $this->resolveAuthorizedAsetTetap(
+        $asetTetap = $this->resolveAuthorizedAsetTetap(
             $request,
             (int) $aset_baru_aset_tetap->AsetTetapID
         );
         $aset_baru_aset_tetap->delete();
+        $this->asetBaruCheck($asetTetap);
 
         return response()->json([
             'success' => true,

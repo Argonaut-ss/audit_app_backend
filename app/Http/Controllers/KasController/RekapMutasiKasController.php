@@ -31,6 +31,17 @@ class RekapMutasiKasController extends Controller
         return $rekap;
     }
 
+    private function rekapMutasiCheck(?Kas $kas): void
+    {
+        if (! $kas) {
+            return;
+        }
+
+        $kas->updateQuietly([
+            'RekapMutasiCheck' => $kas->rekapMutasi()->whereHas('isiRekapMutasi')->exists(),
+        ]);
+    }
+
     private function serializeIsi(IsiRekapMutasiKas $item): array
     {
         return [
@@ -137,6 +148,8 @@ class RekapMutasiKasController extends Controller
             'KreditTotal' => 0,
         ]);
 
+        $this->rekapMutasiCheck($kas);
+
         return response()->json([
             'success' => true,
             'message' => 'Rekap mutasi kas berhasil dibuat.',
@@ -166,6 +179,8 @@ class RekapMutasiKasController extends Controller
             $rekap->update(['SaldoAwal' => $validated['SaldoAwal']]);
             $this->recalculate($rekap);
         });
+
+        $this->rekapMutasiCheck($rekap->kas);
 
         return response()->json([
             'success' => true,
@@ -260,6 +275,8 @@ class RekapMutasiKasController extends Controller
             ]);
         });
 
+        $this->rekapMutasiCheck($kas);
+
         return response()->json([
             'success' => true,
             'message' => 'Rekap mutasi kas berhasil disimpan.',
@@ -272,8 +289,11 @@ class RekapMutasiKasController extends Controller
         $row = IsiRekapMutasiKas::with('rekapMutasi.kas')->findOrFail($id);
         $this->resolveAuthorizedRekap($request, (int) $row->RekapMutasiID);
         $rekap = $row->rekapMutasi;
+        $kas = $rekap?->kas;
         $row->delete();
         $this->recalculate($rekap);
+
+        $this->rekapMutasiCheck($kas);
 
         return response()->json([
             'success' => true,
@@ -284,7 +304,10 @@ class RekapMutasiKasController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $rekap = $this->resolveAuthorizedRekap($request, $id);
+        $kas = $rekap->kas;
         $rekap->delete();
+
+        $this->rekapMutasiCheck($kas);
 
         return response()->json([
             'success' => true,

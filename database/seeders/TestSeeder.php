@@ -443,7 +443,7 @@ class TestSeeder extends Seeder
                     'ProsedurCheck' => false,
                     'DokumenCheck' => false,
                     'KonfirmasiCheck' => false,
-                    'RekapMutasiCheck' => false,
+                    'RekapCheck' => false,
                     'DokumentasiCheck' => false,
                     'BuktiPendukungCheck' => false,
                     'WawancaraCheck' => false,

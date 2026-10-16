@@ -36,7 +36,9 @@ class AsetTetapController extends Controller
                 'ProsedurCheck' => $asetTetap->ProsedurCheck,
                 'DokumenCheck' => $asetTetap->DokumenCheck,
                 'AsetLamaCheck' => $asetTetap->AsetLamaCheck,
+                'HasilObservasiCheck' => $asetTetap->AsetLamaCheck,
                 'AsetBaruCheck' => $asetTetap->AsetBaruCheck,
+                'PenambahanAsetCheck' => $asetTetap->AsetBaruCheck,
                 'UjiPenyusutanCheck' => $asetTetap->UjiPenyusutanCheck,
                 'JurnalCheck' => $asetTetap->JurnalCheck,
                 'Kesimpulan' => $asetTetap->Kesimpulan,
@@ -70,7 +72,15 @@ class AsetTetapController extends Controller
                 'sometimes',
                 'boolean',
             ],
+            'HasilObservasiCheck' => [
+                'sometimes',
+                'boolean',
+            ],
             'AsetBaruCheck' => [
+                'sometimes',
+                'boolean',
+            ],
+            'PenambahanAsetCheck' => [
                 'sometimes',
                 'boolean',
             ],
@@ -89,6 +99,13 @@ class AsetTetapController extends Controller
             ],
         ]);
 
+        if (array_key_exists('HasilObservasiCheck', $validated) && !array_key_exists('AsetLamaCheck', $validated)) {
+            $validated['AsetLamaCheck'] = $validated['HasilObservasiCheck'];
+        }
+        if (array_key_exists('PenambahanAsetCheck', $validated) && !array_key_exists('AsetBaruCheck', $validated)) {
+            $validated['AsetBaruCheck'] = $validated['PenambahanAsetCheck'];
+        }
+
         $asetTetap = AsetTetap::where(
             'JwbKasusID',
             $jwbKasusId
@@ -105,7 +122,9 @@ class AsetTetapController extends Controller
                 'ProsedurCheck' => $asetTetap->ProsedurCheck,
                 'DokumenCheck' => $asetTetap->DokumenCheck,
                 'AsetLamaCheck' => $asetTetap->AsetLamaCheck,
+                'HasilObservasiCheck' => $asetTetap->AsetLamaCheck,
                 'AsetBaruCheck' => $asetTetap->AsetBaruCheck,
+                'PenambahanAsetCheck' => $asetTetap->AsetBaruCheck,
                 'UjiPenyusutanCheck' => $asetTetap->UjiPenyusutanCheck,
                 'JurnalCheck' => $asetTetap->JurnalCheck,
                 'Kesimpulan' => $asetTetap->Kesimpulan,

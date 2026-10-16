@@ -65,6 +65,13 @@ class UjiMutasiKasController extends Controller
         ]);
     }
 
+    private function ujiMutasiCheck(Kas $kas): void
+    {
+        $kas->updateQuietly([
+            'UjiMutasiCheck' => $kas->ujiMutasi()->exists(),
+        ]);
+    }
+
     public function store(Request $request, int $kasId): JsonResponse
     {
         $validated = $request->validate([
@@ -85,6 +92,8 @@ class UjiMutasiKasController extends Controller
                 ]
             );
         });
+
+        $this->ujiMutasiCheck($kas);
 
         return response()->json([
             'success' => true,
