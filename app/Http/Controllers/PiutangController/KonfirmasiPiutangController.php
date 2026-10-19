@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
 use App\Models\Piutang\KonfirmasiPiutang;
 use App\Models\Piutang\Piutang;
+use App\Models\Piutang\RekapBalasan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KonfirmasiPiutangController extends Controller
 {
@@ -67,7 +69,7 @@ class KonfirmasiPiutangController extends Controller
             200,
             [
                 'Content-Type' => $contentType,
-                'Content-Disposition' => 'attachment; filename="' . addslashes($filename) . '"',
+                'Content-Disposition' => 'attachment; filename="'.addslashes($filename).'"',
                 'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
             ]
         );
@@ -162,18 +164,33 @@ class KonfirmasiPiutangController extends Controller
             ],
         ]);
 
-        $konfirmasiPiutang->fill($validated);
+        $piutang = $konfirmasiPiutang->piutang;
 
-        if ($request->hasFile('File')) {
-            $file = $request->file('File');
-            $fileContent = file_get_contents($file->getRealPath());
-            $konfirmasiPiutang->File = $fileContent;
-            $konfirmasiPiutang->NamaFile = $file->getClientOriginalName();
-            $konfirmasiPiutang->TipeFile = $file->getMimeType();
-        }
+        DB::transaction(function () use ($request, $validated, $konfirmasiPiutang, $piutang) {
+            $konfirmasiPiutang->fill($validated);
 
-        $konfirmasiPiutang->save();
-        $this->KonfirmasiCheck($konfirmasiPiutang->piutang);
+            if ($request->hasFile('File')) {
+                $file = $request->file('File');
+                $konfirmasiPiutang->File = file_get_contents($file->getRealPath());
+                $konfirmasiPiutang->NamaFile = $file->getClientOriginalName();
+                $konfirmasiPiutang->TipeFile = $file->getMimeType();
+            }
+
+            $konfirmasiPiutang->save();
+
+            $saldoBB = $konfirmasiPiutang->Jumlah;
+            $piutang->rekapBalasan()
+                ->where('KonfirmasiPiutangID', $konfirmasiPiutang->KonfirmasiPiutangID)
+                ->get()
+                ->each(function (RekapBalasan $rekap) use ($saldoBB) {
+                    $rekap->update([
+                        'SaldoBB' => $saldoBB,
+                        'Selisih' => $saldoBB - ($rekap->SaldoJawab ?? 0),
+                    ]);
+                });
+
+            $this->KonfirmasiCheck($piutang);
+        });
 
         return response()->json([
             'success' => true,
@@ -190,8 +207,28 @@ class KonfirmasiPiutangController extends Controller
             ->where('JwbKasusID', $konfirmasiPiutang->piutang->JwbKasusID)
             ->firstOrFail();
 
-        $konfirmasiPiutang->delete();
-        $this->KonfirmasiCheck($konfirmasiPiutang->piutang);
+        $piutang = $konfirmasiPiutang->piutang;
+
+        DB::transaction(function () use ($konfirmasiPiutang, $piutang) {
+            $piutang->rekapBalasan()
+                ->where('KonfirmasiPiutangID', $konfirmasiPiutang->KonfirmasiPiutangID)
+                ->delete();
+            $piutang->rekonsiliasiPiutang()
+                ->where('KonfirmasiPiutangID', $konfirmasiPiutang->KonfirmasiPiutangID)
+                ->delete();
+            $piutang->prosedurAlternatif()
+                ->where('KonfirmasiPiutangID', $konfirmasiPiutang->KonfirmasiPiutangID)
+                ->delete();
+
+            $konfirmasiPiutang->delete();
+
+            $piutang->updateQuietly([
+                'KonfirmasiCheck' => $piutang->konfirmasiPiutang()->exists(),
+                'RekapCheck' => $piutang->rekapBalasan()->exists(),
+                'RekonsiliasiCheck' => $piutang->rekonsiliasiPiutang()->exists(),
+                'ProsedurAltCheck' => $piutang->prosedurAlternatif()->exists(),
+            ]);
+        });
 
         return response()->json([
             'success' => true,

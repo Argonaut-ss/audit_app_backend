@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
 use App\Models\UtangUsaha\KonfirmasiUtangUsaha;
 use App\Models\UtangUsaha\UtangUsaha;
+use App\Models\UtangUsaha\RekapBalasanUtangUsaha;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KonfirmasiUtangUsahaController extends Controller
 {
@@ -67,7 +69,7 @@ class KonfirmasiUtangUsahaController extends Controller
             200,
             [
                 'Content-Type' => $contentType,
-                'Content-Disposition' => 'attachment; filename="' . addslashes($filename) . '"',
+                'Content-Disposition' => 'attachment; filename="' .addslashes($filename) . '"',
                 'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
             ]
         );
@@ -162,18 +164,33 @@ class KonfirmasiUtangUsahaController extends Controller
             ],
         ]);
 
-        $konfirmasiUtangUsaha->fill($validated);
+        $utangUsaha = $konfirmasiUtangUsaha->utangUsaha;
 
-        if ($request->hasFile('File')) {
-            $file = $request->file('File');
-            $fileContent = file_get_contents($file->getRealPath());
-            $konfirmasiUtangUsaha->File = $fileContent;
-            $konfirmasiUtangUsaha->NamaFile = $file->getClientOriginalName();
-            $konfirmasiUtangUsaha->TipeFile = $file->getMimeType();
-        }
+        DB::transaction(function () use ($request, $validated, $konfirmasiUtangUsaha, $utangUsaha) {
+            $konfirmasiUtangUsaha->fill($validated);
 
-        $konfirmasiUtangUsaha->save();
-        $this->KonfirmasiCheck($konfirmasiUtangUsaha->utangUsaha);
+            if ($request->hasFile('File')) {
+                $file = $request->file('File');
+                $konfirmasiUtangUsaha->File = file_get_contents($file->getRealPath());
+                $konfirmasiUtangUsaha->NamaFile = $file->getClientOriginalName();
+                $konfirmasiUtangUsaha->TipeFile = $file->getMimeType();
+            }
+
+            $konfirmasiUtangUsaha->save();
+
+            $saldoBB = $konfirmasiUtangUsaha->Jumlah;
+            $utangUsaha->rekapBalasan()
+                ->where('KonfirmasiUtangUsahaID', $konfirmasiUtangUsaha->KonfirmasiUtangUsahaID)
+                ->get()
+                ->each(function (RekapBalasanUtangUsaha $rekap) use ($saldoBB) {
+                    $rekap->update([
+                        'SaldoBB' => $saldoBB,
+                        'Selisih' => $saldoBB - ($rekap->SaldoJawab ?? 0),
+                    ]);
+                });
+
+            $this->KonfirmasiCheck($utangUsaha);
+        });
 
         return response()->json([
             'success' => true,
@@ -190,8 +207,28 @@ class KonfirmasiUtangUsahaController extends Controller
             ->where('JwbKasusID', $konfirmasiUtangUsaha->utangUsaha->JwbKasusID)
             ->firstOrFail();
 
-        $konfirmasiUtangUsaha->delete();
-        $this->KonfirmasiCheck($konfirmasiUtangUsaha->utangUsaha);
+        $utangUsaha = $konfirmasiUtangUsaha->utangUsaha;
+
+        DB::transaction(function () use ($konfirmasiUtangUsaha, $utangUsaha) {
+            $utangUsaha->rekapBalasan()
+                ->where('KonfirmasiUtangUsahaID', $konfirmasiUtangUsaha->KonfirmasiUtangUsahaID)
+                ->delete();
+            $utangUsaha->rekonsiliasiUtangUsaha()
+                ->where('KonfirmasiUtangUsahaID', $konfirmasiUtangUsaha->KonfirmasiUtangUsahaID)
+                ->delete();
+            $utangUsaha->prosedurAlternatif()
+                ->where('KonfirmasiUtangUsahaID', $konfirmasiUtangUsaha->KonfirmasiUtangUsahaID)
+                ->delete();
+
+            $konfirmasiUtangUsaha->delete();
+
+            $utangUsaha->updateQuietly([
+                'KonfirmasiCheck' => $utangUsaha->konfirmasiUtangUsaha()->exists(),
+                'RekapCheck' => $utangUsaha->rekapBalasan()->exists(),
+                'RekonsiliasiCheck' => $utangUsaha->rekonsiliasiUtangUsaha()->exists(),
+                'ProsedurAltCheck' => $utangUsaha->prosedurAlternatif()->exists(),
+            ]);
+        });
 
         return response()->json([
             'success' => true,

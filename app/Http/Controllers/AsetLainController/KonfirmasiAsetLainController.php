@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\AsetLainController;
 
 use App\Http\Controllers\Controller;
-use App\Models\JwbKasus;
-use App\Models\AsetLain\KonfirmasiAsetLain;
 use App\Models\AsetLain\AsetLain;
+use App\Models\AsetLain\KonfirmasiAsetLain;
+use App\Models\AsetLain\RekapBalasanAsetLain;
+use App\Models\JwbKasus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KonfirmasiAsetLainController extends Controller
 {
@@ -162,18 +164,33 @@ class KonfirmasiAsetLainController extends Controller
             ],
         ]);
 
-        $konfirmasiAsetLain->fill($validated);
+        $asetLain = $konfirmasiAsetLain->asetLain;
 
-        if ($request->hasFile('File')) {
-            $file = $request->file('File');
-            $fileContent = file_get_contents($file->getRealPath());
-            $konfirmasiAsetLain->File = $fileContent;
-            $konfirmasiAsetLain->NamaFile = $file->getClientOriginalName();
-            $konfirmasiAsetLain->TipeFile = $file->getMimeType();
-        }
+        DB::transaction(function () use ($request, $validated, $konfirmasiAsetLain, $asetLain) {
+            $konfirmasiAsetLain->fill($validated);
 
-        $konfirmasiAsetLain->save();
-        $this->KonfirmasiCheck($konfirmasiAsetLain->asetLain);
+            if ($request->hasFile('File')) {
+                $file = $request->file('File');
+                $konfirmasiAsetLain->File = file_get_contents($file->getRealPath());
+                $konfirmasiAsetLain->NamaFile = $file->getClientOriginalName();
+                $konfirmasiAsetLain->TipeFile = $file->getMimeType();
+            }
+
+            $konfirmasiAsetLain->save();
+
+            $saldoBB = $konfirmasiAsetLain->Jumlah;
+            $asetLain->rekapBalasan()
+                ->where('KonfirmasiAsetLainID', $konfirmasiAsetLain->KonfirmasiAsetLainID)
+                ->get()
+                ->each(function (RekapBalasanAsetLain $rekap) use ($saldoBB) {
+                    $rekap->update([
+                        'SaldoBB' => $saldoBB,
+                        'Selisih' => ($rekap->SaldoJawab ?? 0) - $saldoBB,
+                    ]);
+                });
+
+            $this->KonfirmasiCheck($asetLain);
+        });
 
         return response()->json([
             'success' => true,
@@ -190,8 +207,20 @@ class KonfirmasiAsetLainController extends Controller
             ->where('JwbKasusID', $konfirmasiAsetLain->asetLain->JwbKasusID)
             ->firstOrFail();
 
-        $konfirmasiAsetLain->delete();
-        $this->KonfirmasiCheck($konfirmasiAsetLain->asetLain);
+        $asetLain = $konfirmasiAsetLain->asetLain;
+
+        DB::transaction(function () use ($konfirmasiAsetLain, $asetLain) {
+            $asetLain->rekapBalasan()
+                ->where('KonfirmasiAsetLainID', $konfirmasiAsetLain->KonfirmasiAsetLainID)
+                ->delete();
+
+            $konfirmasiAsetLain->delete();
+
+            $asetLain->updateQuietly([
+                'KonfirmasiCheck' => $asetLain->konfirmasiAsetLain()->exists(),
+                'RekapCheck' => $asetLain->rekapBalasan()->exists(),
+            ]);
+        });
 
         return response()->json([
             'success' => true,
