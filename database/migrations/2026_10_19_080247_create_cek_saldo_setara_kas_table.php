@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('CekSaldoID');
             $table->unsignedBigInteger('SetaraKasID');
             $table->string('NamaBank');
-            $table->string('AkunCOA');
             $table->bigInteger('SaldoBukuBesar');
             $table->bigInteger('SaldoRekeningKoran');
             $table->bigInteger('Selisih');

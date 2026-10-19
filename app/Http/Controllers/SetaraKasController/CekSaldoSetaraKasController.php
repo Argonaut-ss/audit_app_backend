@@ -34,7 +34,6 @@ class CekSaldoSetaraKasController extends Controller
             'CekSaldoID' => $item->CekSaldoID,
             'SetaraKasID' => $item->SetaraKasID,
             'NamaBank' => $item->NamaBank,
-            'AkunCOA' => $item->AkunCOA,
             'SaldoBukuBesar' => $item->SaldoBukuBesar,
             'SaldoRekeningKoran' => $item->SaldoRekeningKoran,
             'Selisih' => $item->Selisih,
@@ -84,7 +83,6 @@ class CekSaldoSetaraKasController extends Controller
         $validated = $request->validate([
             'SetaraKasID' => ['required', 'integer', 'exists:setara_kas,SetaraKasID'],
             'NamaBank' => ['required', 'string', 'max:255'],
-            'AkunCOA' => ['required', 'string', 'max:255'],
             'SaldoBukuBesar' => ['required', 'integer'],
             'SaldoRekeningKoran' => ['required', 'integer'],
         ]);
@@ -106,7 +104,6 @@ class CekSaldoSetaraKasController extends Controller
         $setaraKas = $this->resolveAuthorizedSetaraKas($request, (int) $item->SetaraKasID);
         $validated = $request->validate([
             'NamaBank' => ['sometimes', 'string', 'max:255'],
-            'AkunCOA' => ['sometimes', 'string', 'max:255'],
             'SaldoBukuBesar' => ['sometimes', 'integer'],
             'SaldoRekeningKoran' => ['sometimes', 'integer'],
         ]);
@@ -140,7 +137,6 @@ class CekSaldoSetaraKasController extends Controller
                 'distinct',
             ],
             'rows.*.NamaBank' => ['required', 'string', 'max:255'],
-            'rows.*.AkunCOA' => ['required', 'string', 'max:255'],
             'rows.*.SaldoBukuBesar' => ['required', 'integer'],
             'rows.*.SaldoRekeningKoran' => ['required', 'integer'],
         ]);
@@ -170,7 +166,6 @@ class CekSaldoSetaraKasController extends Controller
             foreach ($validated['rows'] as $row) {
                 $data = [
                     'NamaBank' => $row['NamaBank'],
-                    'AkunCOA' => $row['AkunCOA'],
                     'SaldoBukuBesar' => $row['SaldoBukuBesar'],
                     'SaldoRekeningKoran' => $row['SaldoRekeningKoran'],
                     'Selisih' => $this->calculateSelisih(

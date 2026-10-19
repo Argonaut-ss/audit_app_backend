@@ -14,7 +14,6 @@ class CekSaldoSetaraKas extends Model
     protected $fillable = [
         'SetaraKasID',
         'NamaBank',
-        'AkunCOA',
         'SaldoBukuBesar',
         'SaldoRekeningKoran',
         'Selisih',
