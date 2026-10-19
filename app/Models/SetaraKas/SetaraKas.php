@@ -45,4 +45,13 @@ class SetaraKas extends Model
             'JwbKasusID'
         );
     }
+
+    public function cekSaldoSetaraKas(): HasMany
+    {
+        return $this->hasMany(
+            CekSaldoSetaraKas::class,
+            'SetaraKasID',
+            'SetaraKasID'
+        );
+    }
 }
