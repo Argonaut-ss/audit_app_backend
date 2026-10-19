@@ -27,6 +27,7 @@ use App\Models\Persediaan\UjiMutasiPersediaan;
 use App\Models\Persediaan\TestPricingPersediaan;
 use App\Models\AsetTetap\AsetTetap;
 use App\Models\AsetLain\AsetLain;
+use App\Models\SetaraKas\SetaraKas;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -447,6 +448,21 @@ class TestSeeder extends Seeder
                     'DokumentasiCheck' => false,
                     'BuktiPendukungCheck' => false,
                     'WawancaraCheck' => false,
+                    'JurnalCheck' => false,
+                    'Kesimpulan' => null,
+                ]
+            );
+
+            SetaraKas::updateOrCreate(
+                ['JwbKasusID' => $jwbKasus1->JwbKasusID],
+                [
+                    'ProsedurCheck' => false,
+                    'DokumenCheck' => false,
+                    'RekeningCheck' => false,
+                    'CekSaldoCheck' => false,
+                    'RekonsilasiCheck' => false,
+                    'KonfirmasiCheck' => false,
+                    'RekapCheck' => false,
                     'JurnalCheck' => false,
                     'Kesimpulan' => null,
                 ]
