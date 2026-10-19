@@ -84,6 +84,8 @@ use App\Http\Controllers\AsetLainController\RekapBalasanAsetLainController;
 use App\Http\Controllers\AsetLainController\JurnalKoreksiAsetLainController;
 use App\Http\Controllers\AsetLainController\DokumentasiAsetLainController;
 
+use App\Http\Controllers\SetaraKasController\SetaraKasController;
+
 use App\Http\Controllers\KelasCardController;
 
 // Login & Logout & RBAC
@@ -449,6 +451,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('dokumentasi-aset-lain', DokumentasiAsetLainController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['dokumentasi-aset-lain' => 'dokumentasiAsetLain']);
+
+    // Setara Kas Routes
+    Route::get('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'show']);
+    Route::put('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'update']);
+    
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

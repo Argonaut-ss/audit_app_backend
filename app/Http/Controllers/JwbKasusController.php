@@ -16,6 +16,7 @@ use App\Models\BebanUsaha\BebanUsaha;
 use App\Models\AsetTetap\AsetTetap;
 use App\Models\AsetLain\AsetLain;
 use App\Models\Kas\Kas;
+use App\Models\SetaraKas\SetaraKas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -207,6 +208,10 @@ class JwbKasusController extends Controller
             ]);
 
             $asetLain = AsetLain::create([
+                'JwbKasusID' => $jawaban->JwbKasusID,
+            ]);
+
+            $setaraKas = SetaraKas::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,
             ]);
 
