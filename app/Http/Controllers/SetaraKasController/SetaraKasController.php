@@ -114,11 +114,12 @@ class SetaraKasController extends Controller
                 'JwbKasusID' => $setaraKas->JwbKasusID,
                 'ProsedurCheck' => $setaraKas->ProsedurCheck,
                 'DokumenCheck' => $setaraKas->DokumenCheck,
+                'RekeningCheck' => $setaraKas->RekeningCheck,
+                'CekSaldoCheck' => $setaraKas->CekSaldoCheck,
                 'KonfirmasiCheck' => $setaraKas->KonfirmasiCheck,
                 'RekapCheck' => $setaraKas->RekapCheck,
                 'JurnalCheck' => $setaraKas->JurnalCheck,
                 'RekonsiliasiCheck' => $setaraKas->RekonsiliasiCheck,
-                'ProsedurAltCheck' => $setaraKas->ProsedurAltCheck,
                 'Kesimpulan' => $setaraKas->Kesimpulan,
             ],
         ]);

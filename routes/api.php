@@ -85,6 +85,7 @@ use App\Http\Controllers\AsetLainController\JurnalKoreksiAsetLainController;
 use App\Http\Controllers\AsetLainController\DokumentasiAsetLainController;
 
 use App\Http\Controllers\SetaraKasController\SetaraKasController;
+use App\Http\Controllers\SetaraKasController\CekSaldoSetaraKasController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -455,7 +456,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Setara Kas Routes
     Route::get('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'show']);
     Route::put('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'update']);
-    
+
+    // Cek Saldo Setara Kas Routes
+    Route::post('/cek-saldo-setara-kas/bulk-save', [CekSaldoSetaraKasController::class, 'bulkSave']);
+    Route::get('/cek-saldo-setara-kas', [CekSaldoSetaraKasController::class, 'index']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
