@@ -86,6 +86,10 @@ use App\Http\Controllers\AsetLainController\DokumentasiAsetLainController;
 
 use App\Http\Controllers\SetaraKasController\SetaraKasController;
 use App\Http\Controllers\SetaraKasController\CekSaldoSetaraKasController;
+use App\Http\Controllers\SetaraKasController\ProsedurSetaraKasController;
+use App\Http\Controllers\SetaraKasController\DokumenSetaraKasController;
+use App\Http\Controllers\AsetTetapController\RekeningKoranSetaraKasController;
+use App\Http\Controllers\SetaraKasController\KonfirmasiBankSetaraKasController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -460,6 +464,34 @@ Route::middleware('auth:sanctum')->group(function () {
     // Cek Saldo Setara Kas Routes
     Route::post('/cek-saldo-setara-kas/bulk-save', [CekSaldoSetaraKasController::class, 'bulkSave']);
     Route::get('/cek-saldo-setara-kas', [CekSaldoSetaraKasController::class, 'index']);
+
+    // Prosedur Setara Kas Routes
+    Route::get('/setara-kas/{setaraKas}/prosedur', [ProsedurSetaraKasController::class, 'index']);
+    Route::post('/prosedur-setara-kas', [ProsedurSetaraKasController::class, 'store']);
+    Route::put('/prosedur-setara-kas/{prosedurSetaraKas}', [ProsedurSetaraKasController::class, 'update']);
+    Route::patch('/prosedur-setara-kas/{prosedurSetaraKas}', [ProsedurSetaraKasController::class, 'update']);
+    Route::delete('/prosedur-setara-kas/{prosedurSetaraKas}', [ProsedurSetaraKasController::class, 'destroy']);
+    
+    // Dokumen Setara Kas Routes
+    Route::get('/setara-kas/{setaraKasId}/dokumen', [DokumenSetaraKasController::class, 'index']);
+    Route::post('/setara-kas/{setaraKasId}/dokumen', [DokumenSetaraKasController::class, 'store']);
+    Route::get('/dokumen-setara-kas/{dokumenId}', [DokumenSetaraKasController::class, 'show']);
+    Route::put('/dokumen-setara-kas/{dokumenId}', [DokumenSetaraKasController::class, 'update']);
+    Route::delete('/dokumen-setara-kas/{dokumenId}', [DokumenSetaraKasController::class, 'destroy']);
+
+    // Rekening Koran Setara Kas Routes
+    Route::get('/setara-kas/{setaraKasId}/rekening-koran', [RekeningKoranSetaraKasController::class, 'index']);
+    Route::post('/setara-kas/{setaraKasId}/rekening-koran', [RekeningKoranSetaraKasController::class, 'store']);
+    Route::get('/rekening-koran-setara-kas/{dokumenId}', [RekeningKoranSetaraKasController::class, 'show']);
+    Route::put('/rekening-koran-setara-kas/{dokumenId}', [RekeningKoranSetaraKasController::class, 'update']);
+    Route::delete('/rekening-koran-setara-kas/{dokumenId}', [RekeningKoranSetaraKasController::class, 'destroy']);
+
+    // Konfirmasi Bank Setara Kas Routes
+    Route::get('/setara-kas/{setaraKasId}/konfirmasi-bank', [KonfirmasiBankSetaraKasController::class, 'index']);
+    Route::post('/setara-kas/{setaraKasId}/konfirmasi-bank', [KonfirmasiBankSetaraKasController::class, 'store']);
+    Route::get('/konfirmasi-bank-setara-kas/{dokumenId}', [KonfirmasiBankSetaraKasController::class, 'show']);
+    Route::put('/konfirmasi-bank-setara-kas/{dokumenId}', [KonfirmasiBankSetaraKasController::class, 'update']);
+    Route::delete('/konfirmasi-bank-setara-kas/{dokumenId}', [KonfirmasiBankSetaraKasController::class, 'destroy']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
