@@ -1,42 +1,38 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
+namespace App\Models\SetaraKas;
 
-return new class extends Migration
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class RekeningKoranSetaraKas extends Model
 {
+    protected $table = 'RekeningKoranSetaraKas';
+
+    protected $primaryKey = 'RekeningKoranSetaraKasID';
+
+    protected $fillable = [
+        'SetaraKasID',
+        'NamaFile',
+        'NamaFileUpload',
+        'MimeType',
+        'File',
+    ];
+
+    protected $casts = [
+        'RekeningKoranSetaraKasID' => 'integer',
+        'SetaraKasID' => 'integer',
+    ];
+
     /**
-     * Run the migrations.
+     * A rekening koran document belongs to one setara kas.
      */
-    public function up(): void
+    public function setaraKas(): BelongsTo
     {
-        Schema::create('RekeningKoranSetaraKas', function (Blueprint $table) {
-            $table->id('RekeningKoranSetaraKasID');
-
-            $table->foreignId('SetaraKasID')
-                ->constrained('setara_kas', 'SetaraKasID')
-                ->cascadeOnDelete();
-
-            $table->string('NamaFile');
-            $table->string('NamaFileUpload')->nullable();
-            $table->string('MimeType', 100)->nullable();
-            $table->binary('File')->nullable();
-
-            $table->timestamps();
-        });
-
-        DB::statement(
-            'ALTER TABLE `RekeningKoranSetaraKas` MODIFY `File` MEDIUMBLOB NULL'
+        return $this->belongsTo(
+            SetaraKas::class,
+            'SetaraKasID',
+            'SetaraKasID'
         );
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('RekeningKoranSetaraKas');
-    }
-};
+}

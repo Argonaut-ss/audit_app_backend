@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\AsetTetapController;
+namespace App\Http\Controllers\SetaraKasController;
 
 use App\Http\Controllers\Controller;
-use App\Models\AsetTetap\SetaraKas;
-use App\Models\AsetTetap\RekeningKoranSetaraKas;
+use App\Models\SetaraKas\SetaraKas;
+use App\Models\SetaraKas\RekeningKoranSetaraKas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;

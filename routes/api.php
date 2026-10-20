@@ -88,7 +88,7 @@ use App\Http\Controllers\SetaraKasController\SetaraKasController;
 use App\Http\Controllers\SetaraKasController\CekSaldoSetaraKasController;
 use App\Http\Controllers\SetaraKasController\ProsedurSetaraKasController;
 use App\Http\Controllers\SetaraKasController\DokumenSetaraKasController;
-use App\Http\Controllers\AsetTetapController\RekeningKoranSetaraKasController;
+use App\Http\Controllers\SetaraKasController\RekeningKoranSetaraKasController;
 use App\Http\Controllers\SetaraKasController\KonfirmasiBankSetaraKasController;
 use App\Http\Controllers\SetaraKasController\JurnalKoreksiSetaraKasController;
 
