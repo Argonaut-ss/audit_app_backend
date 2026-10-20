@@ -54,4 +54,42 @@ class SetaraKas extends Model
             'SetaraKasID'
         );
     }
+
+    public function prosedurs(): HasMany
+    {
+        return $this->hasMany(
+            ProsedurSetaraKas::class,
+            'setara_kas_id',
+            'SetaraKasID'
+        );
+    }
+
+    public function dokumen(): HasMany
+    {
+        return $this->hasMany(
+            DokumenSetaraKas::class,
+            'SetaraKasID',
+            'SetaraKasID'
+        );
+    }
+
+    /* A setara kas can have multiple rekening koran documents */
+    public function rekeningKoranSetaraKas(): HasMany
+    {
+        return $this->hasMany(
+            RekeningKoranSetaraKas::class,
+            'SetaraKasID',
+            'SetaraKasID'
+        );
+    }
+
+    /* A setara kas can have multiple konfirmasi bank documents */
+    public function konfirmasiBank(): HasMany
+    {
+        return $this->hasMany(
+            KonfirmasiBankSetaraKas::class,
+            'SetaraKasID',
+            'SetaraKasID'
+        );
+    }
 }
