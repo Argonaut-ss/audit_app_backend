@@ -92,4 +92,13 @@ class SetaraKas extends Model
             'SetaraKasID'
         );
     }
+
+    public function jurnalKoreksi(): HasMany
+    {
+        return $this->hasMany(
+            JurnalKoreksiSetaraKas::class,
+            'SetaraKasID',
+            'SetaraKasID'
+        );
+    }
 }
