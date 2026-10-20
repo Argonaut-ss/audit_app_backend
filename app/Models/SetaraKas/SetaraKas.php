@@ -83,6 +83,15 @@ class SetaraKas extends Model
         );
     }
 
+    public function rekonsilasiBank(): HasMany
+    {
+        return $this->hasMany(
+            RekonsilasiBankSetaraKas::class,
+            'SetaraKasID',
+            'SetaraKasID'
+        );
+    }
+
     /* A setara kas can have multiple konfirmasi bank documents */
     public function konfirmasiBank(): HasMany
     {

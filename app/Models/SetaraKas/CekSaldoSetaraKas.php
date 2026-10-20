@@ -4,6 +4,7 @@ namespace App\Models\SetaraKas;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CekSaldoSetaraKas extends Model
 {
@@ -32,6 +33,15 @@ class CekSaldoSetaraKas extends Model
             SetaraKas::class,
             'SetaraKasID',
             'SetaraKasID'
+        );
+    }
+
+    public function rekonsilasiBank(): HasOne
+    {
+        return $this->hasOne(
+            RekonsilasiBankSetaraKas::class,
+            'CekSaldoID',
+            'CekSaldoID'
         );
     }
 }

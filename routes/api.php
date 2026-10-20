@@ -91,6 +91,7 @@ use App\Http\Controllers\SetaraKasController\DokumenSetaraKasController;
 use App\Http\Controllers\SetaraKasController\RekeningKoranSetaraKasController;
 use App\Http\Controllers\SetaraKasController\KonfirmasiBankSetaraKasController;
 use App\Http\Controllers\SetaraKasController\JurnalKoreksiSetaraKasController;
+use App\Http\Controllers\SetaraKasController\RekonsilasiBankSetaraKasController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -498,6 +499,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('jurnal-koreksi-setara-kas', JurnalKoreksiSetaraKasController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-setara-kas' => 'jurnalKoreksiSetaraKas']);
+
+    // Rekonsiliasi Bank Setara Kas Routes
+    Route::apiResource('rekonsilasi-bank-setara-kas', RekonsilasiBankSetaraKasController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['rekonsilasi-bank-setara-kas' => 'rekonsilasiBankSetaraKa']);
 
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

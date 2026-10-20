@@ -37,7 +37,7 @@ class SetaraKasController extends Controller
                 'DokumenCheck' => $setaraKas->DokumenCheck,
                 'RekeningCheck' => $setaraKas->RekeningCheck,
                 'CekSaldoCheck' => $setaraKas->CekSaldoCheck,
-                'RekonsilasiCheck' => $setaraKas->RekonsilasiCheck,
+                'RekonsiliasiBankCheck' => $setaraKas->RekonsilasiCheck,
                 'KonfirmasiCheck' => $setaraKas->KonfirmasiCheck,
                 'RekapCheck' => $setaraKas->RekapCheck,
                 'JurnalCheck' => $setaraKas->JurnalCheck,
