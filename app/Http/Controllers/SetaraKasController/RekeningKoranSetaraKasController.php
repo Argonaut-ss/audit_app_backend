@@ -25,7 +25,7 @@ class RekeningKoranSetaraKasController extends Controller
         )->exists();
 
         $setaraKas->updateQuietly([
-            'RekeningKoranCheck' => $hasDokumen,
+            'RekeningCheck' => $hasDokumen,
         ]);
     }
 
