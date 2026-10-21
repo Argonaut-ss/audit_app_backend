@@ -25,7 +25,7 @@ class KonfirmasiBankSetaraKasController extends Controller
         )->exists();
 
         $setaraKas->updateQuietly([
-            'KonfirmasiBankCheck' => $hasDokumen,
+            'KonfirmasiCheck' => $hasDokumen,
         ]);
     }
 
