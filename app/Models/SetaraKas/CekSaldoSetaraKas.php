@@ -44,4 +44,13 @@ class CekSaldoSetaraKas extends Model
             'CekSaldoID'
         );
     }
+
+    public function rekapBalasan(): HasOne
+    {
+        return $this->hasOne(
+            RekapBalasanSetaraKas::class,
+            'CekSaldoSetaraKasID',
+            'CekSaldoID'
+        );
+    }
 }

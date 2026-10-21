@@ -92,6 +92,7 @@ use App\Http\Controllers\SetaraKasController\RekeningKoranSetaraKasController;
 use App\Http\Controllers\SetaraKasController\KonfirmasiBankSetaraKasController;
 use App\Http\Controllers\SetaraKasController\JurnalKoreksiSetaraKasController;
 use App\Http\Controllers\SetaraKasController\RekonsilasiBankSetaraKasController;
+use App\Http\Controllers\SetaraKasController\RekapBalasanSetaraKasController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -462,6 +463,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Setara Kas Routes
     Route::get('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'show']);
     Route::put('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'update']);
+
+    // Rekap Balasan Setara Kas Routes
+    Route::post('rekap-balasan-setara-kas/bulk-save', [RekapBalasanSetaraKasController::class, 'bulkSave']);
+    Route::get('/rekap-balasan-setara-kas/{id}/file', [RekapBalasanSetaraKasController::class, 'file']);
+    Route::apiResource('rekap-balasan-setara-kas', RekapBalasanSetaraKasController::class);
 
     // Cek Saldo Setara Kas Routes
     Route::post('/cek-saldo-setara-kas/bulk-save', [CekSaldoSetaraKasController::class, 'bulkSave']);
