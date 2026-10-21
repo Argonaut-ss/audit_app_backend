@@ -15,6 +15,7 @@ use App\Http\Controllers\PerikatanController;
 use App\Http\Controllers\DetilVerifikasiController;
 use App\Http\Controllers\IdentifikasiController;
 use App\Http\Controllers\PmpjController;
+use App\Http\Controllers\PengujianSubstantifController;
 use App\Http\Controllers\COAController;
 use App\Http\Controllers\PiutangController\PiutangController;
 use App\Http\Controllers\PiutangController\KonfirmasiPiutangController;
@@ -141,6 +142,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pmpj/{jwbKasusId}', [PmpjController::class, 'show']);
     Route::get('/pmpj/{jwbKasusId}/file-ktp', [PmpjController::class, 'fileKtp']);
     Route::put('/pmpj/{jwbKasusId}', [PmpjController::class, 'update']);
+
+    // Pengujian Substantif Aggregator Route (Status 9 Modul dalam 1 request)
+    Route::get('/pengujian-substantif/{jwbKasusId}', [PengujianSubstantifController::class, 'show']);
 
     // Piutang Routes
     Route::get('/piutang/{jwbKasusId}', [PiutangController::class, 'show']);
