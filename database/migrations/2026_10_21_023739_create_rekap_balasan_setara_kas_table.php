@@ -23,6 +23,7 @@ return new class extends Migration
             $table->date('TanggalJawab')->nullable();
             $table->bigInteger('SaldoJawab')->default(0);
             $table->bigInteger('Selisih')->default(0);
+            $table->bigInteger('KonfirmasiTakTerbalas')->default(0);
             $table->string('NamaFile')->nullable();
             $table->string('TipeFile')->nullable();
             $table->timestamps();

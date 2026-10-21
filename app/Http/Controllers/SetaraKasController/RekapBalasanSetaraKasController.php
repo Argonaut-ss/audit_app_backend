@@ -148,6 +148,12 @@ class RekapBalasanSetaraKasController extends Controller
                 'integer',
             ],
 
+            'KonfirmasiTakTerbalas' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+
             'StatusKonfirmasi' => [
                 'nullable',
                 'in:diterima,belum diterima',
@@ -210,6 +216,7 @@ class RekapBalasanSetaraKasController extends Controller
             $validated['TipeFile'] = $file->getMimeType();
         }
 
+        $validated = $this->applyConfirmationRules($validated);
         $rekap = RekapBalasanSetaraKas::create($validated);
         $this->rekapCheck($setaraKas);
 
@@ -322,6 +329,12 @@ class RekapBalasanSetaraKasController extends Controller
             'data.*.Selisih' => [
                 'nullable',
                 'integer',
+            ],
+
+            'data.*.KonfirmasiTakTerbalas' => [
+                'nullable',
+                'integer',
+                'min:0',
             ],
 
             'data.*.StatusKonfirmasi' => [
@@ -614,6 +627,7 @@ class RekapBalasanSetaraKasController extends Controller
                                 'TanggalJawab' => $row['TanggalJawab'] ?? null,
                                 'SaldoJawab' => $row['SaldoJawab'] ?? null,
                                 'Selisih' => $row['Selisih'] ?? null,
+                                'KonfirmasiTakTerbalas' => $row['KonfirmasiTakTerbalas'] ?? null,
                                 'StatusKonfirmasi' => $row['StatusKonfirmasi'] ?? null,
                             ];
 
@@ -637,6 +651,7 @@ class RekapBalasanSetaraKasController extends Controller
                                 $updateData['NamaFile'] = $file->getClientOriginalName();
                                 $updateData['TipeFile'] = $file->getMimeType();
                             }
+                            $updateData = $this->applyConfirmationRules($updateData, $rekap);
                             $rekap->fill($updateData);
                             $rekap->save();
                         }
@@ -657,6 +672,7 @@ class RekapBalasanSetaraKasController extends Controller
                                 'TanggalJawab' => $row['TanggalJawab'] ?? null,
                                 'SaldoJawab' => $row['SaldoJawab'] ?? null,
                                 'Selisih' => $row['Selisih'] ?? null,
+                                'KonfirmasiTakTerbalas' => $row['KonfirmasiTakTerbalas'] ?? null,
                                 'StatusKonfirmasi' =>$row['StatusKonfirmasi'] ?? null,
                             ];
 
@@ -676,6 +692,7 @@ class RekapBalasanSetaraKasController extends Controller
                                     $file->getMimeType();
                             }
 
+                            $createData = $this->applyConfirmationRules($createData);
                             RekapBalasanSetaraKas::create($createData);
                         }
                     }
@@ -758,6 +775,12 @@ class RekapBalasanSetaraKasController extends Controller
                 'nullable',
                 'integer',
             ],
+            'KonfirmasiTakTerbalas' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                'min:0',
+            ],
             'StatusKonfirmasi' => [
                 'sometimes',
                 'in:diterima,belum diterima',
@@ -833,6 +856,7 @@ class RekapBalasanSetaraKasController extends Controller
                 $file->getMimeType();
         }
 
+        $validated = $this->applyConfirmationRules($validated, $rekap);
         $rekap->fill($validated);
         $rekap->save();
 
@@ -891,5 +915,57 @@ class RekapBalasanSetaraKasController extends Controller
                         ->exists(),
             ]);
         }
+    }
+
+    private function applyConfirmationRules(
+        array $data,
+        ?RekapBalasanSetaraKas $existing = null
+    ): array {
+        $status = array_key_exists('StatusKonfirmasi', $data)
+            ? $data['StatusKonfirmasi']
+            : $existing?->StatusKonfirmasi;
+
+        $saldoBB = (int) (
+            array_key_exists('SaldoBB', $data)
+                ? ($data['SaldoBB'] ?? 0)
+                : ($existing?->SaldoBB ?? 0)
+        );
+        $data['SaldoBB'] = $saldoBB;
+
+        if ($status === 'diterima') {
+            $saldoJawab = (int) (
+                array_key_exists('SaldoJawab', $data)
+                    ? ($data['SaldoJawab'] ?? 0)
+                    : ($existing?->SaldoJawab ?? 0)
+            );
+
+            $data['TanggalJawab'] = array_key_exists('TanggalJawab', $data)
+                ? $data['TanggalJawab']
+                : $existing?->TanggalJawab?->toDateString();
+            $data['SaldoJawab'] = $saldoJawab;
+            $data['Selisih'] = $saldoBB - $saldoJawab;
+        } else {
+            $data['TanggalJawab'] = null;
+            $data['SaldoJawab'] = 0;
+            $data['Selisih'] = 0;
+        }
+
+        if (array_key_exists('KonfirmasiTakTerbalas', $data)) {
+            $data['KonfirmasiTakTerbalas'] =
+                $data['KonfirmasiTakTerbalas'] ?? 0;
+        } elseif (
+            !$existing
+            || (
+                $status === 'diterima'
+                && $existing->StatusKonfirmasi !== 'diterima'
+            )
+        ) {
+            $data['KonfirmasiTakTerbalas'] = 0;
+        } else {
+            $data['KonfirmasiTakTerbalas'] =
+                $existing->KonfirmasiTakTerbalas ?? 0;
+        }
+
+        return $data;
     }
 }

@@ -24,6 +24,7 @@ class RekapBalasanSetaraKas extends Model
         'TanggalJawab',
         'SaldoJawab',
         'Selisih',
+        'KonfirmasiTakTerbalas',
         'FileBukti',
         'NamaFile',
         'TipeFile',
@@ -41,6 +42,7 @@ class RekapBalasanSetaraKas extends Model
         'TanggalJawab' => 'date',
         'SaldoJawab' => 'integer',
         'Selisih' => 'integer',
+        'KonfirmasiTakTerbalas' => 'integer',
     ];
 
     public function setaraKas(): BelongsTo
