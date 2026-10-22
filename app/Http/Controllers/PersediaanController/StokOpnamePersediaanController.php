@@ -56,6 +56,37 @@ class StokOpnamePersediaanController extends Controller
         ]);
     }
 
+    private function syncUjiMutasi(StokOpnamePersediaan $stokOpname): void
+    {
+        $ujiMutasi = UjiMutasiPersediaan::query()
+            ->where('PersediaanID', $stokOpname->PersediaanID)
+            ->where('StokOpnameID', $stokOpname->StokOpnameID)
+            ->first();
+
+        if (! $ujiMutasi) {
+            return;
+        }
+
+        $saldoStokOpname = (int) $ujiMutasi->SaldoStokOpname;
+        $keluar = (int) $ujiMutasi->Keluar;
+        $rusak = (int) $ujiMutasi->Rusak;
+        $masuk = (int) $ujiMutasi->Masuk;
+        $saldoNeraca = (int) $stokOpname->SaldoNeraca;
+
+        $saldoAuditSblm = $saldoStokOpname - $keluar - $rusak + $masuk;
+        $saldoAkhirSblm = $saldoAuditSblm - $saldoNeraca;
+        $saldoAkhirSdh = $saldoStokOpname + $keluar + $rusak
+            - $masuk - $saldoNeraca;
+        $saldoAuditSdh = $saldoNeraca + $saldoAkhirSdh;
+
+        $ujiMutasi->update([
+            'SaldoAuditSblm' => $saldoAuditSblm,
+            'SaldoAkhirSblm' => $saldoAkhirSblm,
+            'SaldoAuditSdh' => $saldoAuditSdh,
+            'SaldoAkhirSdh' => $saldoAkhirSdh,
+        ]);
+    }
+
     protected function resolveAuthorizedPersediaan(Request $request, int $persediaanId): Persediaan
     {
         $persediaan = Persediaan::findOrFail($persediaanId);
@@ -185,6 +216,7 @@ class StokOpnamePersediaanController extends Controller
                     $this->syncTurunan($item);
                 }
 
+                $this->syncUjiMutasi($item);
                 $result[] = $item->fresh();
             }
 
@@ -219,18 +251,26 @@ class StokOpnamePersediaanController extends Controller
 
         $computed = $this->computeSelisih($validated);
 
-        $stokOpnamePersediaan->update([
-            'NamaPersediaan' => $validated['NamaPersediaan'] ?? null,
-            'Satuan' => $validated['Satuan'] ?? null,
-            'SaldoNeraca' => $computed['SaldoNeraca'],
-            'JumlahSistem' => $computed['JumlahSistem'],
-            'JumlahFisik' => $computed['JumlahFisik'],
-            'SelisihFisik' => $computed['SelisihFisik'],
-            'SelisihSistem' => $computed['SelisihSistem'],
-            'Keterangan' => $validated['Keterangan'] ?? null,
-        ]);
+        DB::transaction(function () use (
+            $stokOpnamePersediaan,
+            $validated,
+            $computed,
+            $persediaan
+        ): void {
+            $stokOpnamePersediaan->update([
+                'NamaPersediaan' => $validated['NamaPersediaan'] ?? null,
+                'Satuan' => $validated['Satuan'] ?? null,
+                'SaldoNeraca' => $computed['SaldoNeraca'],
+                'JumlahSistem' => $computed['JumlahSistem'],
+                'JumlahFisik' => $computed['JumlahFisik'],
+                'SelisihFisik' => $computed['SelisihFisik'],
+                'SelisihSistem' => $computed['SelisihSistem'],
+                'Keterangan' => $validated['Keterangan'] ?? null,
+            ]);
 
-        $this->stockCheck((int) $persediaan->PersediaanID);
+            $this->syncUjiMutasi($stokOpnamePersediaan->fresh());
+            $this->stockCheck((int) $persediaan->PersediaanID);
+        });
 
         return response()->json([
             'success' => true,

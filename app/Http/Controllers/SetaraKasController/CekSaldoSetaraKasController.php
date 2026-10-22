@@ -5,6 +5,8 @@ namespace App\Http\Controllers\SetaraKasController;
 use App\Http\Controllers\Controller;
 use App\Models\JwbKasus;
 use App\Models\SetaraKas\CekSaldoSetaraKas;
+use App\Models\SetaraKas\RekapBalasanSetaraKas;
+use App\Models\SetaraKas\RekonsilasiBankSetaraKas;
 use App\Models\SetaraKas\SetaraKas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -49,6 +51,60 @@ class CekSaldoSetaraKasController extends Controller
         ]);
     }
 
+    private function syncDerivedRecords(CekSaldoSetaraKas $cekSaldo): void
+    {
+        $rekonsilasi = RekonsilasiBankSetaraKas::query()
+            ->where('SetaraKasID', $cekSaldo->SetaraKasID)
+            ->where('CekSaldoID', $cekSaldo->CekSaldoID)
+            ->with('rincian')
+            ->first();
+
+        if ($rekonsilasi) {
+            $saldoSetelahRekonBank = (int) $cekSaldo->SaldoRekeningKoran
+                + (int) $rekonsilasi->rincian
+                    ->where('Kategori', 'BankBertambah')
+                    ->sum('Nominal')
+                - (int) $rekonsilasi->rincian
+                    ->where('Kategori', 'BankBerkurang')
+                    ->sum('Nominal');
+
+            $saldoSetelahRekonBuku = (int) $cekSaldo->SaldoBukuBesar
+                + (int) $rekonsilasi->rincian
+                    ->where('Kategori', 'BukuBertambah')
+                    ->sum('Nominal')
+                - (int) $rekonsilasi->rincian
+                    ->where('Kategori', 'BukuBerkurang')
+                    ->sum('Nominal');
+
+            $rekonsilasi->update([
+                'SaldoSetelahRekonBank' => $saldoSetelahRekonBank,
+                'SaldoSetelahRekonBuku' => $saldoSetelahRekonBuku,
+                'Selisih' => abs($saldoSetelahRekonBank - $saldoSetelahRekonBuku),
+                'Status' => $saldoSetelahRekonBank === $saldoSetelahRekonBuku,
+            ]);
+        }
+
+        $rekapBalasan = RekapBalasanSetaraKas::query()
+            ->where('SetaraKasID', $cekSaldo->SetaraKasID)
+            ->where('CekSaldoSetaraKasID', $cekSaldo->CekSaldoID)
+            ->get();
+
+        foreach ($rekapBalasan as $rekap) {
+            $saldoBB = (int) $cekSaldo->SaldoBukuBesar;
+            $data = ['SaldoBB' => $saldoBB];
+
+            if ($rekap->StatusKonfirmasi === 'diterima') {
+                $data['Selisih'] = $saldoBB - (int) $rekap->SaldoJawab;
+            } else {
+                $data['TanggalJawab'] = null;
+                $data['SaldoJawab'] = 0;
+                $data['Selisih'] = 0;
+            }
+
+            $rekap->update($data);
+        }
+    }
+
     public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -88,8 +144,13 @@ class CekSaldoSetaraKasController extends Controller
         ]);
         $setaraKas = $this->resolveAuthorizedSetaraKas($request, (int) $validated['SetaraKasID']);
         $validated['Selisih'] = $this->calculateSelisih((int) $validated['SaldoBukuBesar'], (int) $validated['SaldoRekeningKoran']);
-        $item = $setaraKas->cekSaldoSetaraKas()->create($validated);
-        $this->updateCekSaldoCheck($setaraKas);
+        $item = DB::transaction(function () use ($setaraKas, $validated) {
+            $item = $setaraKas->cekSaldoSetaraKas()->create($validated);
+            $this->syncDerivedRecords($item);
+            $this->updateCekSaldoCheck($setaraKas);
+
+            return $item;
+        });
 
         return response()->json([
             'success' => true,
@@ -115,8 +176,13 @@ class CekSaldoSetaraKasController extends Controller
             $saldoRekeningKoran
         );
 
-        $item->update($validated);
-        $this->updateCekSaldoCheck($setaraKas);
+        $item = DB::transaction(function () use ($item, $validated, $setaraKas) {
+            $item->update($validated);
+            $this->syncDerivedRecords($item);
+            $this->updateCekSaldoCheck($setaraKas);
+
+            return $item;
+        });
 
         return response()->json([
             'success' => true,
@@ -181,6 +247,7 @@ class CekSaldoSetaraKasController extends Controller
                     $item = $setaraKas->cekSaldoSetaraKas()->create($data);
                 }
 
+                $this->syncDerivedRecords($item);
                 $result[] = $item->fresh();
             }
 
