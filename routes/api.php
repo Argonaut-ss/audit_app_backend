@@ -475,7 +475,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Cek Saldo Setara Kas Routes
     Route::post('/cek-saldo-setara-kas/bulk-save', [CekSaldoSetaraKasController::class, 'bulkSave']);
-    Route::get('/cek-saldo-setara-kas', [CekSaldoSetaraKasController::class, 'index']);
+    Route::apiResource('cek-saldo-setara-kas', CekSaldoSetaraKasController::class);
 
     // Prosedur Setara Kas Routes
     Route::get('/setara-kas/{setaraKas}/prosedur', [ProsedurSetaraKasController::class, 'index']);
