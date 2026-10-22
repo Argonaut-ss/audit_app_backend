@@ -14,6 +14,13 @@ use Illuminate\Validation\ValidationException;
 
 class TestPricingPersediaanController extends Controller
 {
+    private function testPricingCheck(Persediaan $persediaan): void
+    {
+        $persediaan->updateQuietly([
+            'TestPricingCheck' => $persediaan->testPricing()->exists(),
+        ]);
+    }
+
     protected function resolveAuthorizedStokOpname(Request $request, int $stokOpnameId, ?int $persediaanId = null): StokOpnamePersediaan {
         $stokOpname = StokOpnamePersediaan::with('persediaan')
             ->findOrFail($stokOpnameId);
@@ -126,6 +133,7 @@ class TestPricingPersediaanController extends Controller
             ],
             $this->calculate($validated)
         ));
+        $this->testPricingCheck($stokOpname->persediaan);
 
         return response()->json([
             'success' => true,
@@ -148,7 +156,7 @@ class TestPricingPersediaanController extends Controller
     }
 
     public function update(Request $request,TestPricingPersediaan $test_pricing_persediaan): JsonResponse {
-        $this->resolveAuthorizedStokOpname(
+        $stokOpname = $this->resolveAuthorizedStokOpname(
             $request,
             (int) $test_pricing_persediaan->StokOpnameID,
             (int) $test_pricing_persediaan->PersediaanID
@@ -161,6 +169,7 @@ class TestPricingPersediaanController extends Controller
         $test_pricing_persediaan->update(
             $this->calculate($validated)
         );
+        $this->testPricingCheck($stokOpname->persediaan);
 
         return response()->json([
             'success' => true,
@@ -292,6 +301,8 @@ class TestPricingPersediaanController extends Controller
                     ->load('stokOpname');
             }
 
+            $this->testPricingCheck($persediaan);
+
             return $result;
         });
 
@@ -305,12 +316,13 @@ class TestPricingPersediaanController extends Controller
     }
 
     public function destroy(Request $request, TestPricingPersediaan $test_pricing_persediaan): JsonResponse {
-        $this->resolveAuthorizedStokOpname(
+        $stokOpname = $this->resolveAuthorizedStokOpname(
             $request,
             (int) $test_pricing_persediaan->StokOpnameID,
             (int) $test_pricing_persediaan->PersediaanID
         );
         $test_pricing_persediaan->delete();
+        $this->testPricingCheck($stokOpname->persediaan);
 
         return response()->json([
             'success' => true,

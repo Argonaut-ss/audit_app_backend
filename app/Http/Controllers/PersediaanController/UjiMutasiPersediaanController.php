@@ -13,6 +13,13 @@ use Illuminate\Support\Facades\DB;
 
 class UjiMutasiPersediaanController extends Controller
 {
+    private function ujiMutasiCheck(Persediaan $persediaan): void
+    {
+        $persediaan->updateQuietly([
+            'UjiMutasiCheck' => $persediaan->ujiMutasi()->exists(),
+        ]);
+    }
+
     private function resolveAuthorizedStokOpname(
         Request $request,
         int $stokOpnameId
@@ -171,7 +178,7 @@ class UjiMutasiPersediaanController extends Controller
                 (int) $stokOpname->SaldoNeraca
             );
 
-            return UjiMutasiPersediaan::create(array_merge([
+            $ujiMutasi = UjiMutasiPersediaan::create(array_merge([
                     'PersediaanID' => $stokOpname->PersediaanID,
                     'StokOpnameID' => $stokOpname->StokOpnameID,
                 ],
@@ -180,6 +187,10 @@ class UjiMutasiPersediaanController extends Controller
                     'Keterangan' => $payload['Keterangan'],
                 ]
             ));
+
+            $this->ujiMutasiCheck($stokOpname->persediaan);
+
+            return $ujiMutasi;
         });
 
         return response()->json([
@@ -189,10 +200,7 @@ class UjiMutasiPersediaanController extends Controller
         ], 201);
     }
 
-    public function show(
-        Request $request,
-        UjiMutasiPersediaan $uji_mutasi_persediaan
-    ): JsonResponse {
+    public function show(Request $request, UjiMutasiPersediaan $uji_mutasi_persediaan): JsonResponse {
         $this->resolveAuthorizedStokOpname(
             $request,
             (int) $uji_mutasi_persediaan->StokOpnameID
@@ -204,10 +212,7 @@ class UjiMutasiPersediaanController extends Controller
         ]);
     }
 
-    public function update(
-        Request $request,
-        ?UjiMutasiPersediaan $uji_mutasi_persediaan = null
-    ): JsonResponse {
+    public function update(Request $request, ?UjiMutasiPersediaan $uji_mutasi_persediaan = null): JsonResponse {
         if ($request->has('rows')) {
             return $this->bulkUpdate($request);
         }
@@ -234,6 +239,7 @@ class UjiMutasiPersediaanController extends Controller
                 'Keterangan' => $payload['Keterangan'],
             ]
         ));
+        $this->ujiMutasiCheck($stokOpname->persediaan);
 
         return response()->json([
             'success' => true,
@@ -288,7 +294,7 @@ class UjiMutasiPersediaanController extends Controller
             }
         }
 
-        $saved = DB::transaction(function () use ($validated, $existing) {
+        $saved = DB::transaction(function () use ($validated, $existing, $persediaan) {
             $result = [];
             foreach ($validated['rows'] as $row) {
                 $item = $existing->get((int) $row['id']);
@@ -309,6 +315,8 @@ class UjiMutasiPersediaanController extends Controller
                 $result[] = $item->fresh()->load('stokOpname');
             }
 
+            $this->ujiMutasiCheck($persediaan);
+
             return $result;
         });
 
@@ -322,8 +330,9 @@ class UjiMutasiPersediaanController extends Controller
     }
 
     public function destroy(Request $request, UjiMutasiPersediaan $uji_mutasi_persediaan): JsonResponse {
-        $this->resolveAuthorizedStokOpname($request, (int) $uji_mutasi_persediaan->StokOpnameID);
+        $stokOpname = $this->resolveAuthorizedStokOpname($request, (int) $uji_mutasi_persediaan->StokOpnameID);
         $uji_mutasi_persediaan->delete();
+        $this->ujiMutasiCheck($stokOpname->persediaan);
 
         return response()->json([
             'success' => true,

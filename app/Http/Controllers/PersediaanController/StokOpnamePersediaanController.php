@@ -23,6 +23,8 @@ class StokOpnamePersediaanController extends Controller
 
         $persediaan->updateQuietly([
             'StockCheck' => $persediaan->stokOpname()->exists(),
+            'UjiMutasiCheck' => $persediaan->ujiMutasi()->exists(),
+            'TestPricingCheck' => $persediaan->testPricing()->exists(),
         ]);
     }
 
@@ -200,10 +202,7 @@ class StokOpnamePersediaanController extends Controller
         ], 200);
     }
 
-    public function update(
-        Request $request,
-        StokOpnamePersediaan $stokOpnamePersediaan
-    ): JsonResponse {
+    public function update(Request $request, StokOpnamePersediaan $stokOpnamePersediaan): JsonResponse {
         $persediaan = $this->resolveAuthorizedPersediaan(
             $request,
             $stokOpnamePersediaan->PersediaanID
@@ -240,10 +239,7 @@ class StokOpnamePersediaanController extends Controller
         ]);
     }
 
-    public function destroy(
-        Request $request,
-        StokOpnamePersediaan $stokOpnamePersediaan
-    ): JsonResponse {
+    public function destroy(Request $request, StokOpnamePersediaan $stokOpnamePersediaan): JsonResponse {
         $persediaan = $this->resolveAuthorizedPersediaan(
             $request,
             $stokOpnamePersediaan->PersediaanID
