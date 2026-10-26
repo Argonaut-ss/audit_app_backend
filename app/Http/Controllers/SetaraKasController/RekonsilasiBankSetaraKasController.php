@@ -34,9 +34,10 @@ class RekonsilasiBankSetaraKasController extends Controller
         ]);
     }
 
-    protected function serializeItem(RekonsilasiBankSetaraKas $item): array
+    protected function serializeItem(RekonsilasiBankSetaraKas $item, ?CekSaldoSetaraKas $cekSaldo = null): array
     {
         $item->loadMissing(['cekSaldo', 'rincian']);
+        $cs = $cekSaldo ?? $item->cekSaldo;
 
         $rincian = $item->rincian->sortBy('RincianRekonsiliasiBankID');
 
@@ -51,10 +52,10 @@ class RekonsilasiBankSetaraKasController extends Controller
             'RekonsilasiBankID' => $item->RekonsilasiBankID,
             'SetaraKasID' => $item->SetaraKasID,
             'CekSaldoID' => $item->CekSaldoID,
-            'name' => $item->cekSaldo?->NamaBank ?? '',
-            'NamaBank' => $item->cekSaldo?->NamaBank ?? '',
-            'bankBalance' => (int) ($item->cekSaldo?->SaldoRekeningKoran ?? 0),
-            'bookBalance' => (int) ($item->cekSaldo?->SaldoBukuBesar ?? 0),
+            'name' => $cs?->NamaBank ?? '',
+            'NamaBank' => $cs?->NamaBank ?? '',
+            'bankBalance' => (int) ($cs?->SaldoRekeningKoran ?? 0),
+            'bookBalance' => (int) ($cs?->SaldoBukuBesar ?? 0),
             'SaldoSetelahRekonBank' => (int) $item->SaldoSetelahRekonBank,
             'SaldoSetelahRekonBuku' => (int) $item->SaldoSetelahRekonBuku,
             'Selisih' => (int) $item->Selisih,
@@ -64,8 +65,40 @@ class RekonsilasiBankSetaraKasController extends Controller
             'bankReductions' => $rincian->where('Kategori', 'BankBerkurang')->values()->map($mapRow)->all(),
             'bookAdditions' => $rincian->where('Kategori', 'BukuBertambah')->values()->map($mapRow)->all(),
             'bookReductions' => $rincian->where('Kategori', 'BukuBerkurang')->values()->map($mapRow)->all(),
+            'isSaved' => true,
             'created_at' => $item->created_at,
             'updated_at' => $item->updated_at,
+        ];
+    }
+
+    protected function serializeDraftFromCekSaldo(CekSaldoSetaraKas $cs, int $setaraKasId): array
+    {
+        $bankBalance = (int) $cs->SaldoRekeningKoran;
+        $bookBalance = (int) $cs->SaldoBukuBesar;
+        $selisih = abs($bankBalance - $bookBalance);
+        $status = ($bankBalance === $bookBalance);
+
+        return [
+            'id' => 'cs-' . $cs->CekSaldoID,
+            'RekonsilasiBankID' => null,
+            'SetaraKasID' => $setaraKasId,
+            'CekSaldoID' => $cs->CekSaldoID,
+            'name' => $cs->NamaBank ?? '',
+            'NamaBank' => $cs->NamaBank ?? '',
+            'bankBalance' => $bankBalance,
+            'bookBalance' => $bookBalance,
+            'SaldoSetelahRekonBank' => $bankBalance,
+            'SaldoSetelahRekonBuku' => $bookBalance,
+            'Selisih' => $selisih,
+            'Status' => $status,
+            'isBalanced' => $status,
+            'bankAdditions' => [],
+            'bankReductions' => [],
+            'bookAdditions' => [],
+            'bookReductions' => [],
+            'isSaved' => false,
+            'created_at' => null,
+            'updated_at' => null,
         ];
     }
 
@@ -77,23 +110,30 @@ class RekonsilasiBankSetaraKasController extends Controller
 
         $setaraKas = $this->resolveAuthorizedSetaraKas($request, (int) $validated['SetaraKasID']);
 
-        $items = $setaraKas->rekonsilasiBank()
-            ->with(['cekSaldo', 'rincian'])
-            ->orderBy('RekonsilasiBankID')
-            ->get()
-            ->map(fn (RekonsilasiBankSetaraKas $item) => $this->serializeItem($item))
-            ->values();
-
-        $availableBanks = $setaraKas->cekSaldoSetaraKas()
+        // Relasi 1:1 hanya untuk bank yang berselisih (belum seimbang) di Cek Saldo
+        $cekSaldoList = $setaraKas->cekSaldoSetaraKas()
+            ->where(function ($q) {
+                $q->where('Selisih', '!=', 0)
+                    ->orWhereColumn('SaldoBukuBesar', '!=', 'SaldoRekeningKoran');
+            })
+            ->with(['rekonsilasiBank.rincian'])
             ->orderBy('CekSaldoID')
-            ->get()
-            ->map(fn (CekSaldoSetaraKas $cs) => [
-                'CekSaldoID' => $cs->CekSaldoID,
-                'NamaBank' => $cs->NamaBank ?? '',
-                'SaldoRekeningKoran' => (int) $cs->SaldoRekeningKoran,
-                'SaldoBukuBesar' => (int) $cs->SaldoBukuBesar,
-            ])
-            ->values();
+            ->get();
+
+        $items = $cekSaldoList->map(function (CekSaldoSetaraKas $cs) use ($setaraKas) {
+            if ($cs->rekonsilasiBank) {
+                return $this->serializeItem($cs->rekonsilasiBank, $cs);
+            }
+
+            return $this->serializeDraftFromCekSaldo($cs, $setaraKas->SetaraKasID);
+        })->values();
+
+        $availableBanks = $cekSaldoList->map(fn (CekSaldoSetaraKas $cs) => [
+            'CekSaldoID' => $cs->CekSaldoID,
+            'NamaBank' => $cs->NamaBank ?? '',
+            'SaldoRekeningKoran' => (int) $cs->SaldoRekeningKoran,
+            'SaldoBukuBesar' => (int) $cs->SaldoBukuBesar,
+        ])->values();
 
         return response()->json([
             'success' => true,
@@ -107,6 +147,7 @@ class RekonsilasiBankSetaraKasController extends Controller
         $validated = $request->validate([
             'SetaraKasID' => ['required', 'integer', 'exists:setara_kas,SetaraKasID'],
             'CekSaldoID' => ['required', 'integer', 'exists:cek_saldo_setara_kas,CekSaldoID'],
+            'RekonsilasiBankID' => ['nullable', 'integer'],
             'bankAdditions' => ['nullable', 'array'],
             'bankAdditions.*.description' => ['nullable', 'string', 'max:255'],
             'bankAdditions.*.amount' => ['nullable', 'numeric', 'min:0'],
@@ -159,7 +200,7 @@ class RekonsilasiBankSetaraKasController extends Controller
             $selisih = abs($saldoSetelahRekonBank - $saldoSetelahRekonBuku);
             $status = ($saldoSetelahRekonBank === $saldoSetelahRekonBuku);
 
-            // 5. Simpan / Perbarui master RekonsilasiBank
+            // 5. Simpan / Perbarui master RekonsilasiBank (1:1 per CekSaldoID)
             $record = RekonsilasiBankSetaraKas::updateOrCreate(
                 [
                     'SetaraKasID' => $setaraKas->SetaraKasID,
@@ -173,7 +214,7 @@ class RekonsilasiBankSetaraKasController extends Controller
                 ]
             );
 
-            // 6. Sinkronisasi rincian items
+            // 6. Sinkronisasi rincian items (penghapusan baris berlaku saat Simpan ditekan)
             $record->rincian()->delete();
 
             $rincianData = [];
@@ -257,4 +298,3 @@ class RekonsilasiBankSetaraKasController extends Controller
         ]);
     }
 }
-

@@ -60,28 +60,39 @@ class CekSaldoSetaraKasController extends Controller
             ->first();
 
         if ($rekonsilasi) {
-            $saldoSetelahRekonBank = (int) $cekSaldo->SaldoRekeningKoran
-                + (int) $rekonsilasi->rincian
-                    ->where('Kategori', 'BankBertambah')
-                    ->sum('Nominal')
-                - (int) $rekonsilasi->rincian
-                    ->where('Kategori', 'BankBerkurang')
-                    ->sum('Nominal');
+            // Jika bank sudah seimbang di Cek Saldo, rekonsiliasi tidak diperlukan lagi -> hapus
+            if ((int) $cekSaldo->Selisih === 0 && (int) $cekSaldo->SaldoBukuBesar === (int) $cekSaldo->SaldoRekeningKoran) {
+                $rekonsilasi->delete();
+                $setaraKas = $cekSaldo->setaraKas;
+                if ($setaraKas) {
+                    $setaraKas->updateQuietly([
+                        'RekonsilasiCheck' => $setaraKas->rekonsilasiBank()->exists(),
+                    ]);
+                }
+            } else {
+                $saldoSetelahRekonBank = (int) $cekSaldo->SaldoRekeningKoran
+                    + (int) $rekonsilasi->rincian
+                        ->where('Kategori', 'BankBertambah')
+                        ->sum('Nominal')
+                    - (int) $rekonsilasi->rincian
+                        ->where('Kategori', 'BankBerkurang')
+                        ->sum('Nominal');
 
-            $saldoSetelahRekonBuku = (int) $cekSaldo->SaldoBukuBesar
-                + (int) $rekonsilasi->rincian
-                    ->where('Kategori', 'BukuBertambah')
-                    ->sum('Nominal')
-                - (int) $rekonsilasi->rincian
-                    ->where('Kategori', 'BukuBerkurang')
-                    ->sum('Nominal');
+                $saldoSetelahRekonBuku = (int) $cekSaldo->SaldoBukuBesar
+                    + (int) $rekonsilasi->rincian
+                        ->where('Kategori', 'BukuBertambah')
+                        ->sum('Nominal')
+                    - (int) $rekonsilasi->rincian
+                        ->where('Kategori', 'BukuBerkurang')
+                        ->sum('Nominal');
 
-            $rekonsilasi->update([
-                'SaldoSetelahRekonBank' => $saldoSetelahRekonBank,
-                'SaldoSetelahRekonBuku' => $saldoSetelahRekonBuku,
-                'Selisih' => abs($saldoSetelahRekonBank - $saldoSetelahRekonBuku),
-                'Status' => $saldoSetelahRekonBank === $saldoSetelahRekonBuku,
-            ]);
+                $rekonsilasi->update([
+                    'SaldoSetelahRekonBank' => $saldoSetelahRekonBank,
+                    'SaldoSetelahRekonBuku' => $saldoSetelahRekonBuku,
+                    'Selisih' => abs($saldoSetelahRekonBank - $saldoSetelahRekonBuku),
+                    'Status' => $saldoSetelahRekonBank === $saldoSetelahRekonBuku,
+                ]);
+            }
         }
 
         $rekapBalasan = RekapBalasanSetaraKas::query()
@@ -269,8 +280,17 @@ class CekSaldoSetaraKasController extends Controller
     {
         $item = CekSaldoSetaraKas::findOrFail($id);
         $setaraKas = $this->resolveAuthorizedSetaraKas($request, (int) $item->SetaraKasID);
-        $item->delete();
-        $this->updateCekSaldoCheck($setaraKas);
+
+        DB::transaction(function () use ($item, $setaraKas) {
+            $item->rekonsilasiBank?->delete();
+            $item->rekapBalasan?->delete();
+            $item->delete();
+
+            $this->updateCekSaldoCheck($setaraKas);
+            $setaraKas->updateQuietly([
+                'RekonsilasiCheck' => $setaraKas->rekonsilasiBank()->exists(),
+            ]);
+        });
 
         return response()->json([
             'success' => true,
