@@ -72,6 +72,15 @@ class JwbKasus extends Model
             'JwbKasusID'
         );
     }
+
+    public function topSchedules()
+    {
+        return $this->hasMany(
+            \App\Models\TopSchedule\TopSchedule::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
+    }
     
     public function identifikasi()
     {

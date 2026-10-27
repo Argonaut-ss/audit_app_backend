@@ -16,6 +16,7 @@ use App\Http\Controllers\DetilVerifikasiController;
 use App\Http\Controllers\IdentifikasiController;
 use App\Http\Controllers\PmpjController;
 use App\Http\Controllers\PengujianSubstantifController;
+use App\Http\Controllers\TopScheduleController;
 use App\Http\Controllers\COAController;
 use App\Http\Controllers\PiutangController\PiutangController;
 use App\Http\Controllers\PiutangController\KonfirmasiPiutangController;
@@ -145,6 +146,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Pengujian Substantif Aggregator Route (Status 9 Modul dalam 1 request)
     Route::get('/pengujian-substantif/{jwbKasusId}', [PengujianSubstantifController::class, 'show']);
+
+    // Top Schedule Routes (Lead Schedule A s/d N)
+    Route::get('/top-schedule/{jwbKasusId}', [TopScheduleController::class, 'show']);
+    Route::post('/top-schedule/{jwbKasusId}', [TopScheduleController::class, 'store']);
 
     // Piutang Routes
     Route::get('/piutang/{jwbKasusId}', [PiutangController::class, 'show']);
