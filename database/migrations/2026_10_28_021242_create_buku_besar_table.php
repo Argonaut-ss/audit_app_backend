@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('Top')->nullable();
             $table->string('Mapping')->nullable();
             $table->date('TanggalPerBook')->nullable();
-            $table->date('TanggalAuditIn')->nullable();
+            $table->date('TanggalAuditJln')->nullable();
             $table->date('TanggalAuditSblm')->nullable();
 
             $table->foreign('JwbKasusID')

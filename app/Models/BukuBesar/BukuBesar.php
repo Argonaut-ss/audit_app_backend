@@ -19,14 +19,14 @@ class BukuBesar extends Model
         'Top',
         'Mapping',
         'TanggalPerBook',
-        'TanggalAuditIn',
+        'TanggalAuditJln',
         'TanggalAuditSblm',
     ];
 
     protected $casts = [
         'JwbKasusID' => 'integer',
         'TanggalPerBook' => 'date',
-        'TanggalAuditIn' => 'date',
+        'TanggalAuditJln' => 'date',
         'TanggalAuditSblm' => 'date',
     ];
 
