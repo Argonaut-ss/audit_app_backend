@@ -58,4 +58,13 @@ class COA extends Model
             'COAID'
         );
     }
+
+    public function isiBukuBesar()
+    {
+        return $this->hasMany(
+            IsiBukuBesar::class,
+            'COAID',
+            'COAID'
+        );
+    }
 }

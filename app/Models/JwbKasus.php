@@ -109,6 +109,15 @@ class JwbKasus extends Model
     );
 }
 
+    public function bukuBesar()
+    {
+        return $this->hasOne(
+            BukuBesar::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
+    }
+
     public function scopeForUser($query, User $user)
     {
         if ($user->isAdmin()) {
