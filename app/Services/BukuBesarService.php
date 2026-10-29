@@ -59,23 +59,43 @@ class BukuBesarService
     }
 
     public function getTopSchedule(BukuBesar $bukuBesar, ?string $subMapping = null): array {
-        $coas = COA::where('JwbKasusID', $bukuBesar->JwbKasusID)
-            ->where('MappingTop', $bukuBesar->Mapping)
-            ->orderBy('SubMappingTop')
-            ->orderBy('COAID')
-            ->get()
-            ->filter(function (COA $coa) use ($subMapping) {
-                return $subMapping === null || ($coa->SubMappingTop ?: $coa->MappingTop) === $subMapping;
-            });
-
+        $isiItems = $bukuBesar->isiBukuBesar()->with('coa')->orderBy('IsiBukuBesarID')->get();
         $allCorrections = $this->getAggregatedCorrections((int) $bukuBesar->JwbKasusID);
         $correctionsGrouped = $allCorrections->groupBy('COAID');
-        $rows = $coas
-            ->map(fn (COA $coa) => $this->calculateAccount(
-                $coa,
-                $this->getCorrectionsForCoa($coa, $correctionsGrouped)
-            ))
-            ->values();
+
+        if ($isiItems->isNotEmpty()) {
+            $rows = $isiItems
+                ->filter(fn ($item) => $item->coa !== null)
+                ->filter(function ($item) use ($subMapping) {
+                    $itemSubMapping = $item->SubMapping ?: ($item->coa->SubMappingTop ?: $item->coa->MappingTop);
+                    return $subMapping === null || $itemSubMapping === $subMapping;
+                })
+                ->map(function ($item) use ($correctionsGrouped) {
+                    $itemSubMapping = $item->SubMapping ?: ($item->coa->SubMappingTop ?: $item->coa->MappingTop);
+                    return $this->calculateAccount(
+                        $item->coa,
+                        $this->getCorrectionsForCoa($item->coa, $correctionsGrouped),
+                        $itemSubMapping
+                    );
+                })
+                ->values();
+        } else {
+            $coas = COA::where('JwbKasusID', $bukuBesar->JwbKasusID)
+                ->where('MappingTop', $bukuBesar->Mapping)
+                ->orderBy('SubMappingTop')
+                ->orderBy('COAID')
+                ->get()
+                ->filter(function (COA $coa) use ($subMapping) {
+                    return $subMapping === null || ($coa->SubMappingTop ?: $coa->MappingTop) === $subMapping;
+                });
+
+            $rows = $coas
+                ->map(fn (COA $coa) => $this->calculateAccount(
+                    $coa,
+                    $this->getCorrectionsForCoa($coa, $correctionsGrouped)
+                ))
+                ->values();
+        }
 
         $subMappings = $rows
             ->groupBy('SubMapping')
@@ -92,6 +112,22 @@ class BukuBesarService
         ];
     }
 
+    public function getAvailableAccounts(BukuBesar $bukuBesar): Collection
+    {
+        $coas = COA::where('JwbKasusID', $bukuBesar->JwbKasusID)
+            ->where('MappingTop', $bukuBesar->Mapping)
+            ->orderBy('NoAkun')
+            ->get();
+
+        $allCorrections = $this->getAggregatedCorrections((int) $bukuBesar->JwbKasusID);
+        $correctionsGrouped = $allCorrections->groupBy('COAID');
+
+        return $coas->map(fn (COA $coa) => $this->calculateAccount(
+            $coa,
+            $this->getCorrectionsForCoa($coa, $correctionsGrouped)
+        ))->values();
+    }
+
     public function getCorrectionsForCoa(COA $coa, Collection $correctionsGrouped): Collection {
         return $correctionsGrouped->get($coa->COAID, collect());
     }
@@ -103,7 +139,7 @@ class BukuBesarService
      * - Akun Kredit (Liabilitas, Ekuitas, Pendapatan) -> AJE = Kredit - Debit
      * - Audited Berjalan = PerBook + AJE
      */
-    public function calculateAccount(COA $coa, Collection $corrections): array
+    public function calculateAccount(COA $coa, Collection $corrections, ?string $customSubMapping = null): array
     {
         $perBook = (int) $coa->PerBook;
         $auditSebelum = (int) $coa->AuditSebelum;
@@ -120,7 +156,7 @@ class BukuBesarService
             'COAID' => $coa->COAID,
             'NoAkun' => $coa->NoAkun,
             'NamaAkun' => $coa->NamaAkun,
-            'SubMapping' => $coa->SubMappingTop ?: $coa->MappingTop,
+            'SubMapping' => $customSubMapping ?: ($coa->SubMappingTop ?: $coa->MappingTop),
             'SaldoNormal' => $isDebit ? 'debit' : 'kredit',
             'PerBook' => $perBook,
             'AJE_RJE' => $ajeRje,
