@@ -31,13 +31,15 @@ class BukuBesarController extends Controller
             $validated['SubMapping'] ?? null
         );
 
+        $periode = $jwbKasus->Periode ? \Carbon\Carbon::parse($jwbKasus->Periode)->format('Y-m-d') : null;
+
         return response()->json([
             'success' => true,
             'data' => [
                 'JwbKasusID' => $jwbKasus->JwbKasusID,
                 'Mapping' => $bukuBesar->Mapping,
-                'TanggalPerBook' => $bukuBesar->TanggalPerBook?->format('Y-m-d'),
-                'TanggalAuditJln' => $bukuBesar->TanggalAuditJln?->format('Y-m-d'),
+                'TanggalPerBook' => $periode,
+                'TanggalAuditJln' => $periode,
                 'TanggalAuditSblm' => $bukuBesar->TanggalAuditSblm?->format('Y-m-d'),
                 'sub_mappings' => $schedule['sub_mappings'],
                 'totals' => $schedule['totals'],
@@ -53,9 +55,7 @@ class BukuBesarController extends Controller
                 'string',
                 Rule::in(array_keys(BukuBesar::TOP_MAPPINGS)),
             ],
-            'TanggalPerBook' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
-            'TanggalAuditJln' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
-            'TanggalAuditSblm' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
+            'TanggalAuditSblm' => ['present', 'nullable', 'date_format:Y-m-d'],
         ]);
 
         $jwbKasus = JwbKasus::forUser($request->user())
@@ -63,30 +63,20 @@ class BukuBesarController extends Controller
             ->firstOrFail();
 
         $bukuBesar = $this->resolveHeader($jwbKasus, $validated['Top']);
+        $bukuBesar->update([
+            'TanggalAuditSblm' => $validated['TanggalAuditSblm'],
+        ]);
 
-        $updateData = [];
-        if (array_key_exists('TanggalPerBook', $validated)) {
-            $updateData['TanggalPerBook'] = $validated['TanggalPerBook'];
-        }
-        if (array_key_exists('TanggalAuditJln', $validated)) {
-            $updateData['TanggalAuditJln'] = $validated['TanggalAuditJln'];
-        }
-        if (array_key_exists('TanggalAuditSblm', $validated)) {
-            $updateData['TanggalAuditSblm'] = $validated['TanggalAuditSblm'];
-        }
-
-        if (! empty($updateData)) {
-            $bukuBesar->update($updateData);
-        }
+        $periode = $jwbKasus->Periode ? \Carbon\Carbon::parse($jwbKasus->Periode)->format('Y-m-d') : null;
 
         return response()->json([
             'success' => true,
-            'message' => 'Tanggal audit berhasil disimpan.',
+            'message' => 'Tanggal audit sebelumnya berhasil disimpan.',
             'data' => [
                 'JwbKasusID' => $jwbKasus->JwbKasusID,
                 'Mapping' => $bukuBesar->Mapping,
-                'TanggalPerBook' => $bukuBesar->TanggalPerBook?->format('Y-m-d'),
-                'TanggalAuditJln' => $bukuBesar->TanggalAuditJln?->format('Y-m-d'),
+                'TanggalPerBook' => $periode,
+                'TanggalAuditJln' => $periode,
                 'TanggalAuditSblm' => $bukuBesar->TanggalAuditSblm?->format('Y-m-d'),
             ],
         ]);

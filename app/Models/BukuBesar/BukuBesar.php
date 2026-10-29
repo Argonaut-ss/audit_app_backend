@@ -35,15 +35,11 @@ class BukuBesar extends Model
     protected $fillable = [
         'JwbKasusID',
         'Mapping',
-        'TanggalPerBook',
-        'TanggalAuditJln',
         'TanggalAuditSblm',
     ];
 
     protected $casts = [
         'JwbKasusID' => 'integer',
-        'TanggalPerBook' => 'date',
-        'TanggalAuditJln' => 'date',
         'TanggalAuditSblm' => 'date',
     ];
 
