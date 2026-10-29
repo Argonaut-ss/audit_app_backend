@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\BukuBesar\IsiBukuBesar;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -54,6 +55,15 @@ class COA extends Model
     {
         return $this->hasMany(
             PembayaranJurnalKoreksi::class,
+            'COAID',
+            'COAID'
+        );
+    }
+
+    public function isiBukuBesar()
+    {
+        return $this->hasMany(
+            IsiBukuBesar::class,
             'COAID',
             'COAID'
         );
