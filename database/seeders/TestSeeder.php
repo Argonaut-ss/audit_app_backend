@@ -28,6 +28,7 @@ use App\Models\Persediaan\TestPricingPersediaan;
 use App\Models\AsetTetap\AsetTetap;
 use App\Models\AsetLain\AsetLain;
 use App\Models\SetaraKas\SetaraKas;
+use App\Models\BukuBesar\BukuBesar;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -467,6 +468,16 @@ class TestSeeder extends Seeder
                     'Kesimpulan' => null,
                 ]
             );
+
+            foreach (BukuBesar::TOP_MAPPINGS as $mapping) {
+                BukuBesar::updateOrCreate(
+                    [
+                        'JwbKasusID' => $jwbKasus1->JwbKasusID,
+                        'Mapping' => $mapping,
+                    ],
+                    []
+                );
+            }
         });
     }
 
