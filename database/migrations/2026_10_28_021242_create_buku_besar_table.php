@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('buku_besar', function (Blueprint $table) {
             $table->id('BukuBesarID');
-            $table->unsignedBigInteger('JwbKasusID')->unique();
-            $table->string('Top')->nullable();
-            $table->string('Mapping')->nullable();
-            $table->date('TanggalPerBook')->nullable();
-            $table->date('TanggalAuditJln')->nullable();
+            $table->unsignedBigInteger('JwbKasusID');
+            $table->string('Mapping');
             $table->date('TanggalAuditSblm')->nullable();
+
+            $table->unique(
+                ['JwbKasusID', 'Mapping'],
+                'buku_besar_jwb_kasus_mapping_unique'
+            );
 
             $table->foreign('JwbKasusID')
                 ->references('JwbKasusID')

@@ -2,12 +2,100 @@
 
 namespace App\Services;
 
+use App\Models\AsetLain\PembayaranJurnalKoreksiAsetLain;
+use App\Models\AsetTetap\PembayaranJurnalKoreksiAsetTetap;
+use App\Models\BebanUsaha\PembayaranJurnalKoreksiBebanUsaha;
+use App\Models\BukuBesar\BukuBesar;
 use App\Models\COA;
+use App\Models\Kas\PembayaranJurnalKoreksiKas;
+use App\Models\PendapatanUsaha\PembayaranJurnalKoreksiPendapatanUsaha;
+use App\Models\Persediaan\PembayaranJurnalKoreksiPersediaan;
+use App\Models\Piutang\PembayaranJurnalKoreksi;
+use App\Models\SetaraKas\PembayaranJurnalKoreksiSetaraKas;
+use App\Models\UtangUsaha\PembayaranJurnalKoreksiUtangUsaha;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class BukuBesarService
 {
+    public function getAggregatedCorrections(int $jwbKasusId): Collection
+    {
+        $sources = [
+            [PembayaranJurnalKoreksiSetaraKas::class, 'setaraKas', 'Kas dan Setara Kas'],
+            [PembayaranJurnalKoreksiKas::class, 'kas', 'Kas'],
+            [PembayaranJurnalKoreksi::class, 'piutang', 'Piutang'],
+            [PembayaranJurnalKoreksiUtangUsaha::class, 'utangUsaha', 'Utang Usaha'],
+            [PembayaranJurnalKoreksiPersediaan::class, 'persediaan', 'Persediaan'],
+            [PembayaranJurnalKoreksiAsetTetap::class, 'asetTetap', 'Aset Tetap'],
+            [PembayaranJurnalKoreksiAsetLain::class, 'asetLain', 'Aset Lain-Lain'],
+            [PembayaranJurnalKoreksiPendapatanUsaha::class, 'pendapatanUsaha', 'Pendapatan Usaha'],
+            [PembayaranJurnalKoreksiBebanUsaha::class, 'bebanUsaha', 'Beban Usaha'],
+        ];
+
+        return collect($sources)->flatMap(
+            function (array $sourceConfig) use ($jwbKasusId) {
+                [$paymentModel, $moduleRelation, $source] = $sourceConfig;
+
+                return $paymentModel::query()
+                    ->whereHas(
+                        'jurnalKoreksi.'.$moduleRelation,
+                        fn ($query) => $query->where('JwbKasusID', $jwbKasusId)
+                    )
+                    ->whereHas(
+                        'coa',
+                        fn ($query) => $query->where('JwbKasusID', $jwbKasusId)
+                    )
+                    ->with('jurnalKoreksi')
+                    ->get()
+                    ->map(fn ($payment) => (object) [
+                        'sumber' => $source,
+                        'keterangan' => $payment->jurnalKoreksi->Keterangan,
+                        'COAID' => $payment->COAID,
+                        'Debit' => $payment->Debet,
+                        'Kredit' => $payment->Kredit,
+                        'created_at' => $payment->jurnalKoreksi->created_at,
+                    ]);
+            }
+        )->values();
+    }
+
+    public function getTopSchedule(BukuBesar $bukuBesar, ?string $subMapping = null): array {
+        $coas = COA::where('JwbKasusID', $bukuBesar->JwbKasusID)
+            ->where('MappingTop', $bukuBesar->Mapping)
+            ->orderBy('SubMappingTop')
+            ->orderBy('COAID')
+            ->get()
+            ->filter(function (COA $coa) use ($subMapping) {
+                return $subMapping === null || ($coa->SubMappingTop ?: $coa->MappingTop) === $subMapping;
+            });
+
+        $allCorrections = $this->getAggregatedCorrections((int) $bukuBesar->JwbKasusID);
+        $correctionsGrouped = $allCorrections->groupBy('COAID');
+        $rows = $coas
+            ->map(fn (COA $coa) => $this->calculateAccount(
+                $coa,
+                $this->getCorrectionsForCoa($coa, $correctionsGrouped)
+            ))
+            ->values();
+
+        $subMappings = $rows
+            ->groupBy('SubMapping')
+            ->map(fn (Collection $subRows, string $name) => [
+                'SubMapping' => $name,
+                'rows' => $subRows->values(),
+                'totals' => $this->calculateTotals($subRows),
+            ])
+            ->values();
+
+        return [
+            'sub_mappings' => $subMappings,
+            'totals' => $this->calculateTotals($rows),
+        ];
+    }
+
+    public function getCorrectionsForCoa(COA $coa, Collection $correctionsGrouped): Collection {
+        return $correctionsGrouped->get($coa->COAID, collect());
+    }
+
     /**
      * 3. RUMUS KALKULASI SALDO NORMAL & AUDITED SATU AKUN
      * Menerapkan aturan:
@@ -36,6 +124,7 @@ class BukuBesarService
             'SaldoNormal' => $isDebit ? 'debit' : 'kredit',
             'PerBook' => $perBook,
             'AJE_RJE' => $ajeRje,
+            'AuditJln' => $auditedBerjalan,
             'AuditedBerjalan' => $auditedBerjalan,
             'AuditSebelum' => $auditSebelum,
             'TotalDebit' => $totalDebit,
@@ -54,8 +143,9 @@ class BukuBesarService
         $allCorrections = $this->getAggregatedCorrections($jwbKasusId);
         $correctionsGrouped = $allCorrections->groupBy('COAID');
 
-        return $coas->map(function (COA $coa) use ($allCorrections, $correctionsGrouped, $coas) {
-            $corrections = $this->getCorrectionsForCoa($coa, $allCorrections, $correctionsGrouped, $coas);
+        return $coas->map(function (COA $coa) use ($correctionsGrouped) {
+            $corrections = $this->getCorrectionsForCoa($coa, $correctionsGrouped);
+
             return $this->calculateAccount($coa, $corrections);
         });
     }
@@ -71,6 +161,7 @@ class BukuBesarService
         return [
             'PerBook' => (int) $collection->sum('PerBook'),
             'AJE_RJE' => (int) $collection->sum('AJE_RJE'),
+            'AuditJln' => (int) $collection->sum('AuditJln'),
             'AuditedBerjalan' => (int) $collection->sum('AuditedBerjalan'),
             'AuditSebelum' => (int) $collection->sum('AuditSebelum'),
         ];
@@ -91,14 +182,10 @@ class BukuBesarService
             return null;
         }
 
-        $allCoasInCycle = COA::where('JwbKasusID', $jwbKasusId)
-            ->where('MappingTop', $coa->MappingTop)
-            ->get();
-
         $allCorrections = $this->getAggregatedCorrections($jwbKasusId);
         $correctionsGrouped = $allCorrections->groupBy('COAID');
 
-        $corrections = $this->getCorrectionsForCoa($coa, $allCorrections, $correctionsGrouped, $allCoasInCycle);
+        $corrections = $this->getCorrectionsForCoa($coa, $correctionsGrouped);
 
         $saldoNormal = strtolower(trim($coa->Saldo ?? 'debit'));
         $isDebit = in_array($saldoNormal, ['debit', 'debet']);

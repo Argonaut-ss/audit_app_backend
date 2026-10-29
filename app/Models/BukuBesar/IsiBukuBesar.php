@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\BukuBesar;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\COA;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class IsiBukuBesar extends Model
 {

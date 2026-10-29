@@ -1,13 +1,31 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\BukuBesar;
 
+use App\Models\JwbKasus;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 
 class BukuBesar extends Model
 {
+    public const TOP_MAPPINGS = [
+        'A' => 'Kas dan Setara Kas',
+        'B' => 'Piutang',
+        'C' => 'Persediaan',
+        'D' => 'Aset Lain-Lain',
+        'E' => 'Aset Tetap',
+        'F' => 'Utang Usaha',
+        'G' => 'Utang Bank',
+        'H' => 'Utang Pajak',
+        'I' => 'Ekuitas',
+        'J' => 'Penjualan',
+        'K' => 'Beban Pokok Penjualan',
+        'L' => 'Beban Usaha',
+        'M' => 'Pendapatan (Beban) Lain-lain',
+        'N' => 'Beban Pajak Penghasilan',
+    ];
+
     protected $table = 'buku_besar';
 
     protected $primaryKey = 'BukuBesarID';
@@ -16,17 +34,12 @@ class BukuBesar extends Model
 
     protected $fillable = [
         'JwbKasusID',
-        'Top',
         'Mapping',
-        'TanggalPerBook',
-        'TanggalAuditJln',
         'TanggalAuditSblm',
     ];
 
     protected $casts = [
         'JwbKasusID' => 'integer',
-        'TanggalPerBook' => 'date',
-        'TanggalAuditJln' => 'date',
         'TanggalAuditSblm' => 'date',
     ];
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JwbKasus;
+use App\Models\BukuBesar\BukuBesar;
 use App\Models\Perikatan;
 use App\Models\Kasus;
 use App\Models\DetilVerifikasi;
@@ -146,7 +147,7 @@ class JwbKasusController extends Controller
          * CREATE
          * =====================================================
          */
-        
+
         $result = DB::transaction(function () use ($mahasiswa, $validated, $kasus) {
             $jawaban = JwbKasus::create([
                 'MahasiswasID' => $mahasiswa->id,
@@ -157,6 +158,13 @@ class JwbKasusController extends Controller
                 'BatasWaktu' => $validated['BatasWaktu'],
                 'Nilai' => null,
             ]);
+
+            foreach (BukuBesar::TOP_MAPPINGS as $mapping) {
+                BukuBesar::create([
+                    'JwbKasusID' => $jawaban->JwbKasusID,
+                    'Mapping' => $mapping,
+                ]);
+            }
 
             $pmpj = Pmpj::create([
                 'JwbKasusID' => $jawaban->JwbKasusID,

@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\BukuBesar\BukuBesar;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JwbKasus extends Model
 {
@@ -109,9 +111,9 @@ class JwbKasus extends Model
     );
 }
 
-    public function bukuBesar()
+    public function bukuBesars(): HasMany
     {
-        return $this->hasOne(
+        return $this->hasMany(
             BukuBesar::class,
             'JwbKasusID',
             'JwbKasusID'

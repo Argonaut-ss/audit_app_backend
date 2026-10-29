@@ -95,6 +95,8 @@ use App\Http\Controllers\SetaraKasController\JurnalKoreksiSetaraKasController;
 use App\Http\Controllers\SetaraKasController\RekonsilasiBankSetaraKasController;
 use App\Http\Controllers\SetaraKasController\RekapBalasanSetaraKasController;
 
+use App\Http\Controllers\BukuBesarController\BukuBesarController;
+
 use App\Http\Controllers\KelasCardController;
 
 // Login & Logout & RBAC
@@ -159,40 +161,40 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('rekonsiliasi-piutang', RekonsiliasiPiutangController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['rekonsiliasi-piutang' => 'rekonsiliasiPiutang']);
-
-    // Analisis Umur Piutang Routes
-    Route::apiResource('analisis-umur-piutang', AnalisisUmurPiutangController::class)
+        
+        // Analisis Umur Piutang Routes
+        Route::apiResource('analisis-umur-piutang', AnalisisUmurPiutangController::class)
         ->only(['index', 'store']);
-
-    // Jurnal Koreksi Piutang Routes
-    Route::apiResource('jurnal-koreksi-piutang', JurnalKoreksiPiutangController::class)
+        
+        // Jurnal Koreksi Piutang Routes
+        Route::apiResource('jurnal-koreksi-piutang', JurnalKoreksiPiutangController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-piutang' => 'jurnalKoreksi']);
-
-    Route::get('/konfirmasi-piutang/{id}/file', [KonfirmasiPiutangController::class, 'file']);
-    Route::apiResource('konfirmasi-piutang', KonfirmasiPiutangController::class);
-
-    Route::post('rekap-balasan/bulk-save', [RekapBalasanController::class, 'bulkSave']);
-    Route::get('/rekap-balasan/{id}/file', [RekapBalasanController::class, 'file']);
+        
+        Route::get('/konfirmasi-piutang/{id}/file', [KonfirmasiPiutangController::class, 'file']);
+        Route::apiResource('konfirmasi-piutang', KonfirmasiPiutangController::class);
+        
+        Route::post('rekap-balasan/bulk-save', [RekapBalasanController::class, 'bulkSave']);
+        Route::get('/rekap-balasan/{id}/file', [RekapBalasanController::class, 'file']);
     Route::apiResource('rekap-balasan', RekapBalasanController::class);
 
     Route::get('/prosedur-alternatif/{id}/file', [ProsedurAlternatifController::class, 'file']);
     Route::post('/prosedur-alternatif/bulk-save', [ProsedurAlternatifController::class, 'bulkSave']);
     Route::apiResource('prosedur-alternatif', ProsedurAlternatifController::class);
-
+    
     // Prosedur Piutang Routes
     Route::get('/piutangs/{piutang}/prosedur',[ProsedurController::class, 'index']);
     Route::post('/prosedur',[ProsedurController::class, 'store']);
     Route::put('/prosedur/{prosedur}',[ProsedurController::class, 'update']);
     Route::delete('/prosedur/{prosedur}',[ProsedurController::class, 'destroy']);
-
+    
     // Dokumen Piutang Routes
     Route::get('dokumen/piutang/{piutangId}',[DokumenController::class, 'index']);
     Route::post('dokumen/piutang/{piutangId}',[DokumenController::class, 'store']);
     Route::get('dokumen/{dokumenId}',[DokumenController::class, 'show']);
     Route::put('dokumen/{dokumenId}',[DokumenController::class, 'update']);
     Route::delete('dokumen/{dokumenId}',[DokumenController::class, 'destroy']);
-
+    
     // UtangUsaha Routes
     Route::get('/utang-usaha/{jwbKasusId}', [UtangUsahaController::class, 'show']);
     Route::put('/utang-usaha/{jwbKasusId}', [UtangUsahaController::class, 'update']);
@@ -202,20 +204,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/prosedur-utang-usaha', [ProsedurUtangUsahaController::class, 'store']);
     Route::put('/prosedur-utang-usaha/{prosedurUtangUsaha}', [ProsedurUtangUsahaController::class, 'update']);
     Route::delete('/prosedur-utang-usaha/{prosedurUtangUsaha}', [ProsedurUtangUsahaController::class, 'destroy']);
-
+    
     // Rekonsiliasi Utang Usaha Routes
     Route::apiResource('rekonsiliasi-utang-usaha', RekonsiliasiUtangUsahaController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
+    ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['rekonsiliasi-utang-usaha' => 'rekonsiliasiUtangUsaha']);
-
-    // Jurnal Koreksi Utang Usaha Routes
-    Route::apiResource('jurnal-koreksi-utang-usaha', JurnalKoreksiUtangUsahaController::class)
+        
+        // Jurnal Koreksi Utang Usaha Routes
+        Route::apiResource('jurnal-koreksi-utang-usaha', JurnalKoreksiUtangUsahaController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-utang-usaha' => 'jurnalKoreksiUtangUsaha']);
-
-    // Dokumen Utang Usaha Routes
-    Route::get('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'index']);
-    Route::post('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'store']);
+        
+        // Dokumen Utang Usaha Routes
+        Route::get('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'index']);
+        Route::post('dokumen/UtangUsaha/{utangUsahaId}',[DokumenUtangUsahaController::class, 'store']);
     Route::get('dokumen-utang-usaha/{dokumenId}',[DokumenUtangUsahaController::class, 'show']);
     Route::put('dokumen-utang-usaha/{dokumenId}',[DokumenUtangUsahaController::class, 'update']);
     Route::delete('dokumen-utang-usaha/{dokumenId}',[DokumenUtangUsahaController::class, 'destroy']);
@@ -223,62 +225,62 @@ Route::middleware('auth:sanctum')->group(function () {
     // Konfirmasi Utang Usaha Routes
     Route::get('/konfirmasi-utang-usaha/{id}/file', [KonfirmasiUtangUsahaController::class, 'file']);
     Route::apiResource('konfirmasi-utang-usaha', KonfirmasiUtangUsahaController::class);
-
+    
     // Rekap Utang Usaha Routes
     Route::post('rekap-balasan-utang-usaha/bulk-save', [RekapBalasanUtangUsahaController::class, 'bulkSave']);
     Route::get('/rekap-balasan-utang-usaha/{id}/file', [RekapBalasanUtangUsahaController::class, 'file']);
     Route::apiResource('rekap-balasan-utang-usaha', RekapBalasanUtangUsahaController::class);
-
+    
     // Prosedur Alternatif Utang Usaha Routes
     Route::get('/prosedur-alternatif-utang-usaha/{id}/file', [ProsedurAlternatifUtangUsahaController::class, 'file']);
     Route::post('/prosedur-alternatif-utang-usaha/bulk-save', [ProsedurAlternatifUtangUsahaController::class, 'bulkSave']);
     Route::apiResource('prosedur-alternatif-utang-usaha', ProsedurAlternatifUtangUsahaController::class);
-
+    
     // Prosedur Persediaan Routes
     Route::get('/persediaans/{persediaan}/prosedur', [ProsedurPersediaanController::class, 'index']);
     Route::post('/prosedur-persediaan', [ProsedurPersediaanController::class, 'store']);
     Route::put('/prosedur-persediaan/{prosedurPersediaan}', [ProsedurPersediaanController::class, 'update']);
     Route::delete('/prosedur-persediaan/{prosedurPersediaan}', [ProsedurPersediaanController::class, 'destroy']);
-
+    
     // Dokumen Persediaan Routes
     Route::get('/persediaan/{persediaanId}/dokumen', [DokumenPersediaanController::class, 'index']);
     Route::post('/persediaan/{persediaanId}/dokumen', [DokumenPersediaanController::class, 'store']);
     Route::get('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'show']);
     Route::put('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'update']);
     Route::delete('/dokumen-persediaan/{dokumenId}', [DokumenPersediaanController::class, 'destroy']);
-
+    
     // Persediaan Routes
     Route::get('/persediaan/{jwbKasusId}', [PersediaanController::class, 'show']);
     Route::put('/persediaan/{jwbKasusId}', [PersediaanController::class, 'update']);
-
+    
     // Jurnal Koreksi Persediaan Routes
-        Route::apiResource('jurnal-koreksi-persediaan', JurnalKoreksiPersediaanController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['jurnal-koreksi-persediaan' => 'jurnalKoreksiPersediaan']);
-
+    Route::apiResource('jurnal-koreksi-persediaan', JurnalKoreksiPersediaanController::class)
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['jurnal-koreksi-persediaan' => 'jurnalKoreksiPersediaan']);
+    
     // Stok Opname Persediaan Routes
     Route::apiResource('stok-opname-persediaan', StokOpnamePersediaanController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['stok-opname-persediaan' => 'stokOpnamePersediaan']);
 
-    // Uji Mutasi Persediaan Routes
-    Route::put('/uji-mutasi-persediaan', [UjiMutasiPersediaanController::class, 'update']);
-    Route::apiResource('uji-mutasi-persediaan', UjiMutasiPersediaanController::class);
-
-    // Test Pricing Persediaan Routes
-    Route::post('/test-pricing-persediaan/bulk-save', [TestPricingPersediaanController::class, 'bulkSave']);
-    Route::apiResource('test-pricing-persediaan', TestPricingPersediaanController::class);
-
-    // Vouching Pendapatan Usaha Routes
-    Route::get('/vouching-pu/{id}/file/{field}', [VouchingPUController::class, 'file']);
-    Route::apiResource('vouching-pu', VouchingPUController::class);
-
-    // Vouching Beban Usaha Routes
-    Route::get('/vouching-bu/{id}/file/{field}', [VouchingBUController::class, 'file']);
-    Route::apiResource('vouching-bu', VouchingBUController::class);
-
-    // Mutasi Stock Opname Persediaan Routes
-    Route::get('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'index']);
+        // Uji Mutasi Persediaan Routes
+        Route::put('/uji-mutasi-persediaan', [UjiMutasiPersediaanController::class, 'update']);
+        Route::apiResource('uji-mutasi-persediaan', UjiMutasiPersediaanController::class);
+        
+        // Test Pricing Persediaan Routes
+        Route::post('/test-pricing-persediaan/bulk-save', [TestPricingPersediaanController::class, 'bulkSave']);
+        Route::apiResource('test-pricing-persediaan', TestPricingPersediaanController::class);
+        
+        // Vouching Pendapatan Usaha Routes
+        Route::get('/vouching-pu/{id}/file/{field}', [VouchingPUController::class, 'file']);
+        Route::apiResource('vouching-pu', VouchingPUController::class);
+        
+        // Vouching Beban Usaha Routes
+        Route::get('/vouching-bu/{id}/file/{field}', [VouchingBUController::class, 'file']);
+        Route::apiResource('vouching-bu', VouchingBUController::class);
+        
+        // Mutasi Stock Opname Persediaan Routes
+        Route::get('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'index']);
     Route::post('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'store']);
     Route::get('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'show']);
     Route::put('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'update']);
@@ -294,7 +296,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dokumen-pendapatan-usaha/{dokumenId}',[DokumenPendapatanUsahaController::class, 'show']);
     Route::put('/dokumen-pendapatan-usaha/{dokumenId}',[DokumenPendapatanUsahaController::class, 'update']);
     Route::delete('/dokumen-pendapatan-usaha/{dokumenId}',[DokumenPendapatanUsahaController::class, 'destroy']);
-
+    
     // Prosedur Pendapatan Usaha Routes
     Route::get('/pendapatan-usahas/{pendapatanUsaha}/prosedur', [ProsedurPendapatanUsahaController::class, 'index']);
     Route::post('/prosedur-pendapatan-usaha', [ProsedurPendapatanUsahaController::class, 'store']);
@@ -304,25 +306,25 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Jurnal Koreksi Pendapatan Usaha Routes
     Route::apiResource('jurnal-koreksi-pendapatan-usaha', JurnalKoreksiPendapatanUsahaController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['jurnal-koreksi-pendapatan-usaha' => 'jurnalKoreksiPendapatanUsaha']);
-
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['jurnal-koreksi-pendapatan-usaha' => 'jurnalKoreksiPendapatanUsaha']);
+    
     // Cut Off Pendapatan Usaha Routes
     Route::apiResource('cut-off-pendapatan-usaha', CutOffPendapatanUsahaController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['cut-off-pendapatan-usaha' => 'cutOffPendapatanUsaha']);
-
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['cut-off-pendapatan-usaha' => 'cutOffPendapatanUsaha']);
+    
     // Beban Usaha Routes
     Route::get('/beban-usaha/{jwbKasusId}', [BebanUsahaController::class, 'show']);
     Route::put('/beban-usaha/{jwbKasusId}', [BebanUsahaController::class, 'update']);
-
+    
     // Dokumen Beban Usaha Routes
     Route::get('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'index']);
     Route::post('/beban-usaha/{bebanUsahaId}/dokumen',[DokumenBebanUsahaController::class, 'store']);
     Route::get('/dokumen-beban-usaha/{dokumenId}',[DokumenBebanUsahaController::class, 'show']);
     Route::put('/dokumen-beban-usaha/{dokumenId}',[DokumenBebanUsahaController::class, 'update']);
     Route::delete('/dokumen-beban-usaha/{dokumenId}',[DokumenBebanUsahaController::class, 'destroy']);
-
+    
     // Prosedur Beban Usaha Routes
     Route::get('/beban-usahas/{bebanUsaha}/prosedur', [ProsedurBebanUsahaController::class, 'index']);
     Route::post('/prosedur-beban-usaha', [ProsedurBebanUsahaController::class, 'store']);
@@ -332,14 +334,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Jurnal Koreksi Beban Usaha Routes
     Route::apiResource('jurnal-koreksi-beban-usaha', JurnalKoreksiBebanUsahaController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['jurnal-koreksi-beban-usaha' => 'jurnalKoreksiBebanUsaha']);
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['jurnal-koreksi-beban-usaha' => 'jurnalKoreksiBebanUsaha']);
 
     // Cut Off Beban Usaha Routes
     Route::apiResource('cut-off-beban-usaha', CutOffBebanUsahaController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['cut-off-beban-usaha' => 'cutOffBebanUsaha']);
-
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['cut-off-beban-usaha' => 'cutOffBebanUsaha']);
+    
     // Kas Routes
     Route::get('/kas/{jwbKasusId}', [KasController::class, 'show']);
     Route::put('/kas/{jwbKasusId}', [KasController::class, 'update']);
@@ -348,139 +350,139 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/rekap-mutasi-kas/bulk-save', [RekapMutasiKasController::class, 'bulkSave']);
     Route::delete('/rekap-mutasi-kas/row/{id}', [RekapMutasiKasController::class, 'destroyRow']);
     Route::apiResource('rekap-mutasi-kas', RekapMutasiKasController::class);
-
+    
     // Cash Count Routes
     Route::get('/kas/{kasId}/cash-count', [CashCountController::class, 'show']);
     Route::post('/kas/{kasId}/cash-count', [CashCountController::class, 'store']);
-
+    
     // Uji Mutasi Kas Routes
     Route::get('/kas/{kasId}/uji-mutasi', [UjiMutasiKasController::class, 'show']);
     Route::post('/kas/{kasId}/uji-mutasi', [UjiMutasiKasController::class, 'store']);
-
+    
     // Jurnal Koreksi Kas Routes
     Route::apiResource('jurnal-koreksi-kas', JurnalKoreksiKasController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['jurnal-koreksi-kas' => 'jurnalKoreksiKas']);
-
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['jurnal-koreksi-kas' => 'jurnalKoreksiKas']);
+    
     // Aset Tetap Routes
     Route::get('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'show']);
     Route::put('/aset-tetap/{jwbKasusId}', [AsetTetapController::class, 'update']);
-
+    
     // Aset Baru Aset Tetap Routes
     Route::post('/aset-baru-aset-tetap/bulk-save', [AsetBaruAsetTetapController::class, 'bulkSave']);
     Route::get('/aset-baru-aset-tetap/{id}/file/{field}', [AsetBaruAsetTetapController::class, 'file']);
     Route::apiResource('aset-baru-aset-tetap', AsetBaruAsetTetapController::class);
-
+    
     // Aset Lama Aset Tetap Routes
     Route::post('/aset-lama-aset-tetap/bulk-save', [AsetLamaAsetTetapController::class, 'bulkSave']);
     Route::get('/aset-lama-aset-tetap/{id}/file/{field}', [AsetLamaAsetTetapController::class, 'file']);
     Route::apiResource('aset-lama-aset-tetap', AsetLamaAsetTetapController::class);
-
+    
     // Prosedur Aset Tetap Routes
     Route::get('/aset-tetaps/{asetTetap}/prosedur',[ProsedurAsetTetapController::class, 'index']);
     Route::post('/prosedur-aset-tetap',[ProsedurAsetTetapController::class, 'store']);
     Route::put('/prosedur-aset-tetap/{prosedurAsetTetap}',[ProsedurAsetTetapController::class, 'update']);
     Route::patch('/prosedur-aset-tetap/{prosedurAsetTetap}',[ProsedurAsetTetapController::class, 'update']);
     Route::delete('/prosedur-aset-tetap/{prosedurAsetTetap}',[ProsedurAsetTetapController::class, 'destroy']);
-
+    
     // Dokumen Aset Tetap Routes
     Route::get('/aset-tetap/{asetTetapId}/dokumen', [DokumenAsetTetapController::class, 'index']);
     Route::post('/aset-tetap/{asetTetapId}/dokumen', [DokumenAsetTetapController::class, 'store']);
     Route::get('/dokumen-aset-tetap/{dokumenId}', [DokumenAsetTetapController::class, 'show']);
     Route::put('/dokumen-aset-tetap/{dokumenId}', [DokumenAsetTetapController::class, 'update']);
     Route::delete('/dokumen-aset-tetap/{dokumenId}', [DokumenAsetTetapController::class, 'destroy']);
-
+    
     // Uji Penyusutan Aset Tetap Routes
     Route::get('/aset-tetap/{asetTetapId}/uji-penyusutan', [UjiPenyusutanAsetTetapController::class, 'index']);
     Route::post('/aset-tetap/{asetTetapId}/uji-penyusutan', [UjiPenyusutanAsetTetapController::class, 'store']);
     Route::get('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'show']);
     Route::put('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'update']);
     Route::delete('/uji-penyusutan-aset-tetap/{dokumenId}', [UjiPenyusutanAsetTetapController::class, 'destroy']);
-
+    
     // Jurnal Koreksi Aset Tetap Routes
     Route::apiResource('jurnal-koreksi-aset-tetap', JurnalKoreksiAsetTetapController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['jurnal-koreksi-aset-tetap' => 'jurnalKoreksiAsetTetap']);
-
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['jurnal-koreksi-aset-tetap' => 'jurnalKoreksiAsetTetap']);
+    
     // Prosedur Kas Routes
     Route::get('/kas/{kas}/prosedur', [ProsedurKasController::class, 'index']);
     Route::post('/prosedur-kas', [ProsedurKasController::class, 'store']);
     Route::put('/prosedur-kas/{prosedurKas}', [ProsedurKasController::class, 'update']);
     Route::patch('/prosedur-kas/{prosedurKas}', [ProsedurKasController::class, 'update']);
     Route::delete('/prosedur-kas/{prosedurKas}', [ProsedurKasController::class, 'destroy']);
-
+    
     // Dokumen Kas Routes
     Route::get('/kas/{kasId}/dokumen', [DokumenKasController::class, 'index']);
     Route::post('/kas/{kasId}/dokumen', [DokumenKasController::class, 'store']);
     Route::get('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'show']);
     Route::put('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'update']);
     Route::delete('/dokumen-kas/{dokumenId}', [DokumenKasController::class, 'destroy']);
-
+    
     // Aset Lain Routes
     Route::get('/aset-lain/{jwbKasusId}', [AsetLainController::class, 'show']);
     Route::put('/aset-lain/{jwbKasusId}', [AsetLainController::class, 'update']);
-
+    
     // Wawancara Aset Lain Routes
     Route::post('/wawancara-aset-lain/bulk-save', [WawancaraAsetLainController::class, 'bulkSave']);
     Route::apiResource('wawancara-aset-lain', WawancaraAsetLainController::class);
-
+    
     // Prosedur Aset Lain Routes
     Route::get('/aset-lain/{asetLain}/prosedur', [ProsedurAsetLainController::class, 'index']);
     Route::post('/prosedur-aset-lain', [ProsedurAsetLainController::class, 'store']);
     Route::put('/prosedur-aset-lain/{prosedurAsetLain}', [ProsedurAsetLainController::class, 'update']);
     Route::patch('/prosedur-aset-lain/{prosedurAsetLain}', [ProsedurAsetLainController::class, 'update']);
     Route::delete('/prosedur-aset-lain/{prosedurAsetLain}', [ProsedurAsetLainController::class, 'destroy']);
-
+    
     // Dokumen Aset Lain Routes
     Route::get('/aset-lain/{asetLainId}/dokumen', [DokumenAsetLainController::class, 'index']);
     Route::post('/aset-lain/{asetLainId}/dokumen', [DokumenAsetLainController::class, 'store']);
     Route::get('/dokumen-aset-lain/{dokumenId}', [DokumenAsetLainController::class, 'show']);
     Route::put('/dokumen-aset-lain/{dokumenId}', [DokumenAsetLainController::class, 'update']);
     Route::delete('/dokumen-aset-lain/{dokumenId}', [DokumenAsetLainController::class, 'destroy']);
-
+    
     // Bukti Pendukung Aset Lain Routes
     Route::get('/aset-lain/{asetLainId}/bukti-pendukung', [BuktiPendukungAsetLainController::class, 'index']);
     Route::post('/aset-lain/{asetLainId}/bukti-pendukung', [BuktiPendukungAsetLainController::class, 'store']);
     Route::get('/bukti-pendukung-aset-lain/{dokumenId}', [BuktiPendukungAsetLainController::class, 'show']);
     Route::put('/bukti-pendukung-aset-lain/{dokumenId}', [BuktiPendukungAsetLainController::class, 'update']);
     Route::delete('/bukti-pendukung-aset-lain/{dokumenId}', [BuktiPendukungAsetLainController::class, 'destroy']);
-
+    
     // Konfirmasi Aset Lain Routes
     Route::get('/konfirmasi-aset-lain/{id}/file', [KonfirmasiAsetLainController::class, 'file']);
     Route::apiResource('konfirmasi-aset-lain', KonfirmasiAsetLainController::class);
-
+    
     //Rekap Balasan Aset Lain Routes
     Route::post('rekap-balasan-aset-lain/bulk-save', [RekapBalasanAsetLainController::class, 'bulkSave']);
     Route::get('/rekap-balasan-aset-lain/{id}/file', [RekapBalasanAsetLainController::class, 'file']);
     Route::apiResource('rekap-balasan-aset-lain', RekapBalasanAsetLainController::class);
-
+    
     // Jurnal Koreksi Aset Lain Routes
     Route::apiResource('jurnal-koreksi-aset-lain', JurnalKoreksiAsetLainController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
+    ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['jurnal-koreksi-aset-lain' => 'jurnalKoreksiAsetLain']);
-
-    // Dokumentasi Aset Lain Routes
-    Route::apiResource('dokumentasi-aset-lain', DokumentasiAsetLainController::class)
+        
+        // Dokumentasi Aset Lain Routes
+        Route::apiResource('dokumentasi-aset-lain', DokumentasiAsetLainController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['dokumentasi-aset-lain' => 'dokumentasiAsetLain']);
-
-    // Setara Kas Routes
-    Route::get('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'show']);
-    Route::put('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'update']);
-
-    // Rekap Balasan Setara Kas Routes
-    Route::post('rekap-balasan-setara-kas/bulk-save', [RekapBalasanSetaraKasController::class, 'bulkSave']);
-    Route::get('/rekap-balasan-setara-kas/{id}/file', [RekapBalasanSetaraKasController::class, 'file']);
-    Route::apiResource('rekap-balasan-setara-kas', RekapBalasanSetaraKasController::class);
-
-    // Cek Saldo Setara Kas Routes
-    Route::post('/cek-saldo-setara-kas/bulk-save', [CekSaldoSetaraKasController::class, 'bulkSave']);
-    Route::apiResource('cek-saldo-setara-kas', CekSaldoSetaraKasController::class);
-
-    // Prosedur Setara Kas Routes
-    Route::get('/setara-kas/{setaraKas}/prosedur', [ProsedurSetaraKasController::class, 'index']);
-    Route::post('/prosedur-setara-kas', [ProsedurSetaraKasController::class, 'store']);
-    Route::put('/prosedur-setara-kas/{prosedurSetaraKas}', [ProsedurSetaraKasController::class, 'update']);
+        
+        // Setara Kas Routes
+        Route::get('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'show']);
+        Route::put('/setara-kas/{jwbKasusId}', [SetaraKasController::class, 'update']);
+        
+        // Rekap Balasan Setara Kas Routes
+        Route::post('rekap-balasan-setara-kas/bulk-save', [RekapBalasanSetaraKasController::class, 'bulkSave']);
+        Route::get('/rekap-balasan-setara-kas/{id}/file', [RekapBalasanSetaraKasController::class, 'file']);
+        Route::apiResource('rekap-balasan-setara-kas', RekapBalasanSetaraKasController::class);
+        
+        // Cek Saldo Setara Kas Routes
+        Route::post('/cek-saldo-setara-kas/bulk-save', [CekSaldoSetaraKasController::class, 'bulkSave']);
+        Route::apiResource('cek-saldo-setara-kas', CekSaldoSetaraKasController::class);
+        
+        // Prosedur Setara Kas Routes
+        Route::get('/setara-kas/{setaraKas}/prosedur', [ProsedurSetaraKasController::class, 'index']);
+        Route::post('/prosedur-setara-kas', [ProsedurSetaraKasController::class, 'store']);
+        Route::put('/prosedur-setara-kas/{prosedurSetaraKas}', [ProsedurSetaraKasController::class, 'update']);
     Route::patch('/prosedur-setara-kas/{prosedurSetaraKas}', [ProsedurSetaraKasController::class, 'update']);
     Route::delete('/prosedur-setara-kas/{prosedurSetaraKas}', [ProsedurSetaraKasController::class, 'destroy']);
     
@@ -497,7 +499,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rekening-koran-setara-kas/{dokumenId}', [RekeningKoranSetaraKasController::class, 'show']);
     Route::put('/rekening-koran-setara-kas/{dokumenId}', [RekeningKoranSetaraKasController::class, 'update']);
     Route::delete('/rekening-koran-setara-kas/{dokumenId}', [RekeningKoranSetaraKasController::class, 'destroy']);
-
+    
     // Konfirmasi Bank Setara Kas Routes
     Route::get('/setara-kas/{setaraKasId}/konfirmasi-bank', [KonfirmasiBankSetaraKasController::class, 'index']);
     Route::post('/setara-kas/{setaraKasId}/konfirmasi-bank', [KonfirmasiBankSetaraKasController::class, 'store']);
@@ -507,22 +509,26 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Jurnal Koreksi Setara Kas Routes
     Route::apiResource('jurnal-koreksi-setara-kas', JurnalKoreksiSetaraKasController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['jurnal-koreksi-setara-kas' => 'jurnalKoreksiSetaraKas']);
-
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['jurnal-koreksi-setara-kas' => 'jurnalKoreksiSetaraKas']);
+    
     // Rekonsiliasi Bank Setara Kas Routes
     Route::apiResource('rekonsilasi-bank-setara-kas', RekonsilasiBankSetaraKasController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['rekonsilasi-bank-setara-kas' => 'rekonsilasiBankSetaraKa']);
-
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->parameters(['rekonsilasi-bank-setara-kas' => 'rekonsilasiBankSetaraKa']);
+    
+    // Buku Besar Routes
+    Route::get('/buku-besar/{jwbKasusId}', [BukuBesarController::class, 'show']);
+    Route::put('/buku-besar/{jwbKasusId}', [BukuBesarController::class, 'update']);
+    
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
-});
+    });
     
-// Health check
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Backend is running',
-    ]);
-});
+    // Health check
+    Route::get('/health', function () {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Backend is running',
+            ]);
+            });
