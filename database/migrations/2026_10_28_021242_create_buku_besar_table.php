@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id('BukuBesarID');
             $table->unsignedBigInteger('JwbKasusID');
             $table->string('Mapping');
+            $table->date('TanggalPerBook')->nullable();
+            $table->date('TanggalAuditJln')->nullable();
             $table->date('TanggalAuditSblm')->nullable();
 
             $table->unique(
