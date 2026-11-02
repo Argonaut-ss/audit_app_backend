@@ -96,6 +96,7 @@ use App\Http\Controllers\SetaraKasController\RekonsilasiBankSetaraKasController;
 use App\Http\Controllers\SetaraKasController\RekapBalasanSetaraKasController;
 
 use App\Http\Controllers\BukuBesarController\BukuBesarController;
+use App\Http\Controllers\KertasKerjaController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -520,6 +521,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Buku Besar Routes
     Route::get('/buku-besar/{jwbKasusId}', [BukuBesarController::class, 'show']);
     Route::put('/buku-besar/{jwbKasusId}', [BukuBesarController::class, 'update']);
+
+    // Kertas Kerja Routes (WBS & WPL)
+    Route::get('/kertas-kerja/{jwbKasusId}', [KertasKerjaController::class, 'show']);
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
