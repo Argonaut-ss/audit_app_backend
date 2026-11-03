@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BukuBesar\BukuBesar;
 use App\Models\JwbKasus;
 use App\Services\KertasKerjaService;
 use Carbon\Carbon;
@@ -19,6 +20,12 @@ class KertasKerjaController extends Controller
         $result = $kertasKerjaService->getKertasKerja($jwbKasus);
         $periode = $jwbKasus->Periode ? Carbon::parse($jwbKasus->Periode)->format('Y-m-d') : null;
 
+        // Tanggal audit sebelum disinkronkan dari buku besar kasus audit ini
+        $tanggalAuditSblm = BukuBesar::where('JwbKasusID', $jwbKasus->JwbKasusID)
+            ->whereNotNull('TanggalAuditSblm')
+            ->value('TanggalAuditSblm');
+        $tanggalAuditSblmFormatted = $tanggalAuditSblm ? Carbon::parse($tanggalAuditSblm)->format('Y-m-d') : null;
+
         return response()->json([
             'status_code' => 200,
             'message' => 'Data Kertas Kerja berhasil diambil.',
@@ -26,6 +33,9 @@ class KertasKerjaController extends Controller
                 'wpl' => $result['wpl'],
                 'wbs' => $result['wbs'],
                 'periode' => $periode,
+                'TanggalPerBook' => $periode,
+                'TanggalAuditJln' => $periode,
+                'TanggalAuditSblm' => $tanggalAuditSblmFormatted,
             ],
             'settings' => [],
         ]);
