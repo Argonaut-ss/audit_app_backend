@@ -8,6 +8,7 @@ use App\Models\BukuBesar\IsiBukuBesar;
 use App\Models\COA;
 use App\Models\JwbKasus;
 use App\Services\BukuBesarService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,8 @@ use Illuminate\Validation\Rule;
 
 class BukuBesarController extends Controller
 {
-    public function show(Request $request, int $jwbKasusId, BukuBesarService $bukuBesarService): JsonResponse {
+    public function show(Request $request, int $jwbKasusId, BukuBesarService $bukuBesarService): JsonResponse
+    {
         $validated = $request->validate([
             'Top' => [
                 'required',
@@ -28,13 +30,19 @@ class BukuBesarController extends Controller
         $jwbKasus = JwbKasus::forUser($request->user())
             ->where('JwbKasusID', $jwbKasusId)
             ->firstOrFail();
+
         $bukuBesar = $this->resolveHeader($jwbKasus, $validated['Top']);
         $schedule = $bukuBesarService->getTopSchedule(
             $bukuBesar,
             $validated['SubMapping'] ?? null
         );
 
-        $periode = $jwbKasus->Periode ? \Carbon\Carbon::parse($jwbKasus->Periode)->format('Y-m-d') : null;
+        $periode = $jwbKasus->Periode ? Carbon::parse($jwbKasus->Periode)->format('Y-m-d') : null;
+
+        // Tanggal audit sebelum berlaku seragam untuk seluruh TOP pada kasus audit ini
+        $tanggalAuditSblm = $bukuBesar->TanggalAuditSblm
+            ?? BukuBesar::where('JwbKasusID', $jwbKasus->JwbKasusID)->whereNotNull('TanggalAuditSblm')->value('TanggalAuditSblm');
+        $tanggalAuditSblmFormatted = $tanggalAuditSblm ? Carbon::parse($tanggalAuditSblm)->format('Y-m-d') : null;
 
         return response()->json([
             'success' => true,
@@ -43,7 +51,7 @@ class BukuBesarController extends Controller
                 'Mapping' => $bukuBesar->Mapping,
                 'TanggalPerBook' => $periode,
                 'TanggalAuditJln' => $periode,
-                'TanggalAuditSblm' => $bukuBesar->TanggalAuditSblm?->format('Y-m-d'),
+                'TanggalAuditSblm' => $tanggalAuditSblmFormatted,
                 'sub_mappings' => $schedule['sub_mappings'],
                 'totals' => $schedule['totals'],
                 'available_accounts' => $bukuBesarService->getAvailableAccounts($bukuBesar),
@@ -71,9 +79,21 @@ class BukuBesarController extends Controller
             ->firstOrFail();
 
         $bukuBesar = $this->resolveHeader($jwbKasus, $validated['Top']);
-        $bukuBesar->update([
-            'TanggalAuditSblm' => $validated['TanggalAuditSblm'],
-        ]);
+
+        // Sinkronisasi TanggalAuditSblm ke SELURUH TOP pada kasus audit ini
+        $tanggalAuditSblm = $validated['TanggalAuditSblm'];
+        foreach (BukuBesar::TOP_MAPPINGS as $mappingName) {
+            BukuBesar::updateOrCreate(
+                [
+                    'JwbKasusID' => $jwbKasus->JwbKasusID,
+                    'Mapping' => $mappingName,
+                ],
+                [
+                    'TanggalAuditSblm' => $tanggalAuditSblm,
+                ]
+            );
+        }
+        $bukuBesar->refresh();
 
         if ($request->has('items') && is_array($request->input('items'))) {
             DB::transaction(function () use ($bukuBesar, $jwbKasusId, $request) {
@@ -109,7 +129,7 @@ class BukuBesarController extends Controller
         }
 
         $schedule = $bukuBesarService->getTopSchedule($bukuBesar);
-        $periode = $jwbKasus->Periode ? \Carbon\Carbon::parse($jwbKasus->Periode)->format('Y-m-d') : null;
+        $periode = $jwbKasus->Periode ? Carbon::parse($jwbKasus->Periode)->format('Y-m-d') : null;
 
         return response()->json([
             'success' => true,
@@ -119,7 +139,7 @@ class BukuBesarController extends Controller
                 'Mapping' => $bukuBesar->Mapping,
                 'TanggalPerBook' => $periode,
                 'TanggalAuditJln' => $periode,
-                'TanggalAuditSblm' => $bukuBesar->TanggalAuditSblm?->format('Y-m-d'),
+                'TanggalAuditSblm' => $tanggalAuditSblm,
                 'sub_mappings' => $schedule['sub_mappings'],
                 'totals' => $schedule['totals'],
                 'available_accounts' => $bukuBesarService->getAvailableAccounts($bukuBesar),
