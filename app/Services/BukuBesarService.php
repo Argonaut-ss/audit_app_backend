@@ -205,22 +205,25 @@ class BukuBesarService
                 ->values();
         }
 
-        // ========================================================
         // PENYESUAIAN KHUSUS TOP A: Kas dan Setara Kas
-        // Akun 'Kas di Bank' mengambil total dari 'Rincian Setara Kas - Bank'
-        // ========================================================
         if ($mapping === 'Kas dan Setara Kas') {
             $bankRows = $rows->filter(fn ($r) => $r['SubMapping'] === 'Rincian Setara Kas - Bank');
+
             if ($bankRows->isEmpty()) {
                 $bankCoas = COA::where('JwbKasusID', $jwbKasusId)
                     ->where('MappingTop', 'Kas dan Setara Kas')
                     ->where('SubMappingTop', 'Rincian Setara Kas - Bank')
                     ->get();
-                $bankRows = $bankCoas->map(fn ($c) => $this->calculateAccount($c, $this->getCorrectionsForCoa($c, $correctionsGrouped)));
+
+                $bankRows = $bankCoas->map(fn ($c) => $this->calculateAccount(
+                    $c,
+                    $this->getCorrectionsForCoa($c, $correctionsGrouped)
+                ));
             }
+
             $bankTotals = $this->calculateTotals($bankRows);
 
-            $rows = $rows->map(function ($row) use ($bankTotals) {
+            $rows = $rows->map(function ($row) use ($bankTotals, $jwbKasusId) {
                 if ($row['NoAkun'] === '1-0000' || strtolower(trim($row['NamaAkun'])) === 'kas di bank') {
                     $row['PerBook'] = $bankTotals['PerBook'];
                     $row['AJE_RJE'] = $bankTotals['AJE_RJE'];
@@ -230,20 +233,21 @@ class BukuBesarService
                     $row['TotalDebit'] = $bankTotals['TotalDebit'] ?? 0;
                     $row['TotalKredit'] = $bankTotals['TotalKredit'] ?? 0;
                     $row['has_corrections'] = $bankTotals['AJE_RJE'] !== 0;
+
+                    $rincian = $this->calculateRincianPopUp($jwbKasusId, (int) $row['COAID']);
+                    $row['rincian_jurnal'] = $rincian['rincian_jurnal'] ?? [];
                 }
+
                 return $row;
             });
         }
 
-        // ========================================================
         // PENYESUAIAN KHUSUS TOP I: Ekuitas
-        // Akun 'Saldo Laba Tahun Berjalan' mengambil dari Laba Setelah Pajak (WPL)
-        // ========================================================
         if ($mapping === 'Ekuitas') {
             $pnl = $this->calculatePnlSummary($jwbKasusId);
             $labaBerjalan = $pnl['laba_setelah_pajak'];
 
-            $rows = $rows->map(function ($row) use ($labaBerjalan) {
+            $rows = $rows->map(function ($row) use ($labaBerjalan, $jwbKasusId) {
                 if ($row['NoAkun'] === '3-2200' || str_contains(strtolower($row['NamaAkun']), 'laba tahun berjalan')) {
                     $row['PerBook'] = $labaBerjalan['PerBook'];
                     $row['AJE_RJE'] = $labaBerjalan['AJE_RJE'];
@@ -251,7 +255,11 @@ class BukuBesarService
                     $row['AuditedBerjalan'] = $labaBerjalan['AuditedBerjalan'];
                     $row['AuditSebelum'] = $labaBerjalan['AuditSebelum'];
                     $row['has_corrections'] = $labaBerjalan['AJE_RJE'] !== 0;
+
+                    $rincian = $this->calculateRincianPopUp($jwbKasusId, (int) $row['COAID']);
+                    $row['rincian_jurnal'] = $rincian['rincian_jurnal'] ?? [];
                 }
+
                 return $row;
             });
         }
@@ -266,16 +274,11 @@ class BukuBesarService
             ])
             ->values();
 
-        // ========================================================
         // KALKULASI GRAND TOTALS SESUAI LOGIKA AKUNTANSI
-        // ========================================================
         if ($mapping === 'Kas dan Setara Kas') {
-            // Grand Total TOP A = Total tabel utama 'Kas dan Setara Kas' saja (Kas di Bank + Kas Kecil)
-            // agar rincian bank tidak terhitung ganda (double-count).
             $kasSub = $subMappings->firstWhere('SubMapping', 'Kas dan Setara Kas');
             $totals = $kasSub ? $kasSub['totals'] : $this->calculateTotals($rows);
         } elseif ($mapping === 'Aset Tetap') {
-            // Grand Total TOP E = Aset Tetap (Debit) - Akumulasi Penyusutan (Kredit)
             $atSub = $subMappings->firstWhere('SubMapping', 'Aset Tetap');
             $akmSub = $subMappings->firstWhere('SubMapping', 'Akumulasi Penyusutan Aset Tetap');
             $atTot = $atSub ? $atSub['totals'] : $this->emptyTotals();
@@ -289,7 +292,6 @@ class BukuBesarService
                 'AuditSebelum' => $atTot['AuditSebelum'] - $akmTot['AuditSebelum'],
             ];
         } elseif ($mapping === 'Pendapatan (Beban) Lain-lain') {
-            // Grand Total TOP M = Pendapatan Lain-Lain (Kredit) - Beban Lain-Lain (Debit)
             $pendSub = $subMappings->firstWhere('SubMapping', 'Pendapatan Lain-Lain');
             $bebanSub = $subMappings->firstWhere('SubMapping', 'Beban Lain-Lain');
             $pendTot = $pendSub ? $pendSub['totals'] : $this->emptyTotals();
@@ -303,7 +305,6 @@ class BukuBesarService
                 'AuditSebelum' => $pendTot['AuditSebelum'] - $bebanTot['AuditSebelum'],
             ];
         } elseif ($mapping === 'Ekuitas') {
-            // Grand Total TOP I = Modal Saham + Saldo Laba - Dividen + Saldo Laba Tahun Berjalan
             $perBook = 0;
             $ajeRje = 0;
             $auditedBerjalan = 0;
@@ -342,6 +343,7 @@ class BukuBesarService
     {
         $jwbKasusId = (int) $bukuBesar->JwbKasusID;
         $mapping = $bukuBesar->Mapping;
+
         $coas = COA::where('JwbKasusID', $jwbKasusId)
             ->where('MappingTop', $mapping)
             ->orderBy('NoAkun')
@@ -359,7 +361,7 @@ class BukuBesarService
             $bankRows = $rows->filter(fn ($r) => $r['SubMapping'] === 'Rincian Setara Kas - Bank');
             $bankTotals = $this->calculateTotals($bankRows);
 
-            $rows = $rows->map(function ($row) use ($bankTotals) {
+            $rows = $rows->map(function ($row) use ($bankTotals, $jwbKasusId) {
                 if ($row['NoAkun'] === '1-0000' || strtolower(trim($row['NamaAkun'])) === 'kas di bank') {
                     $row['PerBook'] = $bankTotals['PerBook'];
                     $row['AJE_RJE'] = $bankTotals['AJE_RJE'];
@@ -369,7 +371,11 @@ class BukuBesarService
                     $row['TotalDebit'] = $bankTotals['TotalDebit'] ?? 0;
                     $row['TotalKredit'] = $bankTotals['TotalKredit'] ?? 0;
                     $row['has_corrections'] = $bankTotals['AJE_RJE'] !== 0;
+
+                    $rincian = $this->calculateRincianPopUp($jwbKasusId, (int) $row['COAID']);
+                    $row['rincian_jurnal'] = $rincian['rincian_jurnal'] ?? [];
                 }
+
                 return $row;
             });
         }
@@ -378,7 +384,7 @@ class BukuBesarService
             $pnl = $this->calculatePnlSummary($jwbKasusId);
             $labaBerjalan = $pnl['laba_setelah_pajak'];
 
-            $rows = $rows->map(function ($row) use ($labaBerjalan) {
+            $rows = $rows->map(function ($row) use ($labaBerjalan, $jwbKasusId) {
                 if ($row['NoAkun'] === '3-2200' || str_contains(strtolower($row['NamaAkun']), 'laba tahun berjalan')) {
                     $row['PerBook'] = $labaBerjalan['PerBook'];
                     $row['AJE_RJE'] = $labaBerjalan['AJE_RJE'];
@@ -386,7 +392,11 @@ class BukuBesarService
                     $row['AuditedBerjalan'] = $labaBerjalan['AuditedBerjalan'];
                     $row['AuditSebelum'] = $labaBerjalan['AuditSebelum'];
                     $row['has_corrections'] = $labaBerjalan['AJE_RJE'] !== 0;
+
+                    $rincian = $this->calculateRincianPopUp($jwbKasusId, (int) $row['COAID']);
+                    $row['rincian_jurnal'] = $rincian['rincian_jurnal'] ?? [];
                 }
+
                 return $row;
             });
         }
@@ -415,6 +425,34 @@ class BukuBesarService
         $ajeRje = $isDebit ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
         $auditedBerjalan = $perBook + $ajeRje;
 
+        $rincian = [];
+        $no = 1;
+
+        foreach ($corrections as $c) {
+            $debitVal = (int) $c->Debit;
+            $kreditVal = (int) $c->Kredit;
+
+            if ($debitVal > 0) {
+                $rincian[] = [
+                    'no' => $no++,
+                    'posisi' => 'Debit',
+                    'sumber' => $c->sumber,
+                    'keterangan' => $c->keterangan ?? '',
+                    'nilai' => $debitVal,
+                ];
+            }
+
+            if ($kreditVal > 0) {
+                $rincian[] = [
+                    'no' => $no++,
+                    'posisi' => 'Kredit',
+                    'sumber' => $c->sumber,
+                    'keterangan' => $c->keterangan ?? '',
+                    'nilai' => $kreditVal,
+                ];
+            }
+        }
+
         return [
             'COAID' => $coa->COAID,
             'NoAkun' => $coa->NoAkun,
@@ -429,6 +467,7 @@ class BukuBesarService
             'TotalDebit' => $totalDebit,
             'TotalKredit' => $totalKredit,
             'has_corrections' => $corrections->isNotEmpty(),
+            'rincian_jurnal' => $rincian,
         ];
     }
 
@@ -470,6 +509,7 @@ class BukuBesarService
                 ->where('MappingTop', 'Kas dan Setara Kas')
                 ->where('SubMappingTop', 'Rincian Setara Kas - Bank')
                 ->pluck('COAID');
+
             $corrections = $allCorrections->whereIn('COAID', $bankCoaIds);
         }
         // Kasus spesial 2: 'Saldo Laba Tahun Berjalan' (3-2200) -> ambil semua koreksi akun P&L (nominal)
@@ -481,9 +521,11 @@ class BukuBesarService
                 'Pendapatan (Beban) Lain-lain',
                 'Beban Pajak Penghasilan',
             ];
+
             $pnlCoaIds = COA::where('JwbKasusID', $jwbKasusId)
                 ->whereIn('MappingTop', $pnlMappings)
                 ->pluck('COAID');
+
             $corrections = $allCorrections->whereIn('COAID', $pnlCoaIds);
         } else {
             $corrections = $this->getCorrectionsForCoa($coa, $correctionsGrouped);
@@ -498,6 +540,7 @@ class BukuBesarService
 
         $rincian = [];
         $no = 1;
+
         foreach ($corrections as $c) {
             $debitVal = (int) $c->Debit;
             $kreditVal = (int) $c->Kredit;
