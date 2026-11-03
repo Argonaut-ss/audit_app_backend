@@ -95,6 +95,10 @@ class BukuBesarController extends Controller
         }
         $bukuBesar->refresh();
 
+        // NOTE: Penyimpanan baris isi_buku_besar di-comment karena daftar akun
+        // sudah terhubung langsung dari master COA + Jurnal Koreksi.
+        // Tombol Simpan untuk menyimpan TanggalAuditSblm.
+        /*
         if ($request->has('items') && is_array($request->input('items'))) {
             DB::transaction(function () use ($bukuBesar, $jwbKasusId, $request) {
                 $allCoas = COA::where('JwbKasusID', $jwbKasusId)->get();
@@ -127,6 +131,7 @@ class BukuBesarController extends Controller
                 }
             });
         }
+        */
 
         $schedule = $bukuBesarService->getTopSchedule($bukuBesar);
         $periode = $jwbKasus->Periode ? Carbon::parse($jwbKasus->Periode)->format('Y-m-d') : null;
