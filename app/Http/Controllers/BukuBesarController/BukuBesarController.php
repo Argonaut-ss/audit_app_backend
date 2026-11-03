@@ -152,6 +152,35 @@ class BukuBesarController extends Controller
         ]);
     }
 
+    // Test Rincian Pop Up
+    public function rincian(
+        Request $request,
+        int $jwbKasusId,
+        int $coaId,
+        BukuBesarService $service
+    ) {
+        // Ensure the audit case belongs to the authenticated user.
+        $jwbKasus = JwbKasus::forUser($request->user())
+            ->findOrFail($jwbKasusId);
+
+        $result = $service->calculateRincianPopUp(
+            $jwbKasus->JwbKasusID,
+            $coaId
+        );
+
+        if (!$result) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Account not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+        ]);
+    }
+
     private function resolveHeader(JwbKasus $jwbKasus, string $top): BukuBesar
     {
         return BukuBesar::firstOrCreate([
