@@ -98,6 +98,9 @@ use App\Http\Controllers\SetaraKasController\RekapBalasanSetaraKasController;
 use App\Http\Controllers\BukuBesarController\BukuBesarController;
 use App\Http\Controllers\KertasKerjaController;
 
+use App\Http\Controllers\LaporanHasilAuditController;
+use App\Http\Controllers\LaporanHasilAuditFileController;
+
 use App\Http\Controllers\KelasCardController;
 
 // Login & Logout & RBAC
@@ -282,10 +285,10 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Mutasi Stock Opname Persediaan Routes
         Route::get('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'index']);
-    Route::post('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'store']);
-    Route::get('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'show']);
-    Route::put('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'update']);
-    Route::delete('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'destroy']);
+        Route::post('/persediaan/{persediaanId}/mutasi-stock-opname-persediaan', [MutasiStockOpnamePersediaanController::class, 'store']);
+        Route::get('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'show']);
+        Route::put('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'update']);
+        Route::delete('/mutasi-stock-opname-persediaan/{dokumenId}', [MutasiStockOpnamePersediaanController::class, 'destroy']);
 
     // Pendapatan Usaha Routes
     Route::get('/pendapatan-usaha/{jwbKasusId}', [PendapatanUsahaController::class, 'show']);
@@ -525,6 +528,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Kertas Kerja Routes (WBS & WPL)
     Route::get('/kertas-kerja/{jwbKasusId}', [KertasKerjaController::class, 'show']);
+
+    // Laporan Hasil Audit Routes
+    Route::apiResource('/laporan-hasil-audit', LaporanHasilAuditController::class)
+    ->parameters(['laporan-hasil-audit' => 'laporanHasilAudit']);
+    
+    Route::post('/laporan-hasil-audit/{laporanHasilAudit}/files/{jenisFile}', [LaporanHasilAuditFileController::class, 'store']);
+    Route::get('/laporan-hasil-audit/{laporanHasilAudit}/files/{jenisFile}', [LaporanHasilAuditFileController::class, 'show']);
+    Route::delete('/laporan-hasil-audit/{laporanHasilAudit}/files/{jenisFile}', [LaporanHasilAuditFileController::class, 'destroy']);
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
