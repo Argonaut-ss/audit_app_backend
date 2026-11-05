@@ -10,9 +10,18 @@ return new class extends Migration
     {
         Schema::create('laporan_hasil_audits', function (Blueprint $table) {
             $table->id();
+
+            $table->unsignedBigInteger('JwbKasusID')->unique();
+
             $table->string('opini_audit');
             $table->string('ketersediaan_atlas');
+
             $table->timestamps();
+
+            $table->foreign('JwbKasusID')
+                ->references('JwbKasusID')
+                ->on('jwb_kasus')
+                ->cascadeOnDelete();
         });
     }
 

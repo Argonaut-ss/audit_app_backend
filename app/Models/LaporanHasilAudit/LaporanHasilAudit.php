@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LaporanHasilAudit extends Model
 {
     protected $fillable = [
+        'JwbKasusID',
         'opini_audit',
         'ketersediaan_atlas',
     ];
@@ -24,8 +26,21 @@ class LaporanHasilAudit extends Model
         'Tidak Ada',
     ];
 
+    public function jwbKasus(): BelongsTo
+    {
+        return $this->belongsTo(
+            JwbKasus::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
+    }
+
     public function files(): HasMany
     {
-        return $this->hasMany(LaporanHasilAuditFile::class);
+        return $this->hasMany(
+            LaporanHasilAuditFile::class,
+            'laporan_hasil_audit_id',
+            'id'
+        );
     }
 }

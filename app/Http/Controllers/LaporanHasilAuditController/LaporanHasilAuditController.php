@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JwbKasus;
 use App\Models\LaporanHasilAudit;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,6 +19,12 @@ class LaporanHasilAuditController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'JwbKasusID' => [
+                'required',
+                'integer',
+                'exists:jwb_kasus,JwbKasusID',
+                'unique:laporan_hasil_audits,JwbKasusID',
+            ],
             'opini_audit' => [
                 'required',
                 'string',
@@ -40,7 +47,7 @@ class LaporanHasilAuditController extends Controller
 
     public function show(LaporanHasilAudit $laporanHasilAudit)
     {
-        return $laporanHasilAudit->load('files');
+        return $laporanHasilAudit->load('jwbKasus', 'files');
     }
 
     public function update(Request $request, LaporanHasilAudit $laporanHasilAudit)
