@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\LaporanHasilAudit;
 
+use App\Models\JwbKasus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,7 +12,6 @@ class LaporanHasilAudit extends Model
     protected $fillable = [
         'JwbKasusID',
         'opini_audit',
-        'ketersediaan_atlas',
     ];
 
     public const OPINI_AUDIT = [
@@ -19,11 +19,6 @@ class LaporanHasilAudit extends Model
         'Wajar Dengan Pengecualian',
         'Tidak Wajar',
         'Tidak Menyatakan Pendapat',
-    ];
-
-    public const KETERSEDIAAN_ATLAS = [
-        'Ada',
-        'Tidak Ada',
     ];
 
     public function jwbKasus(): BelongsTo

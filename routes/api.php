@@ -99,7 +99,6 @@ use App\Http\Controllers\BukuBesarController\BukuBesarController;
 use App\Http\Controllers\KertasKerjaController;
 
 use App\Http\Controllers\LaporanHasilAuditController;
-use App\Http\Controllers\LaporanHasilAuditFileController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -530,12 +529,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/kertas-kerja/{jwbKasusId}', [KertasKerjaController::class, 'show']);
 
     // Laporan Hasil Audit Routes
-    Route::apiResource('/laporan-hasil-audit', LaporanHasilAuditController::class)
-    ->parameters(['laporan-hasil-audit' => 'laporanHasilAudit']);
-    
-    Route::post('/laporan-hasil-audit/{laporanHasilAudit}/files/{jenisFile}', [LaporanHasilAuditFileController::class, 'store']);
-    Route::get('/laporan-hasil-audit/{laporanHasilAudit}/files/{jenisFile}', [LaporanHasilAuditFileController::class, 'show']);
-    Route::delete('/laporan-hasil-audit/{laporanHasilAudit}/files/{jenisFile}', [LaporanHasilAuditFileController::class, 'destroy']);
+    Route::apiResource('/laporan-hasil-audit', LaporanHasilAuditController::class)->parameters(['laporan-hasil-audit' => 'laporanHasilAudit']);
+    Route::get('/laporan-hasil-audit/{laporanHasilAudit}/files/{jenisFile}', [LaporanHasilAuditController::class, 'showFile'])->name('laporan-hasil-audit.files.show');
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    

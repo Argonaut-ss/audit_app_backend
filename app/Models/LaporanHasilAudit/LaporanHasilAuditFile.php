@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\LaporanHasilAudit;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +29,11 @@ class LaporanHasilAuditFile extends Model
         'pernyataan_direksi',
         'persetujuan_penerbitan_laporan_keuangan_audit',
         'persetujuan_penyerahan_lapkeu_audit',
+    ];
+
+    public const TIPE_INPUT = [
+        'file',
+        'link',
     ];
 
     public function laporanHasilAudit(): BelongsTo

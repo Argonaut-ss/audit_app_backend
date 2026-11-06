@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,8 +16,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->string('jenis_file');
-            $table->string('tipe_input');
-            $table->mediumBlob('file_data')->nullable();
+            $table->enum('tipe_input', ['file', 'link']);
             $table->string('file_name')->nullable();
             $table->string('mime_type')->nullable();
             $table->text('link')->nullable();
@@ -24,6 +24,10 @@ return new class extends Migration
 
             $table->unique(['laporan_hasil_audit_id', 'jenis_file']);
         });
+
+        DB::statement(
+            'ALTER TABLE laporan_hasil_audit_files ADD file_data MEDIUMBLOB NULL'
+        );
     }
 
     public function down(): void

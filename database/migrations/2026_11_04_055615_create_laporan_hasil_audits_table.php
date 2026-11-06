@@ -14,7 +14,6 @@ return new class extends Migration
             $table->unsignedBigInteger('JwbKasusID')->unique();
 
             $table->string('opini_audit');
-            $table->string('ketersediaan_atlas');
 
             $table->timestamps();
 
