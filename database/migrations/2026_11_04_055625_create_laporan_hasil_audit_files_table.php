@@ -22,7 +22,10 @@ return new class extends Migration
             $table->text('link')->nullable();
             $table->timestamps();
 
-            $table->unique(['laporan_hasil_audit_id', 'jenis_file']);
+            $table->unique(
+                ['laporan_hasil_audit_id', 'jenis_file'],
+                'lha_files_audit_jenis_unique'
+            );
         });
 
         DB::statement(
