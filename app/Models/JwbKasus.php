@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\BukuBesar\BukuBesar;
+use App\Models\LaporanHasilAudit\LaporanHasilAudit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -89,6 +90,15 @@ class JwbKasus extends Model
     {
         return $this->hasOne(
             Pmpj::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
+    }
+
+    public function laporanHasilAudit(): HasOne
+    {
+        return $this->hasOne(
+            LaporanHasilAudit::class,
             'JwbKasusID',
             'JwbKasusID'
         );

@@ -1,29 +1,23 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\LaporanHasilAudit;
 
+use App\Models\JwbKasus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class LaporanHasilAudit extends Model
 {
+    protected $table = 'laporan_hasil_audit';
+
+    protected $primaryKey = 'LaporanHasilAuditID';
+
+    public $timestamps = false;
+
     protected $fillable = [
         'JwbKasusID',
-        'opini_audit',
-        'ketersediaan_atlas',
-    ];
-
-    public const OPINI_AUDIT = [
-        'Wajar Tanpa Pengecualian',
-        'Wajar Dengan Pengecualian',
-        'Tidak Wajar',
-        'Tidak Menyatakan Pendapat',
-    ];
-
-    public const KETERSEDIAAN_ATLAS = [
-        'Ada',
-        'Tidak Ada',
+        'OpiniAudit',
     ];
 
     public function jwbKasus(): BelongsTo
@@ -35,12 +29,12 @@ class LaporanHasilAudit extends Model
         );
     }
 
-    public function files(): HasMany
+    public function dokumenLha(): HasOne
     {
-        return $this->hasMany(
-            LaporanHasilAuditFile::class,
-            'laporan_hasil_audit_id',
-            'id'
+        return $this->hasOne(
+            DokumenLHA::class,
+            'LaporanHasilAuditID',
+            'LaporanHasilAuditID'
         );
     }
 }
