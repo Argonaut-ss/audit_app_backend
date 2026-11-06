@@ -97,6 +97,7 @@ use App\Http\Controllers\SetaraKasController\RekapBalasanSetaraKasController;
 
 use App\Http\Controllers\BukuBesarController\BukuBesarController;
 use App\Http\Controllers\KertasKerjaController;
+use App\Http\Controllers\RekapJurnalKoreksiController;
 
 use App\Http\Controllers\KelasCardController;
 
@@ -525,6 +526,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Kertas Kerja Routes (WBS & WPL)
     Route::get('/kertas-kerja/{jwbKasusId}', [KertasKerjaController::class, 'show']);
+
+    // Rekap Jurnal Koreksi Routes
+    Route::get('/rekap-jurnal-koreksi/{jwbKasusId}', [RekapJurnalKoreksiController::class, 'show']);
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
