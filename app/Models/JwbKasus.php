@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Models\BukuBesar\BukuBesar;
+use App\Models\LaporanHasilAudit\LaporanHasilAudit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class JwbKasus extends Model
 {
@@ -115,6 +117,15 @@ class JwbKasus extends Model
     {
         return $this->hasMany(
             BukuBesar::class,
+            'JwbKasusID',
+            'JwbKasusID'
+        );
+    }
+
+    public function laporanHasilAudit(): HasOne
+    {
+        return $this->hasOne(
+            LaporanHasilAudit::class,
             'JwbKasusID',
             'JwbKasusID'
         );
