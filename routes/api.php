@@ -97,6 +97,7 @@ use App\Http\Controllers\SetaraKasController\RekapBalasanSetaraKasController;
 
 use App\Http\Controllers\BukuBesarController\BukuBesarController;
 use App\Http\Controllers\KertasKerjaController;
+use App\Http\Controllers\RekapJurnalKoreksiController;
 
 use App\Http\Controllers\LaporanHasilAuditController;
 
@@ -531,6 +532,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Laporan Hasil Audit Routes
     Route::apiResource('/laporan-hasil-audit', LaporanHasilAuditController::class)->parameters(['laporan-hasil-audit' => 'laporanHasilAudit']);
     Route::get('/laporan-hasil-audit/{laporanHasilAudit}/files/{jenisFile}', [LaporanHasilAuditController::class, 'showFile'])->name('laporan-hasil-audit.files.show');
+    // Rekap Jurnal Koreksi Routes
+    Route::get('/rekap-jurnal-koreksi/{jwbKasusId}', [RekapJurnalKoreksiController::class, 'show']);
     
     // Helper Functions
     Route::get('/kelas-card', [KelasCardController::class, 'index']);    
