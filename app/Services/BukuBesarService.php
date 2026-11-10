@@ -422,7 +422,14 @@ class BukuBesarService
         $totalDebit = (int) $corrections->sum('Debit');
         $totalKredit = (int) $corrections->sum('Kredit');
 
-        $ajeRje = $isDebit ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
+        // Untuk akun kontra (PerBook atau AuditSebelum bernilai minus seperti Cadangan Kerugian Piutang),
+        // saldo kredit menambah nilai minus sehingga dihitung: Debit - Kredit.
+        if ($perBook < 0 || $auditSebelum < 0) {
+            $ajeRje = $totalDebit - $totalKredit;
+        } else {
+            $ajeRje = $isDebit ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
+        }
+
         $auditedBerjalan = $perBook + $ajeRje;
 
         $rincian = [];
@@ -533,10 +540,17 @@ class BukuBesarService
 
         $saldoNormal = strtolower(trim($coa->Saldo ?? 'debit'));
         $isDebit = in_array($saldoNormal, ['debit', 'debet']);
+        $perBook = (int) $coa->PerBook;
+        $auditSebelum = (int) $coa->AuditSebelum;
 
         $totalDebit = (int) $corrections->sum('Debit');
         $totalKredit = (int) $corrections->sum('Kredit');
-        $ajeRje = $isDebit ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
+
+        if ($perBook < 0 || $auditSebelum < 0) {
+            $ajeRje = $totalDebit - $totalKredit;
+        } else {
+            $ajeRje = $isDebit ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
+        }
 
         $rincian = [];
         $no = 1;
@@ -571,6 +585,8 @@ class BukuBesarService
             'NoAkun' => $coa->NoAkun,
             'NamaAkun' => $coa->NamaAkun,
             'SaldoNormal' => $isDebit ? 'debit' : 'kredit',
+            'PerBook' => $perBook,
+            'AuditSebelum' => $auditSebelum,
             'TotalDebit' => $totalDebit,
             'TotalKredit' => $totalKredit,
             'AJE_RJE' => $ajeRje,

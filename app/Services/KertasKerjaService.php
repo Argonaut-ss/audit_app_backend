@@ -57,8 +57,8 @@ class KertasKerjaService
         $labaSetelahPajakTotals = $this->toKertasKerjaFormat($pnl['laba_setelah_pajak']);
 
         // 2. KALKULASI KELOMPOK NERACA (WBS)
-        // TOP A: Kas dan Setara Kas (Kas Kecil + Rincian Bank)
-        $kasTotals = $calc($allCoas->filter(fn ($c) => $c->MappingTop === 'Kas dan Setara Kas'));
+        // TOP A: Kas dan Setara Kas (Kas Kecil + Rincian Bank, exclude akun header induk 1-0000)
+        $kasTotals = $calc($allCoas->filter(fn ($c) => $c->MappingTop === 'Kas dan Setara Kas' && $c->NoAkun !== '1-0000'));
 
         // TOP B: Piutang
         $piutangTotals = $calc($allCoas->filter(fn ($c) => $c->MappingTop === 'Piutang'));
