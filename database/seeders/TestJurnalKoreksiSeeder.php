@@ -306,6 +306,14 @@ class TestJurnalKoreksiSeeder extends Seeder
                 ['2-1100', 53000000, 0],
                 ['1-1111', 0, 53000000],
             ]);
+
+            // 7. Update status JurnalCheck pada model induk pengujian substantif
+            $kas->updateQuietly(['JurnalCheck' => true]);
+            $setaraKas->updateQuietly(['JurnalCheck' => true]);
+            $piutang->updateQuietly(['JurnalCheck' => true]);
+            $persediaan->updateQuietly(['JurnalCheck' => true]);
+            $asetLain->updateQuietly(['JurnalCheck' => true]);
+            $utangUsaha->updateQuietly(['JurnalCheck' => true]);
         });
     }
 }
