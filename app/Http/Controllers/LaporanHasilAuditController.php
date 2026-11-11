@@ -40,8 +40,15 @@ class LaporanHasilAuditController extends Controller
     public function index(Request $request): JsonResponse
     {
         $reports = LaporanHasilAudit::query()
-            ->whereHas('jwbKasus', fn (Builder $query) => $query->forUser($request->user()))
-            ->with(['files' => fn (Builder $query) => $query->select(self::FILE_METADATA_COLUMNS)])
+             // with builder
+            // ->whereHas('jwbKasus', fn (Builder $query) => $query->forUser($request->user()))
+            // ->with(['files' => fn (Builder $query) => $query->select(self::FILE_METADATA_COLUMNS)])
+
+            //without builder
+            ->whereHas('jwbKasus', fn ( $query) => $query->forUser($request->user()))
+            ->with(['files' => fn ( $query) => $query->select(self::FILE_METADATA_COLUMNS)])
+
+
             ->get()
             ->map(fn (LaporanHasilAudit $report) => $this->reportData($report));
 
@@ -61,7 +68,11 @@ class LaporanHasilAuditController extends Controller
             ->where('JwbKasusID', $request->integer('JwbKasusID'))
             ->firstOrFail();
         $report = $jwbKasus->laporanHasilAudit()
-            ->with(['files' => fn (Builder $query) => $query->select(self::FILE_METADATA_COLUMNS)])
+            // with builder
+            // ->with(['files' => fn (Builder $query) => $query->select(self::FILE_METADATA_COLUMNS)])
+
+            // without builder
+            ->with(['files' => fn ( $query) => $query->select(self::FILE_METADATA_COLUMNS)])
             ->first();
 
         $validated = $this->validateReport($request, $report);
@@ -152,8 +163,13 @@ class LaporanHasilAuditController extends Controller
         int $laporanHasilAuditId
     ): LaporanHasilAudit {
         return LaporanHasilAudit::query()
-            ->whereHas('jwbKasus', fn (Builder $query) => $query->forUser($request->user()))
-            ->with(['files' => fn (Builder $query) => $query->select(self::FILE_METADATA_COLUMNS)])
+            // with builder
+            // ->whereHas('jwbKasus', fn (Builder $query) => $query->forUser($request->user()))
+            // ->with(['files' => fn (Builder $query) => $query->select(self::FILE_METADATA_COLUMNS)])
+            
+            // without builder
+            ->whereHas('jwbKasus', fn ( $query) => $query->forUser($request->user()))
+            ->with(['files' => fn ( $query) => $query->select(self::FILE_METADATA_COLUMNS)])
             ->findOrFail($laporanHasilAuditId);
     }
 
@@ -281,7 +297,11 @@ class LaporanHasilAuditController extends Controller
             }
 
             return $report->load([
-                'files' => fn (Builder $query) => $query->select(self::FILE_METADATA_COLUMNS),
+                // with builder
+                // 'files' => fn (Builder $query) => $query->select(self::FILE_METADATA_COLUMNS),
+
+                // without builder
+                'files' => fn ( $query) => $query->select(self::FILE_METADATA_COLUMNS),
             ]);
         });
     }
